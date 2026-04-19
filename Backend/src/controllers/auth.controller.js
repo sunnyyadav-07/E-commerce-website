@@ -59,5 +59,11 @@ export async function loginController(req, res) {
       message: "Invalid credentials",
     });
   }
+  const isPasswordMatched = await user.comparePassword(password);
+  if (!isPasswordMatched) {
+    return res.status(400).json({
+      message: "Invalid credentials",
+    });
+  }
   sendTokenRequence(user, res, "Login successfully");
 }

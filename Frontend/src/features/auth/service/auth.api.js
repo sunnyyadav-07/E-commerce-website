@@ -7,6 +7,8 @@ export async function registerUser({email,password,fullname,contact,isSeller}){
 }
 
 export async function loginUser({email,password}){
+  console.log("aaya")
   const response=await api.post("/login",{email,password});
+  console.log("gya")
   return response.data;
 }
