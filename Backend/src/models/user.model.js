@@ -1,13 +1,20 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 const userSchema = new mongoose.Schema({
+  authProvider: {
+    type: String,
+    enum: ["local", "google"],
+    default: "local",
+  },
   email: {
     type: String,
     required: true,
   },
   contact: {
     type: Number,
-    required: true,
+    required: function () {
+      return this.authProvider === "local";
+    },
   },
   fullname: {
     type: String,
@@ -15,12 +22,19 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true,
+    required: function () {
+      return this.authProvider === "local";
+    },
+  },
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true,
   },
   role: {
     type: String,
-    default: "buyer",
     enum: ["buyer", "seller"],
+    default: null,
   },
 });
 
@@ -30,7 +44,7 @@ userSchema.pre("save", async function () {
   this.password = hash;
 });
 userSchema.methods.comparePassword = async function (password) {
-  return  bcrypt.compare(password, this.password);
+  return bcrypt.compare(password, this.password);
 };
 const userModel = mongoose.model("user", userSchema);
 export default userModel;

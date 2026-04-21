@@ -11,8 +11,8 @@ async function sendTokenRequence(user, res, message) {
   );
   res.cookie("token", token);
   res.status(200).json({
-    message,
     success: true,
+    message,
     user: {
       id: user._id,
       email: user.email,
@@ -69,6 +69,74 @@ export async function loginController(req, res) {
 }
 
 export async function googleCallback(req, res) {
-  console.log(req.user);
-  res.redirect("http://localhost:5173/");
+  try {
+    const { emails, photos, displayName, id } = req.user;
+    const email = emails[0].value;
+    const profilePic = photos[0].value;
+    let user = await userModel.findOne({
+      email,
+    });
+    if (!user) {
+      user = await userModel.create({
+        email,
+        googleId: id,
+        fullname: displayName,
+        authProvider: "google",
+        roll: null,
+      });
+    }
+    const token = jwt.sign(
+      {
+        id: user._id,
+      },
+      config.JWT_SECRET,
+      { expiresIn: "7d" },
+    );
+    res.cookie("token", token);
+    if (user.role === null) {
+      return res.redirect("http://localhost:5173/select-role");
+    } else {
+      return res.redirect("http://localhost:5173/");
+    }
+  } catch (error) {
+    console.log(err);
+    res.redirect("/login");
+  }
+}
+
+export async function setUserRoleController(req, res) {
+  try {
+    const { role } = req.body;
+    const userId = req.user.id;
+    if (!["buyer", "seller"].includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid role",
+      });
+    }
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    if (user.role !== null) {
+      return res.status(400).json({
+        message: "Role already selected",
+      });
+    }
+    user.role = role;
+    await user.save();
+    res.status(200).json({
+      success: true,
+      message: "Role updated successfully",
+      role: user.role,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
 }

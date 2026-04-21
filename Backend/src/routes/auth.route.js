@@ -4,11 +4,13 @@ import {
   googleCallback,
   loginController,
   registerController,
+  setUserRoleController,
 } from "../controllers/auth.controller.js";
 import {
   loginValidator,
   validateRegisterUser,
 } from "../validators/auth.validator.js";
+import { authUser } from "../middlewares/auth.middleware.js";
 
 const authRouter = Router();
 authRouter.post("/register", validateRegisterUser, registerController);
@@ -25,5 +27,5 @@ authRouter.get(
   }),
   googleCallback,
 );
-
+authRouter.patch("/user/role",authUser,setUserRoleController)
 export default authRouter;
