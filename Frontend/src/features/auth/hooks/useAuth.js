@@ -1,5 +1,5 @@
 import { useDispatch } from "react-redux";
-import { registerUser, loginUser } from "../service/auth.api";
+import { registerUser, loginUser, setUserRole } from "../service/auth.api";
 import { setError, setLoading, setUser } from "../state/auth.slice";
 
 const useAuth = () => {
@@ -40,6 +40,18 @@ const useAuth = () => {
       dispatch(setLoading(false));
     }
   }
-  return { handleRegisterUser, handleLoginUser };
+  async function handleSetUserRole({ role }) {
+    try {
+      dispatch(setLoading(true));
+      const data = await setUserRole({ role });
+      // dispatch(setUser(data));
+      return data;
+    } catch (error) {
+      dispatch(setError(error.message));
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+  return { handleRegisterUser, handleLoginUser, handleSetUserRole };
 };
 export default useAuth;

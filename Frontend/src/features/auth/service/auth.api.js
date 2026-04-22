@@ -22,3 +22,7 @@ export async function loginUser({ email, password }) {
 
   return response.data;
 }
+export async function setUserRole({role}) {
+  const response = await api.patch("/user/role", { role });
+  return response.data;
+}
