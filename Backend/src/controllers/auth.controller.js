@@ -85,6 +85,11 @@ export async function googleCallback(req, res) {
         roll: null,
       });
     }
+    if (user && !user.googleId) {
+      // link Google account
+      user.googleId = id;
+      await user.save();
+    }
     const token = jwt.sign(
       {
         id: user._id,
