@@ -25,7 +25,7 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
- const res=   await handleRegisterUser({
+    const res = await handleRegisterUser({
       email: formData.email,
       password: formData.password,
       fullname: formData.fullName,
@@ -33,8 +33,7 @@ const Register = () => {
       isSeller: formData.isSeller,
     });
     console.log("Registering:", formData);
-    if(res)
-    navigate("/");
+    if (res) navigate("/");
   };
 
   return (
@@ -43,7 +42,7 @@ const Register = () => {
       <header className="h-[60px] bg-white/90 backdrop-blur-md px-6 py-3 border-b border-gray-100 flex items-center justify-between shrink-0 z-[100] shadow-[0_4px_20px_rgba(0,0,0,0.03)] relative">
         <button
           onClick={() => navigate(-1)}
-          className="text-gray-500 hover:text-gray-900 transition-colors"
+          className="text-gray-500 hover:text-gray-900 transition-colors cursor-pointer"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -63,7 +62,7 @@ const Register = () => {
           ATELIER
         </h1>
         <div className="flex items-center gap-4">
-          <button className="text-gray-500 hover:text-gray-900 transition-colors">
+          <button className="text-gray-500 hover:text-gray-900 transition-colors cursor-pointer">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="18"
@@ -79,7 +78,7 @@ const Register = () => {
               <path d="m21 21-4.3-4.3" />
             </svg>
           </button>
-          <button className="text-gray-500 hover:text-gray-900 transition-colors">
+          <button className="text-gray-500 hover:text-gray-900 transition-colors cursor-pointer">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="18"
@@ -194,7 +193,7 @@ const Register = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#3b557e] transition-colors"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#3b557e] transition-colors cursor-pointer"
                     >
                       {showPassword ? (
                         <svg
@@ -257,10 +256,48 @@ const Register = () => {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  className="w-full bg-[#3b557e] text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-[#2d4363] hover:shadow-lg transition-all uppercase tracking-[0.2em] text-[10px] mt-4"
+                  className="w-full bg-[#3b557e] text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-[#2d4363] hover:shadow-lg transition-all uppercase tracking-[0.2em] text-[10px] mt-4 cursor-pointer"
                 >
                   Register
                 </button>
+
+                <div className="flex items-center my-6">
+                  <div className="flex-1 h-px bg-gray-100"></div>
+                  <span className="px-4 text-[10px] font-bold text-gray-300 tracking-widest uppercase">
+                    OR
+                  </span>
+                  <div className="flex-1 h-px bg-gray-100"></div>
+                </div>
+
+                <a
+                  href="http://localhost:3000/api/auth/google"
+                  className="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 text-[#1f1f1f] font-semibold py-3.5 rounded-xl shadow-sm hover:bg-gray-50 hover:shadow-md transition-all uppercase tracking-[0.1em] text-[10px] cursor-pointer"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 18 18"
+                  >
+                    <path
+                      fill="#4285F4"
+                      d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.49h4.84c-.21 1.12-.84 2.07-1.79 2.7l2.9 2.25C16.64 14.19 18 11.93 18 9.2z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.25c-.81.54-1.85.87-3.06.87-2.35 0-4.34-1.58-5.05-3.71L.95 13.04C2.43 15.98 5.48 18 9 18z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M3.95 10.73c-.18-.54-.28-1.12-.28-1.73s.1-1.19.28-1.73L.95 4.96C.35 6.17 0 7.55 0 9s.35 2.83.95 4.04l3-2.31z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.59C13.46.89 11.42 0 9 0 5.48 0 2.43 2.02.95 4.96l3 2.31C4.66 5.16 6.65 3.58 9 3.58z"
+                    />
+                  </svg>
+                  Continue with Google
+                </a>
               </form>
 
               {/* Redirect link */}
@@ -268,7 +305,7 @@ const Register = () => {
                 ALREADY HAVE AN ACCOUNT?{" "}
                 <button
                   onClick={() => navigate("/login")}
-                  className="text-[#3b557e] font-extrabold hover:underline transition-all ml-1 uppercase"
+                  className="text-[#3b557e] font-extrabold hover:underline transition-all ml-1 uppercase cursor-pointer"
                 >
                   Log In
                 </button>
