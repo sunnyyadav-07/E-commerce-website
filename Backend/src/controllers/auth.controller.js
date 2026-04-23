@@ -5,6 +5,7 @@ async function sendTokenRequence(user, res, message) {
   const token = jwt.sign(
     {
       id: user._id,
+      role: user.role,
     },
     config.JWT_SECRET,
     { expiresIn: "7d" },
@@ -80,7 +81,7 @@ export async function loginController(req, res) {
       message: "Invalid credentials",
     });
   }
-  // if user registered with google
+  // if user login with google
   if (user.authProvider === "google") {
     return res.status(400).json({
       success: false,
@@ -166,6 +167,15 @@ export async function setUserRoleController(req, res) {
     }
     user.role = role;
     await user.save();
+    const token = jwt.sign(
+      {
+        id: user._id,
+        role: user.role,
+      },
+      config.JWT_SECRET,
+      { expiresIn: "7d" },
+    );
+    res.cookie("token", token);
     res.status(200).json({
       success: true,
       message: "Role updated successfully",

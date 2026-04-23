@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
 import { config } from "../config/config.js";
+import userModel from "../models/user.model.js";
 
-export function authUser(req, res, next) {
+export async function authUser(req, res, next) {
   const token = req.cookies.token;
   if (!token) {
     return res.status(400).json({
@@ -13,6 +14,14 @@ export function authUser(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, config.JWT_SECRET);
+    const user = await userModel.findById(decoded.id);
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "User no longer exists",
+      });
+    }
     req.user = decoded;
     next();
   } catch (error) {
