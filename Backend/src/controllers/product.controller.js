@@ -5,13 +5,7 @@ import { uploadFiles } from "../services/storage.service.js";
 export async function createProductController(req, res) {
   try {
     const { title, description, priceAmount, priceCurrency } = req.body;
-    const userRole = req.user.role;
-    if (userRole !== "seller") {
-      return res.status(400).json({
-        success: false,
-        message: "Unauthorized user",
-      });
-    }
+
     const images = await Promise.all(
       req.files.map(async (file) => {
         return await uploadFiles({
@@ -39,4 +33,22 @@ export async function createProductController(req, res) {
       message: "Server error",
     });
   }
+}
+
+export async function getSellerProducts(req, res) {
+  const sellerId = req.user.id;
+  const products = await productModel.find({
+    sellerId,
+  });
+  if (!products) {
+    return res.status(404).json({
+      success: false,
+      message: "Product not found",
+    });
+  }
+  res.status(200).json({
+    success: true,
+    message: "Products fetched successfully",
+    products,
+  });
 }
