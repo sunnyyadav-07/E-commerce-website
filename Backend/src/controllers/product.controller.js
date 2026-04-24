@@ -4,9 +4,9 @@ import { uploadFiles } from "../services/storage.service.js";
 
 export async function createProductController(req, res) {
   try {
-    const { title, description, price } = req.body;
+    const { title, description, priceAmount, priceCurrency } = req.body;
     const userRole = req.user.role;
-    if (userRole === "buyer") {
+    if (userRole !== "seller") {
       return res.status(400).json({
         success: false,
         message: "Unauthorized user",
@@ -16,14 +16,15 @@ export async function createProductController(req, res) {
       req.files.map(async (file) => {
         return await uploadFiles({
           buffer: file.buffer,
-          filename: file.originalname,
+          fileName: file.originalname,
         });
       }),
     );
     const product = await productModel.create({
       title,
       description,
-      price: { amount: price, currency: "INR" },
+      price: { amount: priceAmount, currency: priceCurrency || "INR" },
+      images,
       sellerId: req.user.id,
     });
     res.status(201).json({
