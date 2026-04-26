@@ -19,7 +19,7 @@ export async function createProductController(req, res) {
       description,
       price: { amount: priceAmount, currency: priceCurrency || "INR" },
       images,
-      sellerId: req.user.id,
+      sellerId: req.user._id,
     });
     res.status(201).json({
       success: true,
@@ -36,7 +36,7 @@ export async function createProductController(req, res) {
 }
 
 export async function getSellerProducts(req, res) {
-  const sellerId = req.user.id;
+  const sellerId = req.user._id;
   const products = await productModel.find({
     sellerId,
   });

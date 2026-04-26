@@ -145,7 +145,7 @@ export async function googleCallback(req, res) {
 export async function setUserRoleController(req, res) {
   try {
     const { role } = req.body;
-    const userId = req.user.id;
+    const userId = req.user._id;
     if (!["buyer", "seller"].includes(role)) {
       return res.status(400).json({
         success: false,
@@ -188,4 +188,18 @@ export async function setUserRoleController(req, res) {
       message: "Server error",
     });
   }
+}
+
+export function getMeController(req, res) {
+  const user = req.user;
+  res.status(200).json({
+    success: true,
+    message: "User fetched successfully",
+    user: {
+      id: user._id,
+      email: user.email,
+      fullname: user.fullname,
+      role: user.role,
+    },
+  });
 }

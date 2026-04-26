@@ -1,6 +1,7 @@
 import { Router } from "express";
 import passport from "passport";
 import {
+  getMeController,
   googleCallback,
   loginController,
   registerController,
@@ -28,4 +29,5 @@ authRouter.get(
   googleCallback,
 );
 authRouter.patch("/user/role", authUser, setUserRoleController);
+authRouter.get("/me", authUser, getMeController);
 export default authRouter;

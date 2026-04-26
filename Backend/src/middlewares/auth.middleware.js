@@ -22,7 +22,7 @@ export async function authUser(req, res, next) {
         message: "User no longer exists",
       });
     }
-    req.user = decoded;
+    req.user = user;
     next();
   } catch (error) {
     return res.status(400).json({
