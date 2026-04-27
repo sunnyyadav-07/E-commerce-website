@@ -1,13 +1,14 @@
-
+import { Outlet } from "react-router";
+import useAuth from "../features/auth/hooks/useAuth";
+import { useEffect } from "react";
 
 function App() {
-
-
+  
   return (
     <>
-     <  h1 className='text-3xl text-red-700'>Hello world</h1>
+      <Outlet />
     </>
-  )
+  );
 }
 
-export default App
+export default App;

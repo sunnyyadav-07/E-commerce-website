@@ -226,7 +226,7 @@ const CreateProduct = () => {
                 onDragOver={onDragOver}
                 onDrop={(e) => onDrop(e, 0)}
                 onClick={() => document.getElementById("file-0").click()}
-                className={`relative aspect-square w-full bg-[#f3f4f6] rounded-2xl border-2 border-dashed flex flex-col items-center justify-center group cursor-pointer transition-all overflow-hidden ${
+                className={`relative aspect-square w-full max-w-[400px] mx-auto bg-[#f3f4f6] rounded-2xl border-2 border-dashed flex flex-col items-center justify-center group cursor-pointer transition-all overflow-hidden ${
                   images[0]
                     ? "border-solid border-[#3b557e]"
                     : "border-gray-300 hover:border-[#3b557e]/30 hover:bg-[#f3f4f6]/50"
