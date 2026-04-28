@@ -6,6 +6,7 @@ import Footer from "../components/Footer";
 import Heading from "../components/Heading";
 
 const Login = () => {
+  console.log("Login")
   const navigate = useNavigate();
   const { handleLoginUser } = useAuth();
   const [formData, setFormData] = useState({

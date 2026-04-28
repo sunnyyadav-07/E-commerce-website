@@ -25,7 +25,7 @@ const useAuth = () => {
         contact,
         isSeller,
       });
-      dispatch(setUser(data));
+      dispatch(setUser(data.user));
       return data;
     } catch (error) {
       dispatch(setError(error.message));
@@ -37,7 +37,7 @@ const useAuth = () => {
     try {
       dispatch(setLoading(true));
       const data = await loginUser({ email, password });
-      dispatch(setUser(data));
+      dispatch(setUser(data.user));
       return data;
     } catch (error) {
       dispatch(setError(error.message));
