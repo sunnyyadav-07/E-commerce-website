@@ -5,20 +5,27 @@ import SelectRole from "../features/auth/pages/SelectRole.jsx";
 import CreateProduct from "../features/products/pages/Seller/CreateProduct.jsx";
 import SellerDashboard from "../features/products/pages/Seller/SellerDashboard.jsx";
 import Protected from "../features/auth/components/Protected.jsx";
-import App from "./App.jsx";
+import PublicOnlyRoute from "../features/auth/components/PublicOnlyRoute.jsx";
+import AppLayout from "./AppLayout.jsx";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: <AppLayout />,
     children: [
-      { path: "register", element: <Register /> },
-      { path: "login", element: <Login /> },
-      { path: "select-role", element: <SelectRole /> },
+      {
+        path: "select-role",
+        element: (
+          <Protected>
+            <SelectRole />
+          </Protected>
+        ),
+      },
+
       {
         path: "seller",
         element: (
-          <Protected>
+          <Protected role="seller">
             <Outlet />
           </Protected>
         ),
@@ -32,6 +39,19 @@ export const router = createBrowserRouter([
             element: <SellerDashboard />,
           },
         ],
+      },
+    ],
+  },
+  {
+    element: <PublicOnlyRoute />,
+    children: [
+      {
+        path: "/login",
+        element: <Login />,
+      },
+      {
+        path: "/register",
+        element: <Register />,
       },
     ],
   },

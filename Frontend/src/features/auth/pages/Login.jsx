@@ -6,7 +6,7 @@ import Footer from "../components/Footer";
 import Heading from "../components/Heading";
 
 const Login = () => {
-  console.log("Login")
+  console.log("Login");
   const navigate = useNavigate();
   const { handleLoginUser } = useAuth();
   const [formData, setFormData] = useState({
@@ -32,15 +32,15 @@ const Login = () => {
     });
     console.log("Logging in:", formData);
     // sirf success pe navigate karo
-    if (res) {
+    if (res.user.role == "buyer") {
       navigate("/");
+    } else if (res.user.role == "seller") {
+      navigate("/seller/dashboard");
     }
   };
 
   return (
     <div className="h-screen bg-white flex flex-col font-sans text-gray-800 overflow-hidden">
-
-
       {/* Main Content Area - Split Layout consistent with Register */}
       <main className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Left Side Image - Cinematic Zoom Effect */}
@@ -66,7 +66,7 @@ const Login = () => {
         <div className="w-full lg:w-1/2 overflow-y-auto bg-[#fcfcfc] flex flex-col no-scrollbar">
           <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 lg:p-14">
             <div className="w-full max-w-[340px]">
-            <Heading/>
+              <Heading />
               <h2 className="text-2xl font-bold text-[#1a1a1a] mb-2 text-center lg:text-left">
                 Sign In
               </h2>

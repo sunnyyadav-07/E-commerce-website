@@ -36,7 +36,11 @@ const Register = () => {
       isSeller: formData.isSeller,
     });
     console.log("Registering:", formData);
-    if (res) navigate("/");
+    if (res.user.role == "buyer") {
+      navigate("/");
+    } else if (res.user.role == "seller") {
+      navigate("/seller/dashboard");
+    }
   };
 
   return (
