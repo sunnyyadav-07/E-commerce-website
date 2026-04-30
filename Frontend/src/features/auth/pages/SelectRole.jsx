@@ -8,9 +8,9 @@ const SelectRole = () => {
   async function handleClick(role) {
     const res = await handleSetUserRole({ role });
     console.log("working");
-    if (res.user.role == "buyer") {
+    if (res.role == "buyer") {
       navigate("/");
-    } else if (res.user.role == "seller") {
+    } else if (res.role == "seller") {
       navigate("/seller/dashboard");
     }
   }

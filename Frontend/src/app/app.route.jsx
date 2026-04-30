@@ -7,12 +7,16 @@ import SellerDashboard from "../features/products/pages/Seller/SellerDashboard.j
 import Protected from "../features/auth/components/Protected.jsx";
 import PublicOnlyRoute from "../features/auth/components/PublicOnlyRoute.jsx";
 import AppLayout from "./AppLayout.jsx";
+import Home from "../features/products/pages/Home.jsx";
+import ProductDetail from "../features/products/pages/ProductDetail.jsx";
 
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <AppLayout />,
     children: [
+      { path: "", element: <Home /> },
+      { path: "/product/:productId", element: <ProductDetail /> },
       {
         path: "select-role",
         element: (

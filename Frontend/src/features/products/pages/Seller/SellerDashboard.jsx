@@ -15,13 +15,10 @@ import SellerNavigation from "../../../shared/components/SellerNavigation";
 const SellerDashboard = () => {
   const navigate = useNavigate();
   const { handleGetSellerProduct } = useProduct();
-  const sellerProducts =
-    useSelector((state) => state.product.sellerProducts) || [];
+  const sellerProducts = useSelector((state) => state.product.sellerProducts);
 
   useEffect(() => {
-    (async function () {
-      await handleGetSellerProduct();
-    })();
+    handleGetSellerProduct();
   }, []);
 
   return (
