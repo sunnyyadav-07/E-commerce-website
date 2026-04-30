@@ -52,3 +52,39 @@ export async function getSellerProducts(req, res) {
     products,
   });
 }
+export async function getAllProductsController(req, res) {
+  const products = await productModel.find();
+  if (!products) {
+    return res.status(404).json({
+      success: false,
+      message: "Do not have products",
+    });
+  }
+  return res.status(200).json({
+    success: true,
+    message: "Products fetched successfully",
+    products,
+  });
+}
+
+export async function getProductDetailsController(req, res) {
+  const { productId } = req.params;
+  if (!productId) {
+    return res.status(400).json({
+      success: false,
+      message: "Product id not found",
+    });
+  }
+  const product = await productModel.findById(productId);
+  if (!product) {
+    return res.status(404).json({
+      success: false,
+      message: "Product not found",
+    });
+  }
+  return res.status(200).json({
+    success: true,
+    message: "Product details fetched successfully",
+    product,
+  });
+}

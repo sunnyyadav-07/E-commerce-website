@@ -5,6 +5,8 @@ import {
 } from "../middlewares/auth.middleware.js";
 import {
   createProductController,
+  getAllProductsController,
+  getProductDetailsController,
   getSellerProducts,
 } from "../controllers/product.controller.js";
 import multer from "multer";
@@ -27,4 +29,6 @@ productRouter.post(
   createProductController,
 );
 productRouter.get("/seller", authUser, authenticateSeller, getSellerProducts);
+productRouter.get("/", getAllProductsController);
+productRouter.get("/detail/:productId", getProductDetailsController);
 export default productRouter;
