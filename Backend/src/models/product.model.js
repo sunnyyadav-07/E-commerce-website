@@ -15,22 +15,60 @@ const productSchema = new mongoose.Schema(
       ref: "user",
       required: true,
     },
-    price: {
-      amount: {
-        type: Number,
-        required: true,
-      },
-      currency: {
-        type: String,
-        enum: ["USD", "EUR", "GBP", "JPY", "INR"],
-        default: "INR",
-      },
+    category: {
+      type: String,
+      required: true,
     },
-    images: [
+    brand: {
+      type: String,
+      required: true,
+    },
+    variants: [
       {
-        url: {
+        sku: {
           type: String,
           required: true,
+          unique: true,
+          uppercase: true,
+          trim: true,
+        },
+        images: [
+          {
+            url: {
+              type: String,
+              required: true,
+            },
+          },
+        ],
+        stock: {
+          type: Number,
+          default: 0,
+        },
+        price: {
+          amount: {
+            type: Number,
+            required: true,
+          },
+          currency: {
+            type: String,
+            enum: ["USD", "EUR", "GBP", "JPY", "INR"],
+            default: "INR",
+          },
+        },
+        attributes: {
+          type: Map,
+          of: String,
+          required: true,
+        },
+        isDefault: {
+          type: Boolean,
+          default: false,
+        },
+
+        status: {
+          type: String,
+          enum: ["active", "inactive", "out_of_stock"],
+          default: "active",
         },
       },
     ],
