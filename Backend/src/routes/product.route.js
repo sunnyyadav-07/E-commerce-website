@@ -4,13 +4,17 @@ import {
   authUser,
 } from "../middlewares/auth.middleware.js";
 import {
+  createParentProductController,
   createProductController,
   getAllProductsController,
   getProductDetailsController,
   getSellerProducts,
 } from "../controllers/product.controller.js";
 import multer from "multer";
-import { createProductValidator } from "../validators/product.validator.js";
+import {
+  createProductValidator,
+  parentProductValidator,
+} from "../validators/product.validator.js";
 import { validateImages } from "../middlewares/custom.middleware.js";
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -19,6 +23,13 @@ const upload = multer({
   },
 });
 const productRouter = Router();
+productRouter.post(
+  "/create",
+  authUser,
+  authenticateSeller,
+  parentProductValidator,
+  createParentProductController,
+);
 productRouter.post(
   "/",
   authUser,

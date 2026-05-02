@@ -37,3 +37,30 @@ export const createProductValidator = [
     .withMessage("Price currency must be a string"),
   validateRequest,
 ];
+export const parentProductValidator = [
+  body("title")
+    .trim()
+    .notEmpty()
+    .withMessage("Title is required")
+    .isString()
+    .withMessage("Title must be a string"),
+  body("description")
+    .trim()
+    .notEmpty()
+    .withMessage("Description is required")
+    .isString()
+    .withMessage("Description must be a string"),
+  body("category")
+    .trim()
+    .notEmpty()
+    .withMessage("Category is required")
+    .isString()
+    .withMessage("Category must be a string"),
+  body("brand")
+    .trim()
+    .notEmpty()
+    .withMessage("Brand is required")
+    .isString()
+    .withMessage("Brand must be a string"),
+  validateRequest,
+];

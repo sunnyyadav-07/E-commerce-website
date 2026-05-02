@@ -19,9 +19,18 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    subCategory: {
+      type: String,
+      required: true,
+    },
     brand: {
       type: String,
       required: true,
+    },
+    status: {
+      type: String,
+      enum: ["draft", "active", "archived"],
+      default: "draft",
     },
     variants: [
       {
