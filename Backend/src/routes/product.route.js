@@ -5,14 +5,14 @@ import {
 } from "../middlewares/auth.middleware.js";
 import {
   createParentProductController,
-  createProductController,
+  createProductVariantController,
   getAllProductsController,
   getProductDetailsController,
   getSellerProducts,
 } from "../controllers/product.controller.js";
 import multer from "multer";
 import {
-  createProductValidator,
+  createProductVariantValidator,
   parentProductValidator,
 } from "../validators/product.validator.js";
 import { validateImages } from "../middlewares/custom.middleware.js";
@@ -31,13 +31,13 @@ productRouter.post(
   createParentProductController,
 );
 productRouter.post(
-  "/",
+  "/:productId/variant",
   authUser,
   authenticateSeller,
   upload.array("images", 7),
   validateImages,
-  createProductValidator,
-  createProductController,
+  createProductVariantValidator,
+  createProductVariantController,
 );
 productRouter.get("/seller", authUser, authenticateSeller, getSellerProducts);
 productRouter.get("/", getAllProductsController);

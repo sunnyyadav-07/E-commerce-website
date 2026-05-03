@@ -1,12 +1,28 @@
 import productModel from "../models/product.model.js";
 import userModel from "../models/user.model.js";
 import { uploadFiles } from "../services/storage.service.js";
+import { nanoid } from "nanoid";
 
-export async function createProductController(req, res) {
+function generateSKU(title, brand, attributes) {
+  const brandPart = brand.replace(/\s+/g, "").toUpperCase();
+
+  const titlePart = title.replace(/\s+/g, "").toUpperCase().slice(0, 8);
+
+  const attrPart = Object.values(attributes)
+    .join("-")
+    .replace(/\s+/g, "")
+    .toUpperCase();
+
+  const uniquePart = nanoid(5).toUpperCase();
+
+  return `${brandPart}-${titlePart}-${attrPart}-${uniquePart}`;
+}
+
+export async function createProductVariantController(req, res) {
   try {
-    const productId = req.params;
+    const { productId } = req.params;
     const sellerId = req.user._id;
-    const { attributes, stock, priceAmount, priceCurrency, sku } = req.body;
+    const { attributes, stock, priceAmount, priceCurrency } = req.body;
     const product = await productModel.findOne({
       _id: productId,
       sellerId,
@@ -18,6 +34,17 @@ export async function createProductController(req, res) {
           "Product not found or you are not authorized to add variants to this product",
       });
     }
+    const variantExists = product.variants.find(
+      (variant) =>
+        JSON.stringify(Object.fromEntries(variant.attributes)) ===
+        JSON.stringify(attributes),
+    );
+    if (variantExists) {
+      return res.status(400).json({
+        success: false,
+        message: "This variant already exists",
+      });
+    }
     const images = await Promise.all(
       req.files.map(async (file) => {
         return await uploadFiles({
@@ -26,16 +53,26 @@ export async function createProductController(req, res) {
         });
       }),
     );
-    // const product = await productModel.create({
-    //   title,
-    //   description,
-    //   price: { amount: priceAmount, currency: priceCurrency || "INR" },
-    //   images,
-    //   sellerId: req.user._id,
-    // });
+    const parsedAttributes = JSON.parse(attributes);
+    let isDefault = false;
+    if (product.variants.length === 0) {
+      isDefault = true;
+    }
+    const sku = generateSKU(product.title, product.brand, parsedAttributes);
+    product.variants.push({
+      sku,
+      images,
+      stock,
+      price: { amount: priceAmount, currency: priceCurrency || "INR" },
+      attributes: parsedAttributes,
+      isDefault,
+    });
+    product.status = "active";
+    await product.save();
+
     res.status(201).json({
       success: true,
-      message: "Product created successfully",
+      message: "Variant created successfully",
       product,
     });
   } catch (error) {
@@ -115,16 +152,21 @@ export async function createParentProductController(req, res) {
     if (isProductExists) {
       return res.status(400).json({
         success: false,
-        message: "This product already exists, try adding variants.",
+        message:
+          isProductExists.status === "draft"
+            ? "Draft product exists. Please add first variant."
+            : "Product already exists. Add another variant.",
+        product: isProductExists,
       });
     }
+
     const product = await productModel.create({
       title,
       description,
       brand,
       category,
       subCategory,
-      sellerId
+      sellerId,
     });
     res.status(201).json({
       success: true,
