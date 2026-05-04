@@ -9,6 +9,7 @@ import PublicOnlyRoute from "../features/auth/components/PublicOnlyRoute.jsx";
 import AppLayout from "./AppLayout.jsx";
 import Home from "../features/products/pages/Home.jsx";
 import ProductDetail from "../features/products/pages/ProductDetail.jsx";
+import CreateParentProduct from "../features/products/pages/Seller/CreateParentProduct.jsx";
 
 export const router = createBrowserRouter([
   {
@@ -34,6 +35,14 @@ export const router = createBrowserRouter([
           </Protected>
         ),
         children: [
+          {
+            path: "create-product",
+            element: <CreateParentProduct />,
+          },
+          {
+            path: "create-product/:productId/variant",
+            element: <CreateProduct />,
+          },
           {
             path: "create-product",
             element: <CreateProduct />,
