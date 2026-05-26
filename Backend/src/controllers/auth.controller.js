@@ -1,7 +1,7 @@
 import userModel from "../models/user.model.js";
 import { config } from "../config/config.js";
 import jwt from "jsonwebtoken";
-async function sendTokenRequence(user, res, message) {
+async function sendTokenRequest(user, res, message) {
   const token = jwt.sign(
     {
       id: user._id,
@@ -17,7 +17,6 @@ async function sendTokenRequence(user, res, message) {
     user: {
       id: user._id,
       email: user.email,
-      contact: user.contact,
       fullname: user.fullname,
       role: user.role,
     },
@@ -54,7 +53,7 @@ export async function registerController(req, res) {
       password,
       role: isSeller ? "seller" : "buyer",
     });
-    sendTokenRequence(user, res, "User register successfully");
+    sendTokenRequest(user, res, "User register successfully");
   } catch (error) {
     console.log(error);
     //  Handle duplicate key error
@@ -97,7 +96,7 @@ export async function loginController(req, res) {
       message: "Invalid credentials",
     });
   }
-  sendTokenRequence(user, res, "Login successfully");
+  sendTokenRequest(user, res, "Login successfully");
 }
 
 export async function googleCallback(req, res) {
@@ -117,6 +116,7 @@ export async function googleCallback(req, res) {
         role: null,
       });
     }
+    // when user is registered without google and then login with google
     if (user && !user.googleId) {
       // link Google account
       user.googleId = id;
@@ -132,9 +132,14 @@ export async function googleCallback(req, res) {
     );
     res.cookie("token", token);
     if (!user.role) {
+      console.log("aaya kya role");
       return res.redirect("http://localhost:5173/select-role");
     } else {
-      return res.redirect("http://localhost:5173/");
+      if (user.role == "buyer") {
+        return res.redirect("http://localhost:5173/");
+      } else {
+        return res.redirect("http://localhost:5173/seller/dashboard");
+      }
     }
   } catch (error) {
     console.log(error);
@@ -145,18 +150,11 @@ export async function googleCallback(req, res) {
 export async function setUserRoleController(req, res) {
   try {
     const { role } = req.body;
-    const userId = req.user._id;
+    const user = req.user;
     if (!["buyer", "seller"].includes(role)) {
       return res.status(400).json({
         success: false,
         message: "Invalid role",
-      });
-    }
-    const user = await userModel.findById(userId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
       });
     }
     if (user.role) {
@@ -167,15 +165,15 @@ export async function setUserRoleController(req, res) {
     }
     user.role = role;
     await user.save();
-    const token = jwt.sign(
-      {
-        id: user._id,
-        role: user.role,
-      },
-      config.JWT_SECRET,
-      { expiresIn: "7d" },
-    );
-    res.cookie("token", token);
+    // const token = jwt.sign(
+    //   {
+    //     id: user._id,
+    //     role: user.role,
+    //   },
+    //   config.JWT_SECRET,
+    //   { expiresIn: "7d" },
+    // );
+    // res.cookie("token", token);
     res.status(200).json({
       success: true,
       message: "Role updated successfully",

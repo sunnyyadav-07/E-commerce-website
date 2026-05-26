@@ -86,6 +86,7 @@ export async function createProductVariantController(req, res) {
 
 export async function getSellerProducts(req, res) {
   const sellerId = req.user._id;
+  console.log(sellerId)
   const products = await productModel.find({
     sellerId,
   });
@@ -95,10 +96,15 @@ export async function getSellerProducts(req, res) {
       message: "Product not found",
     });
   }
+  console.log(products)
+  const activeProducts = products.filter(
+    (product) => product.status === "active",
+  );
+  console.log(activeProducts)
   res.status(200).json({
     success: true,
     message: "Products fetched successfully",
-    products,
+    products: activeProducts,
   });
 }
 export async function getAllProductsController(req, res) {
@@ -109,10 +115,13 @@ export async function getAllProductsController(req, res) {
       message: "Do not have products",
     });
   }
+  const activeProducts = products.filter(
+    (product) => product.status === "active",
+  );
   return res.status(200).json({
     success: true,
     message: "Products fetched successfully",
-    products,
+    products: activeProducts,
   });
 }
 

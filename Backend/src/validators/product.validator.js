@@ -74,6 +74,12 @@ export const parentProductValidator = [
     .withMessage("Category is required")
     .isString()
     .withMessage("Category must be a string"),
+  body("subCategory")
+    .trim()
+    .notEmpty()
+    .withMessage("subCategory is required")
+    .isString()
+    .withMessage("subCategory must be a string"),
   body("brand")
     .trim()
     .notEmpty()
