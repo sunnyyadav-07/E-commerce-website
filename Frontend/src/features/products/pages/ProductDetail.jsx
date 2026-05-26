@@ -29,8 +29,10 @@ const ProductDetail = () => {
     })();
   }, [productId]);
 
-  const currency =
-    product?.price?.currency === "INR" ? "₹" : product?.price?.currency;
+  const defaultVariant = product?.variants?.find((v) => v.isDefault) || product?.variants?.[0];
+  const images = defaultVariant?.images || product?.images || [];
+  const price = defaultVariant?.price || product?.price || { amount: 0, currency: "INR" };
+  const currency = price.currency === "INR" ? "₹" : (price.currency === "USD" ? "$" : price.currency);
 
   // ── Loading State ──
   if (loading) {
@@ -94,11 +96,11 @@ const ProductDetail = () => {
           {/* ── Left: Image Gallery ── */}
           <div className="flex flex-col-reverse md:flex-row gap-4">
             {/* Thumbnail Strip */}
-            {product.images?.length > 1 && (
+            {images?.length > 1 && (
               <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto md:max-h-[600px] shrink-0 pb-2 md:pb-0">
-                {product.images.map((img, i) => (
+                {images.map((img, i) => (
                   <button
-                    key={img._id}
+                    key={img._id || i}
                     onClick={() => setActiveImg(i)}
                     className={`cursor-pointer shrink-0 w-16 h-20 md:w-20 md:h-24 rounded-xl overflow-hidden border-2 transition-all duration-200 ${
                       activeImg === i
@@ -120,18 +122,18 @@ const ProductDetail = () => {
             <div className="relative flex-1 aspect-[3/4] rounded-3xl overflow-hidden bg-stone-100 shadow-xl">
               <img
                 key={activeImg}
-                src={product.images?.[activeImg]?.url}
+                src={images?.[activeImg]?.url}
                 alt={product.title}
                 className="w-full h-full object-cover transition-opacity duration-500"
               />
 
               {/* Prev / Next arrows */}
-              {product.images?.length > 1 && (
+              {images?.length > 1 && (
                 <>
                   <button
                     onClick={() =>
                       setActiveImg((prev) =>
-                        prev === 0 ? product.images.length - 1 : prev - 1,
+                        prev === 0 ? images.length - 1 : prev - 1,
                       )
                     }
                     className="cursor-pointer absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow hover:bg-white transition-colors"
@@ -141,7 +143,7 @@ const ProductDetail = () => {
                   <button
                     onClick={() =>
                       setActiveImg((prev) =>
-                        prev === product.images.length - 1 ? 0 : prev + 1,
+                        prev === images.length - 1 ? 0 : prev + 1,
                       )
                     }
                     className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow hover:bg-white transition-colors"
@@ -151,7 +153,7 @@ const ProductDetail = () => {
 
                   {/* Dot indicator */}
                   <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
-                    {product.images.map((_, i) => (
+                    {images.map((_, i) => (
                       <button
                         key={i}
                         onClick={() => setActiveImg(i)}
@@ -184,10 +186,10 @@ const ProductDetail = () => {
               <div className="flex items-baseline gap-3">
                 <span className="text-3xl font-bold text-stone-900">
                   {currency}
-                  {product.price?.amount?.toLocaleString("en-IN")}
+                  {price.amount?.toLocaleString("en-IN")}
                 </span>
                 <span className="text-sm text-stone-400 uppercase tracking-widest">
-                  {product.price?.currency}
+                  {price.currency}
                 </span>
               </div>
             </div>
@@ -220,7 +222,7 @@ const ProductDetail = () => {
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-stone-400 shrink-0"></span>
-                  {product.images?.length} high-resolution images available
+                  {images?.length} high-resolution images available
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-stone-400 shrink-0"></span>

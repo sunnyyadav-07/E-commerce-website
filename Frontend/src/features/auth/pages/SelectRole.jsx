@@ -7,7 +7,6 @@ const SelectRole = () => {
   const { handleSetUserRole } = useAuth();
   async function handleClick(role) {
     const res = await handleSetUserRole({ role });
-    console.log("working");
     if (res.role == "buyer") {
       navigate("/");
     } else if (res.role == "seller") {

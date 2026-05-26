@@ -6,9 +6,13 @@ import { Heart, ShoppingCart, Search, ShoppingBag } from "lucide-react";
 
 const ProductCard = ({ product }) => {
   const [hovered, setHovered] = useState(false);
-  const currency =
-    product.price?.currency === "INR" ? "₹" : product.price?.currency;
   const navigate = useNavigate();
+
+  const defaultVariant = product.variants?.find((v) => v.isDefault) || product.variants?.[0];
+  const images = defaultVariant?.images || product.images || [];
+  const price = defaultVariant?.price || product.price || { amount: 0, currency: "INR" };
+  const currency = price.currency === "INR" ? "₹" : (price.currency === "USD" ? "$" : price.currency);
+
   return (
     <div
       className="group cursor-pointer"
@@ -20,20 +24,20 @@ const ProductCard = ({ product }) => {
     >
       {/* Image Area */}
       <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-stone-100 mb-4">
-        {product.images?.length > 0 ? (
+        {images.length > 0 ? (
           <>
             <img
-              src={product.images[0].url}
+              src={images[0].url}
               alt={product.title}
               className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ${
-                hovered && product.images.length > 1
+                hovered && images.length > 1
                   ? "opacity-0 scale-105"
                   : "opacity-100 scale-100"
               }`}
             />
-            {product.images.length > 1 && (
+            {images.length > 1 && (
               <img
-                src={product.images[1].url}
+                src={images[1].url}
                 alt={`${product.title} alt`}
                 className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ${
                   hovered ? "opacity-100 scale-105" : "opacity-0 scale-100"
@@ -68,9 +72,9 @@ const ProductCard = ({ product }) => {
         </button>
 
         {/* Image count badge */}
-        {product.images?.length > 1 && (
+        {images.length > 1 && (
           <div className="absolute bottom-3 left-3 px-2 py-1 bg-black/50 backdrop-blur-sm text-white text-[10px] rounded-full">
-            {product.images.length} photos
+            {images.length} photos
           </div>
         )}
       </div>
@@ -83,7 +87,7 @@ const ProductCard = ({ product }) => {
           </h3>
           <span className="font-bold text-stone-900 text-sm shrink-0">
             {currency}
-            {product.price?.amount?.toLocaleString("en-IN")}
+            {price.amount?.toLocaleString("en-IN")}
           </span>
         </div>
         <p className="text-xs text-stone-500 line-clamp-2 leading-relaxed">
