@@ -2,7 +2,6 @@ import { createBrowserRouter, Outlet } from "react-router";
 import Register from "../features/auth/pages/Register.jsx";
 import Login from "../features/auth/pages/Login.jsx";
 import SelectRole from "../features/auth/pages/SelectRole.jsx";
-import CreateProduct from "../features/products/pages/Seller/CreateProduct.jsx";
 import SellerDashboard from "../features/products/pages/Seller/SellerDashboard.jsx";
 import Protected from "../features/auth/components/Protected.jsx";
 import PublicOnlyRoute from "../features/auth/components/PublicOnlyRoute.jsx";
@@ -10,6 +9,7 @@ import AppLayout from "./AppLayout.jsx";
 import Home from "../features/products/pages/Home.jsx";
 import ProductDetail from "../features/products/pages/ProductDetail.jsx";
 import CreateParentProduct from "../features/products/pages/Seller/CreateParentProduct.jsx";
+import CreateProductVariants from "../features/products/pages/Seller/CreateProductVariants.jsx";
 
 export const router = createBrowserRouter([
   {
@@ -41,11 +41,11 @@ export const router = createBrowserRouter([
           },
           {
             path: "create-product/:productId/variant",
-            element: <CreateProduct />,
+            element: <CreateProductVariants />,
           },
           {
             path: "create-product",
-            element: <CreateProduct />,
+            element: <CreateParentProduct/>,
           },
           {
             path: "dashboard",

@@ -5,8 +5,13 @@ export async function getSellerProducts() {
   return response.data;
 }
 
-export async function createProduct(formData) {
-  const response = await api.post("/", formData);
+export async function createParentProduct(formData) {
+  const response = await api.post("/create", formData);
+  return response.data;
+}
+
+export async function createProductVariant(productId, formData) {
+  const response = await api.post(`/${productId}/variant`, formData);
   return response.data;
 }
 export async function getAllProducts() {

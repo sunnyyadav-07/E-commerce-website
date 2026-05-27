@@ -1,9 +1,10 @@
 import { useDispatch } from "react-redux";
 import {
-  createProduct,
+  createParentProduct,
+  createProductVariant,
   getAllProducts,
   getSellerProducts,
-  getProductDetails
+  getProductDetails,
 } from "../services/product.api";
 import {
   setAllProducts,
@@ -15,10 +16,21 @@ import {
 const useProduct = () => {
   const dispatch = useDispatch();
 
-  async function handleCreateProduct(formData) {
+  async function handleCreateParentProduct(formData) {
     try {
       dispatch(setLoading(true));
-      const data = await createProduct(formData);
+      const data = await createParentProduct(formData);
+      return data.product;
+    } catch (error) {
+      dispatch(setError(error.message));
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+  async function handleCreateProductVariant(productId, formData) {
+    try {
+      dispatch(setLoading(true));
+      const data = await createProductVariant(productId, formData);
       return data.product;
     } catch (error) {
       dispatch(setError(error.message));
@@ -62,7 +74,8 @@ const useProduct = () => {
     }
   }
   return {
-    handleCreateProduct,
+    handleCreateParentProduct,
+    handleCreateProductVariant,
     handleGetSellerProduct,
     handleGetAllProducts,
     handleGetProductDetails,

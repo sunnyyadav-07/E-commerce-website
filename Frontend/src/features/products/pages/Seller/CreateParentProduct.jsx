@@ -12,7 +12,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import SellerNavigation from "../../../shared/components/SellerNavigation";
-
+import useProduct from "../../hooks/useProduct";
 const CATEGORIES = ["Men's Clothing", "Women's Clothing"];
 
 const SUBCATEGORIES = {
@@ -35,20 +35,22 @@ const inputClass =
 
 const CreateParentProduct = () => {
   const navigate = useNavigate();
+  const { handleCreateParentProduct } = useProduct();
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     brand: "",
     category: "",
-    subcategory: "",
+    subCategory: "",
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     // Reset subcategory whenever category changes
     if (name === "category") {
-      setFormData((prev) => ({ ...prev, category: value, subcategory: "" }));
+      setFormData((prev) => ({ ...prev, category: value, subCategory: "" }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -56,6 +58,8 @@ const CreateParentProduct = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const res = await handleCreateParentProduct(formData);
+    console.log(res);
   };
 
   const filledFields = Object.values(formData).filter(Boolean).length;
@@ -200,16 +204,16 @@ const CreateParentProduct = () => {
                   <label
                     key={sub}
                     className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 cursor-pointer transition-all text-sm font-bold tracking-wide select-none ${
-                      formData.subcategory === sub
+                      formData.subCategory === sub
                         ? "border-[#3b557e] bg-[#3b557e]/5 text-[#3b557e]"
                         : "border-slate-200 bg-[#f3f4f6] text-slate-500 hover:border-[#3b557e]/30 hover:text-[#3b557e]/70"
                     }`}
                   >
                     <input
                       type="radio"
-                      name="subcategory"
+                      name="subCategory"
                       value={sub}
-                      checked={formData.subcategory === sub}
+                      checked={formData.subCategory === sub}
                       onChange={handleChange}
                       className="appearance-none"
                       required
