@@ -10,6 +10,9 @@ import {
   Trash2,
   Search,
   Eye,
+  FilePen,
+  Layers,
+  ChevronRight,
 } from "lucide-react";
 import SellerNavigation from "../../../shared/components/SellerNavigation";
 
@@ -17,10 +20,18 @@ const SellerDashboard = () => {
   const navigate = useNavigate();
   const { handleGetSellerProduct } = useProduct();
   const sellerProducts = useSelector((state) => state.product.sellerProducts);
-  console.log(sellerProducts);
+
   useEffect(() => {
     handleGetSellerProduct();
   }, []);
+
+  // ── Split into drafts (no variants) and live products ─────────────────────
+  const drafts = sellerProducts.filter(
+    (p) => !p.variants || p.variants.length === 0
+  );
+  const liveProducts = sellerProducts.filter(
+    (p) => p.variants && p.variants.length > 0
+  );
 
   return (
     <div className="min-h-screen bg-[#f8fafc] flex flex-col font-sans text-[#1a1a1a] md:pl-64">
@@ -54,6 +65,7 @@ const SellerDashboard = () => {
 
       {/* Main Content */}
       <main className="flex-1 w-full max-w-5xl mx-auto p-6 pb-32 space-y-8">
+
         {/* Welcome Section */}
         <section className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-1">
@@ -77,13 +89,19 @@ const SellerDashboard = () => {
         </section>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {[
             {
-              label: "Active Products",
-              value: sellerProducts.length,
+              label: "Live Products",
+              value: liveProducts.length,
               color: "text-emerald-600",
               bg: "bg-emerald-50",
+            },
+            {
+              label: "Drafts",
+              value: drafts.length,
+              color: "text-amber-600",
+              bg: "bg-amber-50",
             },
             {
               label: "Total Orders",
@@ -106,21 +124,151 @@ const SellerDashboard = () => {
           ))}
         </div>
 
-        {/* Product Grid */}
-        <section className="space-y-6">
-          {sellerProducts.length > 0 ? (
+        {/* ── Drafts Section ─────────────────────────────────────────────────── */}
+        {drafts.length > 0 && (
+          <section className="space-y-4">
+            {/* Section header */}
+            <div className="flex items-center gap-3">
+              <div className="w-7 h-7 bg-amber-100 rounded-lg flex items-center justify-center">
+                <FilePen size={14} className="text-amber-600" strokeWidth={2} />
+              </div>
+              <div>
+                <h3 className="text-sm font-extrabold text-[#1a1a1a] uppercase tracking-widest">
+                  Drafts
+                </h3>
+                <p className="text-[10px] text-slate-400 font-medium">
+                  These products need at least one variant before going live.
+                </p>
+              </div>
+              <span className="ml-auto bg-amber-100 text-amber-700 text-[10px] font-black px-2.5 py-1 rounded-full">
+                {drafts.length}
+              </span>
+            </div>
+
+            {/* Draft cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {drafts.map((product) => (
+                <button
+                  key={product._id}
+                  type="button"
+                  onClick={() =>
+                    navigate(
+                      `/seller/create-product/${product._id}/variant`
+                    )
+                  }
+                  className="group text-left w-full bg-white border-2 border-dashed border-amber-200 hover:border-amber-400 hover:shadow-lg hover:shadow-amber-100/60 rounded-3xl p-5 transition-all duration-300 cursor-pointer"
+                >
+                  <div className="flex items-start gap-4">
+                    {/* Icon */}
+                    <div className="shrink-0 w-12 h-12 bg-amber-50 group-hover:bg-amber-100 rounded-2xl flex items-center justify-center transition-colors">
+                      <Layers
+                        size={22}
+                        className="text-amber-500"
+                        strokeWidth={1.5}
+                      />
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-700 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                          Draft
+                        </span>
+                      </div>
+                      <h4 className="font-extrabold text-slate-800 text-sm leading-snug line-clamp-1 group-hover:text-amber-700 transition-colors">
+                        {product.title}
+                      </h4>
+                      <p className="text-[11px] text-slate-400 font-medium mt-0.5 line-clamp-1">
+                        {product.brand && `${product.brand} · `}
+                        {product.category}
+                        {product.subCategory && ` · ${product.subCategory}`}
+                      </p>
+                    </div>
+
+                    {/* Arrow */}
+                    <ChevronRight
+                      size={18}
+                      className="shrink-0 text-amber-300 group-hover:text-amber-500 group-hover:translate-x-1 transition-all mt-1"
+                    />
+                  </div>
+
+                  <div className="mt-4 pt-4 border-t border-amber-100 flex items-center justify-between">
+                    <p className="text-[10px] text-slate-400 font-medium">
+                      0 variants · Click to add
+                    </p>
+                    <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest group-hover:underline">
+                      Add Variant →
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── Live Products Section ──────────────────────────────────────────── */}
+        <section className="space-y-4">
+          {liveProducts.length > 0 && (
+            <div className="flex items-center gap-3">
+              <div className="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center">
+                <Package size={14} className="text-emerald-600" strokeWidth={2} />
+              </div>
+              <div>
+                <h3 className="text-sm font-extrabold text-[#1a1a1a] uppercase tracking-widest">
+                  Live Products
+                </h3>
+                <p className="text-[10px] text-slate-400 font-medium">
+                  Products with at least one variant and available to buyers.
+                </p>
+              </div>
+              <span className="ml-auto bg-emerald-100 text-emerald-700 text-[10px] font-black px-2.5 py-1 rounded-full">
+                {liveProducts.length}
+              </span>
+            </div>
+          )}
+
+          {liveProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {sellerProducts.map((product) => {
-                const defaultVariant = product.variants?.find((v) => v.isDefault) || product.variants?.[0];
-                const imageUrl = defaultVariant?.images?.[0]?.url || product.images?.[0]?.url || "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=1000";
-                const price = defaultVariant?.price || product.price || { amount: 0, currency: "INR" };
-                const currencySymbol = price.currency === "INR" ? "₹" : (price.currency === "USD" ? "$" : price.currency);
-                const totalStock = product.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) ?? product.stock ?? 0;
-                
-                // Get unique attributes
-                const colors = [...new Set(product.variants?.map(v => v.attributes?.color).filter(Boolean))];
-                const sizes = [...new Set(product.variants?.map(v => v.attributes?.size).filter(Boolean))];
-                
+              {liveProducts.map((product) => {
+                const defaultVariant =
+                  product.variants?.find((v) => v.isDefault) ||
+                  product.variants?.[0];
+                const imageUrl =
+                  defaultVariant?.images?.[0]?.url ||
+                  product.images?.[0]?.url ||
+                  "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=1000";
+                const price = defaultVariant?.price ||
+                  product.price || { amount: 0, currency: "INR" };
+                const currencySymbol =
+                  price.currency === "INR"
+                    ? "₹"
+                    : price.currency === "USD"
+                      ? "$"
+                      : price.currency;
+                const totalStock =
+                  product.variants?.reduce(
+                    (sum, v) => sum + (v.stock || 0),
+                    0
+                  ) ??
+                  product.stock ??
+                  0;
+
+                const colors = [
+                  ...new Set(
+                    product.variants
+                      ?.map((v) => v.attributes?.color)
+                      .filter(Boolean)
+                  ),
+                ];
+                const sizes = [
+                  ...new Set(
+                    product.variants
+                      ?.map((v) => v.attributes?.size)
+                      .filter(Boolean)
+                  ),
+                ];
+
                 const isLowStock = totalStock > 0 && totalStock < 5;
                 const isOutOfStock = totalStock === 0;
 
@@ -129,17 +277,15 @@ const SellerDashboard = () => {
                     key={product._id}
                     className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 group flex flex-col h-full"
                   >
-                    {/* Image Container */}
+                    {/* Image */}
                     <div className="relative aspect-[4/5] overflow-hidden bg-slate-50">
                       <img
                         src={imageUrl}
                         alt={product.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                       />
-                      
-                      {/* Overlay Gradients */}
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      
+
                       {/* Top Badges */}
                       <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
                         <span className="bg-white/90 backdrop-blur-md text-[#1a1a1a] text-[10px] font-bold px-3 py-1.5 rounded-full shadow-sm uppercase tracking-wider">
@@ -152,15 +298,23 @@ const SellerDashboard = () => {
                         )}
                       </div>
 
-                      {/* Status & Stock Badges */}
+                      {/* Status & Stock */}
                       <div className="absolute top-4 right-4 flex flex-col items-end gap-2 z-10">
-                        <span className={`backdrop-blur-md text-[10px] font-bold px-3 py-1.5 rounded-full shadow-sm uppercase tracking-wider flex items-center gap-1.5 ${
-                          product.status === "active" ? "bg-emerald-500/90 text-white" : "bg-slate-500/90 text-white"
-                        }`}>
-                          <span className={`w-1.5 h-1.5 rounded-full bg-white ${product.status === "active" ? "animate-pulse" : ""}`} />
+                        <span
+                          className={`backdrop-blur-md text-[10px] font-bold px-3 py-1.5 rounded-full shadow-sm uppercase tracking-wider flex items-center gap-1.5 ${
+                            product.status === "active"
+                              ? "bg-emerald-500/90 text-white"
+                              : "bg-slate-500/90 text-white"
+                          }`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full bg-white ${
+                              product.status === "active" ? "animate-pulse" : ""
+                            }`}
+                          />
                           {product.status || "Active"}
                         </span>
-                        
+
                         {isOutOfStock ? (
                           <span className="bg-rose-500/90 backdrop-blur-sm text-white text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
                             Out of Stock
@@ -176,22 +330,22 @@ const SellerDashboard = () => {
                         )}
                       </div>
 
-                      {/* Hover Action Buttons */}
+                      {/* Hover Actions */}
                       <div className="absolute bottom-4 right-4 flex gap-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-20">
-                        <button 
+                        <button
                           onClick={() => navigate(`/product/${product._id}`)}
                           className="p-2.5 bg-white rounded-full text-slate-600 hover:text-[#3b557e] hover:scale-110 shadow-lg transition-all cursor-pointer"
                           title="View Product"
                         >
                           <Eye size={16} />
                         </button>
-                        <button 
+                        <button
                           className="p-2.5 bg-white rounded-full text-slate-600 hover:text-[#3b557e] hover:scale-110 shadow-lg transition-all cursor-pointer"
                           title="Edit Product"
                         >
                           <Edit3 size={16} />
                         </button>
-                        <button 
+                        <button
                           className="p-2.5 bg-white rounded-full text-rose-500 hover:bg-rose-50 hover:scale-110 shadow-lg transition-all cursor-pointer"
                           title="Delete Product"
                         >
@@ -199,7 +353,6 @@ const SellerDashboard = () => {
                         </button>
                       </div>
 
-                      {/* Variant quick-view overlay */}
                       {product.variants?.length > 1 && (
                         <div className="absolute bottom-4 left-4 text-white text-[10px] font-bold tracking-wider uppercase drop-shadow z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                           {product.variants.length} Variants Available
@@ -224,15 +377,16 @@ const SellerDashboard = () => {
                           </p>
                         </div>
 
-                        {/* Variants summary (Colors/Sizes swatches) */}
                         {(colors.length > 0 || sizes.length > 0) && (
                           <div className="pt-3 flex flex-wrap gap-x-4 gap-y-2 items-center text-[10px] border-t border-slate-50">
                             {colors.length > 0 && (
                               <div className="flex items-center gap-1.5">
-                                <span className="text-slate-400 font-bold uppercase tracking-widest">Colors:</span>
+                                <span className="text-slate-400 font-bold uppercase tracking-widest">
+                                  Colors:
+                                </span>
                                 <div className="flex flex-wrap gap-1">
                                   {colors.map((color, cIdx) => (
-                                    <span 
+                                    <span
                                       key={cIdx}
                                       className="px-2 py-0.5 bg-slate-50 text-slate-700 font-semibold border border-slate-100 rounded-md"
                                     >
@@ -244,10 +398,12 @@ const SellerDashboard = () => {
                             )}
                             {sizes.length > 0 && (
                               <div className="flex items-center gap-1.5">
-                                <span className="text-slate-400 font-bold uppercase tracking-widest">Sizes:</span>
+                                <span className="text-slate-400 font-bold uppercase tracking-widest">
+                                  Sizes:
+                                </span>
                                 <div className="flex flex-wrap gap-0.5">
                                   {sizes.map((size, sIdx) => (
-                                    <span 
+                                    <span
                                       key={sIdx}
                                       className="w-5 h-5 bg-slate-50 text-slate-700 font-semibold border border-slate-100 rounded-md flex items-center justify-center text-[9px]"
                                     >
@@ -261,12 +417,11 @@ const SellerDashboard = () => {
                         )}
                       </div>
 
-                      {/* Footer Info / Action */}
                       <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[10px]">
                         <span className="text-slate-400 font-medium tracking-wide">
                           {product.subCategory && `In ${product.subCategory}`}
                         </span>
-                        <button 
+                        <button
                           onClick={() => navigate(`/product/${product._id}`)}
                           className="flex items-center gap-1 font-bold text-[#3b557e] uppercase tracking-widest hover:gap-2 transition-all cursor-pointer"
                         >
@@ -278,7 +433,8 @@ const SellerDashboard = () => {
                 );
               })}
             </div>
-          ) : (
+          ) : drafts.length === 0 ? (
+            /* Empty state — no products at all */
             <div className="flex flex-col items-center justify-center py-20 px-6 bg-white rounded-[32px] border border-dashed border-slate-200 space-y-6">
               <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-300">
                 <Package size={40} strokeWidth={1} />
@@ -298,6 +454,16 @@ const SellerDashboard = () => {
               >
                 Launch First Product
               </button>
+            </div>
+          ) : (
+            /* Drafts exist but no live products yet */
+            <div className="flex flex-col items-center justify-center py-12 px-6 bg-white rounded-[32px] border border-dashed border-slate-200 space-y-3">
+              <p className="text-sm font-bold text-slate-400">
+                No live products yet
+              </p>
+              <p className="text-[11px] text-slate-400 max-w-xs text-center">
+                Complete your drafts above by adding variants to publish them.
+              </p>
             </div>
           )}
         </section>

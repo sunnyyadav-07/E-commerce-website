@@ -20,6 +20,8 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [activeImg, setActiveImg] = useState(0);
   const loading = useSelector((state) => state.product.loading);
+  const user = useSelector((state) => state.auth.user);
+  const isSeller = user?.role === "seller";
   const { handleGetProductDetails } = useProduct();
 
   useEffect(() => {
@@ -29,10 +31,17 @@ const ProductDetail = () => {
     })();
   }, [productId]);
 
-  const defaultVariant = product?.variants?.find((v) => v.isDefault) || product?.variants?.[0];
+  const defaultVariant =
+    product?.variants?.find((v) => v.isDefault) || product?.variants?.[0];
   const images = defaultVariant?.images || product?.images || [];
-  const price = defaultVariant?.price || product?.price || { amount: 0, currency: "INR" };
-  const currency = price.currency === "INR" ? "₹" : (price.currency === "USD" ? "$" : price.currency);
+  const price = defaultVariant?.price ||
+    product?.price || { amount: 0, currency: "INR" };
+  const currency =
+    price.currency === "INR"
+      ? "₹"
+      : price.currency === "USD"
+        ? "$"
+        : price.currency;
 
   // ── Loading State ──
   if (loading) {
@@ -83,10 +92,12 @@ const ProductDetail = () => {
             Atelier
           </a>
 
-          <button className="cursor-pointer flex items-center gap-1.5 text-[11px] uppercase tracking-widest font-medium text-stone-900 hover:text-stone-600 transition-colors">
-            <ShoppingBag className="w-4 h-4" />
-            Bag (0)
-          </button>
+          {user?.role == "buyer" && (
+            <button className="cursor-pointer flex items-center gap-1.5 text-[11px] uppercase tracking-widest font-medium text-stone-900 hover:text-stone-600 transition-colors">
+              <ShoppingBag className="w-4 h-4" />
+              Bag (0)
+            </button>
+          )}
         </div>
       </nav>
 
@@ -179,9 +190,11 @@ const ProductDetail = () => {
                 <h1 className="text-4xl md:text-5xl font-bold text-stone-900 tracking-tight leading-tight">
                   {product.title}
                 </h1>
-                <button className="cursor-pointer shrink-0 mt-1 w-10 h-10 rounded-full border border-stone-200 flex items-center justify-center text-stone-400 hover:text-red-500 hover:border-red-300 hover:bg-red-50 transition-all duration-200">
-                  <Heart className="w-5 h-5" />
-                </button>
+                {!isSeller && (
+                  <button className="cursor-pointer shrink-0 mt-1 w-10 h-10 rounded-full border border-stone-200 flex items-center justify-center text-stone-400 hover:text-red-500 hover:border-red-300 hover:bg-red-50 transition-all duration-200">
+                    <Heart className="w-5 h-5" />
+                  </button>
+                )}
               </div>
               <div className="flex items-baseline gap-3">
                 <span className="text-3xl font-bold text-stone-900">
@@ -235,17 +248,34 @@ const ProductDetail = () => {
               </ul>
             </div>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col gap-3 pt-2">
-              <button className="cursor-pointer w-full flex items-center justify-center gap-2 py-4 bg-[#3b557e] text-white text-sm font-bold uppercase tracking-widest rounded-2xl hover:bg-[#2d4363] active:scale-[0.98] transition-all duration-200 shadow-lg hover:shadow-xl">
-                <ShoppingCart className="w-5 h-5" />
-                Add to Cart
-              </button>
-              <button className="cursor-pointer w-full flex items-center justify-center gap-2 py-4 bg-stone-900 text-white text-sm font-bold uppercase tracking-widest rounded-2xl hover:bg-stone-700 active:scale-[0.98] transition-all duration-200">
-                <Zap className="w-5 h-5" />
-                Buy Now
-              </button>
-            </div>
+            {/* CTA Buttons — hidden for sellers */}
+            {isSeller ? (
+              <div className="flex items-start gap-3 p-4 bg-[#3b557e]/5 border border-[#3b557e]/15 rounded-2xl">
+                <div className="w-8 h-8 bg-[#3b557e]/10 rounded-xl flex items-center justify-center shrink-0">
+                  <ShoppingBag className="w-4 h-4 text-[#3b557e]" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-[#3b557e] mb-0.5">
+                    Seller View
+                  </p>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    Purchase actions are disabled in seller mode. Switch to a
+                    buyer account to shop.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3 pt-2">
+                <button className="cursor-pointer w-full flex items-center justify-center gap-2 py-4 bg-[#3b557e] text-white text-sm font-bold uppercase tracking-widest rounded-2xl hover:bg-[#2d4363] active:scale-[0.98] transition-all duration-200 shadow-lg hover:shadow-xl">
+                  <ShoppingCart className="w-5 h-5" />
+                  Add to Cart
+                </button>
+                <button className="cursor-pointer w-full flex items-center justify-center gap-2 py-4 bg-stone-900 text-white text-sm font-bold uppercase tracking-widest rounded-2xl hover:bg-stone-700 active:scale-[0.98] transition-all duration-200">
+                  <Zap className="w-5 h-5" />
+                  Buy Now
+                </button>
+              </div>
+            )}
 
             {/* Trust badges */}
             <div className="grid grid-cols-3 gap-3 pt-2">
