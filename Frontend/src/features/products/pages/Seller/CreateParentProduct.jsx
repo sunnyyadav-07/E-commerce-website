@@ -55,10 +55,13 @@ const CreateParentProduct = () => {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
-
+  const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
     const res = await handleCreateParentProduct(formData);
+    if (res) {
+      navigate(`/seller/create-product/:${res._id}/variant`);
+    }
     console.log(res);
   };
 
