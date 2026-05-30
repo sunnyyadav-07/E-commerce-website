@@ -22,7 +22,9 @@ const useProduct = () => {
       const data = await createParentProduct(formData);
       return data.product;
     } catch (error) {
-      dispatch(setError(error.message));
+      const errMsg = error.response?.data?.message || error.message;
+      dispatch(setError(errMsg));
+      throw error;
     } finally {
       dispatch(setLoading(false));
     }

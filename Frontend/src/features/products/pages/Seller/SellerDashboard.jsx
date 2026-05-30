@@ -27,10 +27,11 @@ const SellerDashboard = () => {
 
   // ── Split into drafts (no variants) and live products ─────────────────────
   const drafts = sellerProducts.filter(
-    (p) => !p.variants || p.variants.length === 0
+    (p) => !p.variants || p.variants.length === 0,
   );
+  console.log(drafts.length);
   const liveProducts = sellerProducts.filter(
-    (p) => p.variants && p.variants.length > 0
+    (p) => p.variants && p.variants.length > 0,
   );
 
   return (
@@ -65,7 +66,6 @@ const SellerDashboard = () => {
 
       {/* Main Content */}
       <main className="flex-1 w-full max-w-5xl mx-auto p-6 pb-32 space-y-8">
-
         {/* Welcome Section */}
         <section className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-1">
@@ -152,9 +152,7 @@ const SellerDashboard = () => {
                   key={product._id}
                   type="button"
                   onClick={() =>
-                    navigate(
-                      `/seller/create-product/${product._id}/variant`
-                    )
+                    navigate(`/seller/create-product/${product._id}/variant`)
                   }
                   className="group text-left w-full bg-white border-2 border-dashed border-amber-200 hover:border-amber-400 hover:shadow-lg hover:shadow-amber-100/60 rounded-3xl p-5 transition-all duration-300 cursor-pointer"
                 >
@@ -212,7 +210,11 @@ const SellerDashboard = () => {
           {liveProducts.length > 0 && (
             <div className="flex items-center gap-3">
               <div className="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center">
-                <Package size={14} className="text-emerald-600" strokeWidth={2} />
+                <Package
+                  size={14}
+                  className="text-emerald-600"
+                  strokeWidth={2}
+                />
               </div>
               <div>
                 <h3 className="text-sm font-extrabold text-[#1a1a1a] uppercase tracking-widest">
@@ -249,7 +251,7 @@ const SellerDashboard = () => {
                 const totalStock =
                   product.variants?.reduce(
                     (sum, v) => sum + (v.stock || 0),
-                    0
+                    0,
                   ) ??
                   product.stock ??
                   0;
@@ -258,14 +260,14 @@ const SellerDashboard = () => {
                   ...new Set(
                     product.variants
                       ?.map((v) => v.attributes?.color)
-                      .filter(Boolean)
+                      .filter(Boolean),
                   ),
                 ];
                 const sizes = [
                   ...new Set(
                     product.variants
                       ?.map((v) => v.attributes?.size)
-                      .filter(Boolean)
+                      .filter(Boolean),
                   ),
                 ];
 
