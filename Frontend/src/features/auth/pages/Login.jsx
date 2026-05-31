@@ -6,7 +6,6 @@ import Footer from "../components/Footer";
 import Heading from "../components/Heading";
 
 const Login = () => {
-  console.log("Login");
   const navigate = useNavigate();
   const { handleLoginUser } = useAuth();
   const [formData, setFormData] = useState({
@@ -30,7 +29,6 @@ const Login = () => {
       email: formData.email,
       password: formData.password,
     });
-    console.log("Logging in:", formData);
     // sirf success pe navigate karo
     if (res.user.role == "buyer") {
       navigate("/");

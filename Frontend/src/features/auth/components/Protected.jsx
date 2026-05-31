@@ -1,14 +1,14 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router";
+import Loading from "../../shared/components/Loading";
 
 const Protected = ({ children, role = "buyer" }) => {
   const user = useSelector((state) => state.auth.user);
   const loading = useSelector((state) => state.auth.loading);
-  if (loading) return <div>loading...</div>;
+  if (loading) return <Loading />;
   if (!user) return <Navigate to="/login" replace />;
-  // if (!user.role) return <Navigate to="/select-role" replace />;
-  // if (user.role === "buyer") return <Navigate to="/" replace />;
+
   return children;
 };
 
