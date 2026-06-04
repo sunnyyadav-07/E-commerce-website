@@ -1,5 +1,5 @@
 import { body, validationResult } from "express-validator";
-import { validateRequest } from "./validateRequest";
+import { validateRequest } from "./validateRequest.js";
 
 export const createProductVariantValidator = [
   body("priceCurrency")

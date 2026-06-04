@@ -31,7 +31,7 @@ export async function registerController(req, res) {
     });
     if (isUserExists) {
       //  Google conflict case
-      if (existingUser.authProvider === "google") {
+      if (isUserExists.authProvider === "google") {
         return res.status(400).json({
           success: false,
           message:
