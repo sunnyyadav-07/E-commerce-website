@@ -59,3 +59,51 @@ export async function addToCartController(req, res) {
     });
   }
 }
+
+export async function getAllCartProducts(req, res) {
+  try {
+    const userId = req.user._id;
+
+    const userCartProducts = await cartModel
+      .findOne({
+        userId,
+      })
+      .populate("items.productId");
+    if (!userCartProducts) {
+      return res.status(404).json({
+        success: false,
+        message: "Do not have any product in cart",
+      });
+    }
+    const formattedCartItems = userCartProducts.items.map((item) => {
+      const variant = item.productId.variants.id(item.variantId);
+      return {
+        productId: item.productId._id,
+        title: item.productId.title,
+        brand: item.productId.brand,
+        category: item.productId.category,
+        subCategory: item.productId.subCategory,
+        description: item.productId.description,
+        price: variant.price.amount,
+        currency: variant.price.currency,
+        images: variant.images,
+        stock: variant.stock,
+        attributes: variant.attributes,
+        variantId: variant._id,
+        quantity: item.quantity,
+      };
+    });
+    return res.status(200).json({
+      success: true,
+      message: "Cart products fetched successfully",
+      products: formattedCartItems,
+    });
+  } catch (error) {
+    console.log("Error in get all cart products api", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error,
+    });
+  }
+}
