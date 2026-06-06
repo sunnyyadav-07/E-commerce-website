@@ -23,7 +23,7 @@ const ProductCard = ({ product }) => {
       onMouseLeave={() => setHovered(false)}
     >
       {/* Image Area */}
-      <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-stone-100 mb-4">
+      <div className="relative aspect-3/4 overflow-hidden rounded-2xl bg-stone-100 mb-4">
         {images.length > 0 ? (
           <>
             <img
@@ -53,7 +53,7 @@ const ProductCard = ({ product }) => {
 
         {/* Hover overlay: CTA */}
         <div
-          className={`absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/70 to-transparent transition-all duration-400 ${
+          className={`absolute inset-x-0 bottom-0 p-4 bg-linear-to-t from-black/70 to-transparent transition-all duration-400 ${
             hovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
@@ -171,7 +171,7 @@ const Home = () => {
           </button>
         </div>
         <div className="hidden md:block flex-1 max-w-lg">
-          <div className="aspect-[3/4] rounded-3xl overflow-hidden bg-stone-200 shadow-2xl">
+          <div className="aspect-3/4 rounded-3xl overflow-hidden bg-stone-200 shadow-2xl">
             <img
               src="https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=1200&auto=format&fit=crop"
               alt="Editorial fashion"

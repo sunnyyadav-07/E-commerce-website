@@ -108,7 +108,7 @@ const ProductDetail = () => {
           <div className="flex flex-col-reverse md:flex-row gap-4">
             {/* Thumbnail Strip */}
             {images?.length > 1 && (
-              <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto md:max-h-[600px] shrink-0 pb-2 md:pb-0">
+              <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto md:max-h-150 shrink-0 pb-2 md:pb-0">
                 {images.map((img, i) => (
                   <button
                     key={img._id || i}
@@ -130,7 +130,7 @@ const ProductDetail = () => {
             )}
 
             {/* Main Image */}
-            <div className="relative flex-1 aspect-[3/4] rounded-3xl overflow-hidden bg-stone-100 shadow-xl">
+            <div className="relative flex-1 aspect-3/4 rounded-3xl overflow-hidden bg-stone-100 shadow-xl">
               <img
                 key={activeImg}
                 src={images?.[activeImg]?.url}
