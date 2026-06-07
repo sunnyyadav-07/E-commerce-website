@@ -15,6 +15,7 @@ import {
   Tag,
   Layers,
 } from "lucide-react";
+import { useCart } from "../../addToCart/hooks/useCart";
 
 /* ─── Component ──────────────────────────────────────────── */
 const ProductDetail = () => {
@@ -24,6 +25,7 @@ const ProductDetail = () => {
   const [selectedVariantId, setSelectedVariantId] = useState(null);
   const [activeImg, setActiveImg] = useState(0);
   const [wishlisted, setWishlisted] = useState(false);
+  const { handleAddToCart } = useCart();
   const loading = useSelector((state) => state.product.loading);
   const user = useSelector((state) => state.auth.user);
   const isSeller = user?.role === "seller";
@@ -41,7 +43,13 @@ const ProductDetail = () => {
       }
     })();
   }, [productId]);
-
+  function addToCartHandle(variantId) {
+    const data = {
+      productId,
+      variantId,
+    };
+    handleAddToCart(data);
+  }
   /* ── derived values from selected variant ── */
   const selectedVariant =
     product?.variants?.find((v) => v._id === selectedVariantId) ??
@@ -112,7 +120,10 @@ const ProductDetail = () => {
           </a>
 
           {user?.role === "buyer" && (
-            <button className="cursor-pointer flex items-center gap-1.5 text-[11px] uppercase tracking-widest font-medium text-stone-900 hover:text-stone-600 transition-colors">
+            <button
+              onClick={() => navigate("/my-cart")}
+              className="cursor-pointer flex items-center gap-1.5 text-[11px] uppercase tracking-widest font-medium text-stone-900 hover:text-stone-600 transition-colors"
+            >
               <ShoppingBag className="w-4 h-4" />
               Bag (0)
             </button>
@@ -392,6 +403,9 @@ const ProductDetail = () => {
               <div className="flex flex-col gap-3 pt-2">
                 <button
                   disabled={stock === 0}
+                  onClick={() => {
+                    addToCartHandle(selectedVariantId);
+                  }}
                   className="cursor-pointer w-full flex items-center justify-center gap-2 py-4 bg-[#3b557e] text-white text-sm font-bold uppercase tracking-widest rounded-2xl hover:bg-[#2d4363] active:scale-[0.98] transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <ShoppingCart className="w-5 h-5" />

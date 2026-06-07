@@ -14,6 +14,7 @@ export async function createProductVariant(productId, formData) {
   const response = await api.post(`/${productId}/variant`, formData);
   return response.data;
 }
+
 export async function getAllProducts() {
   const response = await api.get("/");
   return response.data;

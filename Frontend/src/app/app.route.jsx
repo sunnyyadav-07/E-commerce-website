@@ -10,6 +10,7 @@ import Home from "../features/products/pages/Home.jsx";
 import ProductDetail from "../features/products/pages/ProductDetail.jsx";
 import CreateParentProduct from "../features/products/pages/Seller/CreateParentProduct.jsx";
 import CreateProductVariants from "../features/products/pages/Seller/CreateProductVariants.jsx";
+import Cart from "../features/addToCart/pages/Cart.jsx";
 
 export const router = createBrowserRouter([
   {
@@ -26,7 +27,7 @@ export const router = createBrowserRouter([
           </Protected>
         ),
       },
-
+      { path: "my-cart", element: <Cart /> },
       {
         path: "seller",
         element: (
@@ -45,7 +46,7 @@ export const router = createBrowserRouter([
           },
           {
             path: "create-product",
-            element: <CreateParentProduct/>,
+            element: <CreateParentProduct />,
           },
           {
             path: "dashboard",

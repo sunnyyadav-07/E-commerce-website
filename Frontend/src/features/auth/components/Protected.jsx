@@ -8,6 +8,7 @@ const Protected = ({ children, role = "buyer" }) => {
   const loading = useSelector((state) => state.auth.loading);
   if (loading) return <Loading />;
   if (!user) return <Navigate to="/login" replace />;
+  if (user.role == "buyer") return <Navigate to="/" replace />;
 
   return children;
 };
