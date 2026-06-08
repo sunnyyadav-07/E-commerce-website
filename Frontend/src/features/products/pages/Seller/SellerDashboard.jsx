@@ -29,7 +29,6 @@ const SellerDashboard = () => {
   const drafts = sellerProducts.filter(
     (p) => !p.variants || p.variants.length === 0,
   );
-  console.log(drafts.length);
   const liveProducts = sellerProducts.filter(
     (p) => p.variants && p.variants.length > 0,
   );
