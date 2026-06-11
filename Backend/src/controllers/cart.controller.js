@@ -1,3 +1,4 @@
+import { stockOfProduct } from "../dao/product.dao.js";
 import cartModel from "../models/cart.model.js";
 import productModel from "../models/product.model.js";
 
@@ -24,8 +25,15 @@ export async function addToCartController(req, res) {
         item.productId.toString() === productId &&
         item.variantId.toString() === variantId,
     );
+    const stock = await stockOfProduct(productId, variantId);
     if (existingItem) {
-      existingItem.quantity += 1;
+      const cartItemQnty = (existingItem.quantity += 1);
+      if (cartItemQnty > stock) {
+        return res.status(400).json({
+          success: false,
+          message: `Only ${stock} items are left in stock and user already have ${cartItemQnty - 1}`,
+        });
+      }
       await cart.save();
       return res.status(200).json({
         success: true,
