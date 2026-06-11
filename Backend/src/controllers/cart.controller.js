@@ -32,11 +32,6 @@ export async function addToCartController(req, res) {
         message: "Quantity updated successfully",
         cart,
       });
-      return res.status(200).json({
-        success: true,
-        message: "Quantity updated successfully",
-        cart,
-      });
     }
     if (!existingItem) {
       cart.items.push({
@@ -44,6 +39,7 @@ export async function addToCartController(req, res) {
         variantId,
         quantity: 1,
       });
+      await cart.save();
       return res.status(200).json({
         success: true,
         message: "Product added in cart  successfully",
