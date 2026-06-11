@@ -30,7 +30,7 @@ const ProductDetail = () => {
   const user = useSelector((state) => state.auth.user);
   const isSeller = user?.role === "seller";
   const { handleGetProductDetails } = useProduct();
-
+  const cartItems = useSelector((state) => state.cart.allCartProducts);
   useEffect(() => {
     (async () => {
       const data = await handleGetProductDetails(productId);
@@ -125,7 +125,7 @@ const ProductDetail = () => {
               className="cursor-pointer flex items-center gap-1.5 text-[11px] uppercase tracking-widest font-medium text-stone-900 hover:text-stone-600 transition-colors"
             >
               <ShoppingBag className="w-4 h-4" />
-              Bag (0)
+              Bag ({cartItems?.length??0})
             </button>
           )}
         </div>

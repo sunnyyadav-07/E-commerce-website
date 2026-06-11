@@ -3,15 +3,23 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { Heart, ShoppingCart, Search, ShoppingBag } from "lucide-react";
+import { useCart } from "../../addToCart/hooks/useCart";
 
 const ProductCard = ({ product }) => {
   const [hovered, setHovered] = useState(false);
   const navigate = useNavigate();
 
-  const defaultVariant = product.variants?.find((v) => v.isDefault) || product.variants?.[0];
+  const defaultVariant =
+    product.variants?.find((v) => v.isDefault) || product.variants?.[0];
   const images = defaultVariant?.images || product.images || [];
-  const price = defaultVariant?.price || product.price || { amount: 0, currency: "INR" };
-  const currency = price.currency === "INR" ? "₹" : (price.currency === "USD" ? "$" : price.currency);
+  const price = defaultVariant?.price ||
+    product.price || { amount: 0, currency: "INR" };
+  const currency =
+    price.currency === "INR"
+      ? "₹"
+      : price.currency === "USD"
+        ? "$"
+        : price.currency;
 
   return (
     <div
@@ -106,10 +114,15 @@ const ProductCard = ({ product }) => {
 
 const Home = () => {
   const products = useSelector((state) => state.product.allProducts);
+  const cartItems = useSelector((state) => state.cart.allCartProducts);
+  const cartProductCount = cartItems?.length ?? 0;
+  const navigate = useNavigate();
   const { handleGetAllProducts } = useProduct();
+  const { handleGetAllCartProducts } = useCart();
 
   useEffect(() => {
     handleGetAllProducts();
+    handleGetAllCartProducts();
   }, []);
 
   return (
@@ -141,9 +154,14 @@ const Home = () => {
               <Search className="w-4 h-4" />
               Search
             </button>
-            <button className="cursor-pointer flex items-center gap-1.5 text-[11px] uppercase tracking-widest font-medium text-stone-900 hover:text-stone-600 transition-colors">
+            <button
+              onClick={() => {
+                navigate("/my-cart");
+              }}
+              className="cursor-pointer flex items-center gap-1.5 text-[11px] uppercase tracking-widest font-medium text-stone-900 hover:text-stone-600 transition-colors"
+            >
               <ShoppingBag className="w-4 h-4" />
-              Bag (0)
+              Bag ({cartProductCount})
             </button>
           </div>
         </div>

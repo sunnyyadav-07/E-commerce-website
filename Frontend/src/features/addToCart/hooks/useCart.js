@@ -21,7 +21,6 @@ export const useCart = () => {
     dispatch(setLoadingInCart(true));
     try {
       const res = await getAllCartProducts();
-      console.log(res)
       dispatch(setCartProducts(res.products));
       return res.products;
     } catch (error) {

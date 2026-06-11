@@ -34,22 +34,21 @@ const CartItemSkeleton = () => (
 );
 
 /* ── Cart Item Card ──────────────────────────────────────── */
-const CartItemCard = ({ item, onUpdateQty, onRemove }) => {
+const CartItemCard = ({ item }) => {
   const [removing, setRemoving] = useState(false);
 
-  const variant = item.variant || {};
-  const product = item.product || {};
-  const price = variant.price || {};
-  const images = variant.images || product.images || [];
-  const attributes = variant.attributes || {};
-  const currencySymbol =
-    price.currency === "INR" ? "₹" : price.currency === "USD" ? "$" : price.currency || "₹";
-  const itemTotal = (price.amount || 0) * (item.quantity || 1);
+  // Support both flat API shape and nested variant/product shape
+  const title = item.title || item.product?.title || "Product";
+  const brand = item.brand || item.product?.brand;
+  const images =
+    item.images || item.variant?.images || item.product?.images || [];
+  const attributes = item.attributes || item.variant?.attributes || {};
+  const rawPrice = item.price ?? item.variant?.price?.amount ?? 0;
+  const rawCurrency = item.currency || item.variant?.price?.currency || "INR";
 
-  async function handleRemove() {
-    setRemoving(true);
-    await onRemove(item._id);
-  }
+  const currencySymbol =
+    rawCurrency === "INR" ? "₹" : rawCurrency === "USD" ? "$" : rawCurrency;
+  const itemTotal = rawPrice * (item.quantity || 1);
 
   return (
     <div
@@ -62,7 +61,7 @@ const CartItemCard = ({ item, onUpdateQty, onRemove }) => {
         {images[0]?.url ? (
           <img
             src={images[0].url}
-            alt={product.title || "Product"}
+            alt={title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
@@ -78,16 +77,15 @@ const CartItemCard = ({ item, onUpdateQty, onRemove }) => {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h3 className="font-bold text-stone-900 text-sm leading-snug truncate">
-              {product.title || "Product"}
+              {title}
             </h3>
-            {product.brand && (
+            {brand && (
               <p className="text-[10px] uppercase tracking-widest text-stone-400 font-semibold mt-0.5">
-                {product.brand}
+                {brand}
               </p>
             )}
           </div>
           <button
-            onClick={handleRemove}
             className="cursor-pointer shrink-0 w-8 h-8 rounded-xl flex items-center justify-center text-stone-300 hover:text-red-500 hover:bg-red-50 transition-all duration-200"
             title="Remove item"
           >
@@ -119,7 +117,6 @@ const CartItemCard = ({ item, onUpdateQty, onRemove }) => {
           {/* Stepper */}
           <div className="flex items-center gap-0 bg-stone-50 border border-stone-200 rounded-xl overflow-hidden">
             <button
-              onClick={() => onUpdateQty(item._id, Math.max(1, (item.quantity || 1) - 1))}
               className="cursor-pointer w-9 h-9 flex items-center justify-center text-stone-500 hover:bg-stone-200 hover:text-stone-900 transition-colors disabled:opacity-30"
               disabled={(item.quantity || 1) <= 1}
             >
@@ -128,10 +125,7 @@ const CartItemCard = ({ item, onUpdateQty, onRemove }) => {
             <span className="w-9 text-center text-sm font-bold text-stone-900 select-none">
               {item.quantity || 1}
             </span>
-            <button
-              onClick={() => onUpdateQty(item._id, (item.quantity || 1) + 1)}
-              className="cursor-pointer w-9 h-9 flex items-center justify-center text-stone-500 hover:bg-stone-200 hover:text-stone-900 transition-colors"
-            >
+            <button className="cursor-pointer w-9 h-9 flex items-center justify-center text-stone-500 hover:bg-stone-200 hover:text-stone-900 transition-colors">
               <Plus className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -145,7 +139,7 @@ const CartItemCard = ({ item, onUpdateQty, onRemove }) => {
             {(item.quantity || 1) > 1 && (
               <p className="text-[10px] text-stone-400 mt-0.5">
                 {currencySymbol}
-                {price.amount?.toLocaleString("en-IN")} each
+                {rawPrice.toLocaleString("en-IN")} each
               </p>
             )}
           </div>
@@ -188,16 +182,19 @@ const EmptyCart = ({ onContinueShopping }) => (
 /* ── Order Summary Panel ─────────────────────────────────── */
 const OrderSummary = ({ items, onCheckout, onContinueShopping }) => {
   const subtotal = items.reduce((acc, item) => {
-    const price = item.variant?.price?.amount || 0;
+    // Support flat API shape (item.price) and nested shape (item.variant.price.amount)
+    const price = item.price ?? item.variant?.price?.amount ?? 0;
     return acc + price * (item.quantity || 1);
   }, 0);
 
-  const currency = items[0]?.variant?.price?.currency;
+  const currency =
+    items[0]?.currency || items[0]?.variant?.price?.currency || "INR";
   const currencySymbol =
     currency === "INR" ? "₹" : currency === "USD" ? "$" : "₹";
 
   const shippingThreshold = currency === "INR" ? 2000 : 30;
-  const shippingFee = subtotal >= shippingThreshold ? 0 : currency === "INR" ? 99 : 5;
+  const shippingFee =
+    subtotal >= shippingThreshold ? 0 : currency === "INR" ? 99 : 5;
   const total = subtotal + shippingFee;
   const savings = 0; // placeholder for discount logic
 
@@ -328,8 +325,7 @@ const OrderSummary = ({ items, onCheckout, onContinueShopping }) => {
 /* ── Main Cart Page ──────────────────────────────────────── */
 const Cart = () => {
   const navigate = useNavigate();
-  const { handleGetAllCartProducts, handleUpdateCartItem, handleRemoveFromCart } =
-    useCart();
+  const { handleGetAllCartProducts } = useCart();
 
   const cartItems = useSelector((state) => state.cart.allCartProducts);
   const loading = useSelector((state) => state.cart.loading);
@@ -419,12 +415,7 @@ const Cart = () => {
             {/* Left: item list */}
             <div className="space-y-4">
               {cartItems.map((item) => (
-                <CartItemCard
-                  key={item._id}
-                  item={item}
-                  onUpdateQty={handleUpdateCartItem}
-                  onRemove={handleRemoveFromCart}
-                />
+                <CartItemCard key={item.productId} item={item} />
               ))}
 
               {/* Continue shopping link (mobile) */}
