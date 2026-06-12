@@ -1,6 +1,22 @@
 import { stockOfProduct } from "../dao/product.dao.js";
 import cartModel from "../models/cart.model.js";
 import productModel from "../models/product.model.js";
+async function hasCart(userId, populate = false) {
+  let query = cartModel.findOne({
+    userId,
+  });
+  if (populate) {
+    query = query.populate("items.productId");
+  }
+  const userCart = await query;
+  if (!userCart) {
+    return res.status(404).json({
+      success: false,
+      message: "Cart not found",
+    });
+  }
+  return userCart;
+}
 
 export async function addToCartController(req, res) {
   try {
@@ -74,12 +90,7 @@ export async function addToCartController(req, res) {
 export async function getAllCartProducts(req, res) {
   try {
     const userId = req.user._id;
-
-    const userCartProducts = await cartModel
-      .findOne({
-        userId,
-      })
-      .populate("items.productId");
+    const userCartProducts = await hasCart(userId, true);
     if (!userCartProducts) {
       return res.status(404).json({
         success: false,
@@ -130,15 +141,7 @@ export async function updateQuantityOfProductController(req, res) {
       });
     }
     const userId = req.user._id;
-    const userCart = await cartModel.findOne({
-      userId,
-    });
-    if (!userCart) {
-      return res.status(404).json({
-        success: false,
-        message: "Cart not found",
-      });
-    }
+    const userCart = await hasCart(userId);
     const item = userCart.items.find(
       (item) =>
         item.productId.equals(productId) && item.variantId.equals(variantId),
@@ -173,6 +176,45 @@ export async function updateQuantityOfProductController(req, res) {
     });
   } catch (error) {
     console.log("Error in quantity increment API", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error,
+    });
+  }
+}
+
+export async function removeProductFromCartController(req, res) {
+  try {
+    const { productId, variantId } = req.params;
+    if (!productId || !variantId) {
+      return res.status(400).json({
+        success: false,
+        message: "fields are required to update quantity",
+      });
+    }
+    const userId = req.user._id;
+    const userCart = await hasCart(userId);
+    const productToBeDeleted = userCart.items.find(
+      (item) =>
+        item.productId.equals(productId) && item.variantId.equals(variantId),
+    );
+    if (!productToBeDeleted) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found in cart",
+      });
+    }
+    productToBeDeleted.deleteOne();
+
+    await userCart.save();
+    return res.status(200).json({
+      success: true,
+      message: "Product deletd from cart successfully",
+      products: userCart,
+    });
+  } catch (error) {
+    console.log("Error in remove product from cart API", error);
     res.status(500).json({
       success: false,
       message: "Server error",

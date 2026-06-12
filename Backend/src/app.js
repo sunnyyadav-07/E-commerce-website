@@ -35,5 +35,5 @@ app.use(cookieParser());
 app.use(express.json());
 app.use("/api/auth", authRouter);
 app.use("/api/products", productRouter);
-app.use("/api/add-to-cart", cartRouter);
+app.use("/api/cart", cartRouter);
 export default app;
