@@ -9,7 +9,15 @@ export async function addToCartController(req, res) {
     const cart = await cartModel.findOne({
       userId,
     });
+    const stock = await stockOfProduct(productId, variantId);
+
     if (!cart) {
+      if (stock <= 0) {
+        return res.status(409).json({
+          success: false,
+          message: "This product is currently out of stock.",
+        });
+      }
       const newCart = await cartModel.create({
         userId,
         items: [{ productId, variantId, variant: 1 }],
@@ -25,9 +33,8 @@ export async function addToCartController(req, res) {
         item.productId.toString() === productId &&
         item.variantId.toString() === variantId,
     );
-    const stock = await stockOfProduct(productId, variantId);
     if (existingItem) {
-      const cartItemQnty = (existingItem.quantity += 1);
+      const cartItemnewQuantity = (existingItem.quantity += 1);
       if (cartItemQnty > stock) {
         return res.status(400).json({
           success: false,
@@ -104,6 +111,68 @@ export async function getAllCartProducts(req, res) {
     });
   } catch (error) {
     console.log("Error in get all cart products api", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error,
+    });
+  }
+}
+
+export async function updateQuantityOfProductController(req, res) {
+  try {
+    const { productId, variantId } = req.params;
+    const { quantity } = req.body;
+    if (!quantity || !productId || !variantId) {
+      return res.status(400).json({
+        success: false,
+        message: "fields are required to update quantity",
+      });
+    }
+    const userId = req.user._id;
+    const userCart = await cartModel.findOne({
+      userId,
+    });
+    if (!userCart) {
+      return res.status(404).json({
+        success: false,
+        message: "Cart not found",
+      });
+    }
+    const item = userCart.items.find(
+      (item) =>
+        item.productId.equals(productId) && item.variantId.equals(variantId),
+    );
+
+    if (!item) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+    const stock = await stockOfProduct(productId, variantId);
+    const newQuantity = item.quantity + quantity;
+    if (newQuantity > stock) {
+      return res.status(409).json({
+        success: false,
+        message: "Maximum available quantity reached.",
+      });
+    }
+    if (newQuantity < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Quantity cannot be less than 1.",
+      });
+    }
+    item.quantity += quantity;
+    await userCart.save();
+    return res.status(200).json({
+      success: true,
+      message: "Product quantity updated successfully",
+      quantity: newQuantity,
+    });
+  } catch (error) {
+    console.log("Error in quantity increment API", error);
     res.status(500).json({
       success: false,
       message: "Server error",
