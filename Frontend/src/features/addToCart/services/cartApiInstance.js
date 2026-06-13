@@ -1,6 +1,6 @@
 import axios from "axios";
 const cartApi = axios.create({
-  baseURL: "/api/add-to-cart",
+  baseURL: "/api/cart",
   withCredentials: true,
 });
 

@@ -34,7 +34,7 @@ const CartItemSkeleton = () => (
 );
 
 /* ── Cart Item Card ──────────────────────────────────────── */
-const CartItemCard = ({ item }) => {
+const CartItemCard = ({ item, updateProductQnty }) => {
   const [removing, setRemoving] = useState(false);
 
   // Support both flat API shape and nested variant/product shape
@@ -117,6 +117,10 @@ const CartItemCard = ({ item }) => {
           {/* Stepper */}
           <div className="flex items-center gap-0 bg-stone-50 border border-stone-200 rounded-xl overflow-hidden">
             <button
+              onClick={() => {
+                const data = { quantity: -1 };
+                updateProductQnty(item.productId, item.variantId, data);
+              }}
               className="cursor-pointer w-9 h-9 flex items-center justify-center text-stone-500 hover:bg-stone-200 hover:text-stone-900 transition-colors disabled:opacity-30"
               disabled={(item.quantity || 1) <= 1}
             >
@@ -125,7 +129,13 @@ const CartItemCard = ({ item }) => {
             <span className="w-9 text-center text-sm font-bold text-stone-900 select-none">
               {item.quantity || 1}
             </span>
-            <button className="cursor-pointer w-9 h-9 flex items-center justify-center text-stone-500 hover:bg-stone-200 hover:text-stone-900 transition-colors">
+            <button
+              onClick={() => {
+                const data = { quantity: 1 };
+                updateProductQnty(item.productId, item.variantId, data);
+              }}
+              className="cursor-pointer w-9 h-9 flex items-center justify-center text-stone-500 hover:bg-stone-200 hover:text-stone-900 transition-colors"
+            >
               <Plus className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -324,8 +334,11 @@ const OrderSummary = ({ items, onCheckout, onContinueShopping }) => {
 
 /* ── Main Cart Page ──────────────────────────────────────── */
 const Cart = () => {
+  function updateProductQnty(productId, variantId, quantity) {
+    handleUpdateProductQuantity(productId, variantId, quantity);
+  }
   const navigate = useNavigate();
-  const { handleGetAllCartProducts } = useCart();
+  const { handleGetAllCartProducts, handleUpdateProductQuantity } = useCart();
 
   const cartItems = useSelector((state) => state.cart.allCartProducts);
   const loading = useSelector((state) => state.cart.loading);
@@ -415,7 +428,11 @@ const Cart = () => {
             {/* Left: item list */}
             <div className="space-y-4">
               {cartItems.map((item) => (
-                <CartItemCard key={item.productId} item={item} />
+                <CartItemCard
+                  key={item.productId}
+                  item={item}
+                  updateProductQnty={updateProductQnty}
+                />
               ))}
 
               {/* Continue shopping link (mobile) */}

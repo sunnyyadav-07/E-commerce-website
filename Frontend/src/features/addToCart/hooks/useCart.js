@@ -1,9 +1,14 @@
 import { useDispatch } from "react-redux";
-import { addToCart, getAllCartProducts } from "../services/cart.api";
+import {
+  addToCart,
+  getAllCartProducts,
+  updateProductQuantity,
+} from "../services/cart.api";
 import {
   setCartProducts,
   setErrorInCart,
   setLoadingInCart,
+  updateQuantityOfProduct,
 } from "../state/cart.slice";
 
 export const useCart = () => {
@@ -30,8 +35,27 @@ export const useCart = () => {
       dispatch(setLoadingInCart(false));
     }
   }
+  async function handleUpdateProductQuantity(productId, variantId, quantity) {
+    try {
+      dispatch(setLoadingInCart(true));
+      const res = await updateProductQuantity(productId, variantId, quantity);
+      dispatch(
+        updateQuantityOfProduct({
+          productId,
+          variantId,
+          quantity: res.quantity,
+        }),
+      );
+    } catch (error) {
+      const errMsg = error.response?.data?.message || error.message;
+      dispatch(setErrorInCart(errMsg));
+    } finally {
+      dispatch(setLoadingInCart(false));
+    }
+  }
   return {
     handleAddToCart,
     handleGetAllCartProducts,
+    handleUpdateProductQuantity,
   };
 };
