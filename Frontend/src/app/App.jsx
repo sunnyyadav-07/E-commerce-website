@@ -15,7 +15,11 @@ function App() {
   return (
     <>
       <RouterProvider router={router} />
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+      />
     </>
   );
 }

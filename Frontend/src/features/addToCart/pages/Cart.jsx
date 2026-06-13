@@ -34,21 +34,20 @@ const CartItemSkeleton = () => (
 );
 
 /* ── Cart Item Card ──────────────────────────────────────── */
-const CartItemCard = ({ item, updateProductQnty }) => {
+const CartItemCard = ({ item, updateProductQnty, removeItem }) => {
   const [removing, setRemoving] = useState(false);
 
   // Support both flat API shape and nested variant/product shape
-  const title = item.title || item.product?.title || "Product";
-  const brand = item.brand || item.product?.brand;
-  const images =
-    item.images || item.variant?.images || item.product?.images || [];
-  const attributes = item.attributes || item.variant?.attributes || {};
-  const rawPrice = item.price ?? item.variant?.price?.amount ?? 0;
-  const rawCurrency = item.currency || item.variant?.price?.currency || "INR";
+  const title = item?.title;
+  const brand = item?.brand;
+  const images = item?.images || [];
+  const attributes = item?.attributes || {};
+  const rawPrice = item?.price;
+  const rawCurrency = item?.currency || "INR";
 
   const currencySymbol =
     rawCurrency === "INR" ? "₹" : rawCurrency === "USD" ? "$" : rawCurrency;
-  const itemTotal = rawPrice * (item.quantity || 1);
+  const itemTotal = rawPrice * (item?.quantity || 1);
 
   return (
     <div
@@ -86,6 +85,9 @@ const CartItemCard = ({ item, updateProductQnty }) => {
             )}
           </div>
           <button
+            onClick={() => {
+              removeItem(item.productId, item.variantId);
+            }}
             className="cursor-pointer shrink-0 w-8 h-8 rounded-xl flex items-center justify-center text-stone-300 hover:text-red-500 hover:bg-red-50 transition-all duration-200"
             title="Remove item"
           >
@@ -122,12 +124,12 @@ const CartItemCard = ({ item, updateProductQnty }) => {
                 updateProductQnty(item.productId, item.variantId, data);
               }}
               className="cursor-pointer w-9 h-9 flex items-center justify-center text-stone-500 hover:bg-stone-200 hover:text-stone-900 transition-colors disabled:opacity-30"
-              disabled={(item.quantity || 1) <= 1}
+              disabled={(item?.quantity || 1) <= 1}
             >
               <Minus className="w-3.5 h-3.5" />
             </button>
             <span className="w-9 text-center text-sm font-bold text-stone-900 select-none">
-              {item.quantity || 1}
+              {item?.quantity || 1}
             </span>
             <button
               onClick={() => {
@@ -146,7 +148,7 @@ const CartItemCard = ({ item, updateProductQnty }) => {
               {currencySymbol}
               {itemTotal.toLocaleString("en-IN")}
             </p>
-            {(item.quantity || 1) > 1 && (
+            {(item?.quantity || 1) > 1 && (
               <p className="text-[10px] text-stone-400 mt-0.5">
                 {currencySymbol}
                 {rawPrice.toLocaleString("en-IN")} each
@@ -190,15 +192,13 @@ const EmptyCart = ({ onContinueShopping }) => (
 );
 
 /* ── Order Summary Panel ─────────────────────────────────── */
-const OrderSummary = ({ items, onCheckout, onContinueShopping }) => {
-  const subtotal = items.reduce((acc, item) => {
-    // Support flat API shape (item.price) and nested shape (item.variant.price.amount)
-    const price = item.price ?? item.variant?.price?.amount ?? 0;
-    return acc + price * (item.quantity || 1);
+const OrderSummary = ({ items, onContinueShopping }) => {
+  const subtotal = items?.reduce((acc, item) => {
+    const price = item?.price;
+    return acc + price * (item?.quantity || 1);
   }, 0);
 
-  const currency =
-    items[0]?.currency || items[0]?.variant?.price?.currency || "INR";
+  const currency = items[0]?.currency || "INR";
   const currencySymbol =
     currency === "INR" ? "₹" : currency === "USD" ? "$" : "₹";
 
@@ -292,10 +292,7 @@ const OrderSummary = ({ items, onCheckout, onContinueShopping }) => {
         </div>
 
         {/* CTA */}
-        <button
-          onClick={onCheckout}
-          className="cursor-pointer w-full flex items-center justify-center gap-2 py-4 bg-[#3b557e] text-white text-sm font-bold uppercase tracking-widest rounded-2xl hover:bg-[#2d4363] active:scale-[0.98] transition-all duration-200 shadow-lg hover:shadow-xl"
-        >
+        <button className="cursor-pointer w-full flex items-center justify-center gap-2 py-4 bg-[#3b557e] text-white text-sm font-bold uppercase tracking-widest rounded-2xl hover:bg-[#2d4363] active:scale-[0.98] transition-all duration-200 shadow-lg hover:shadow-xl">
           <Zap className="w-4 h-4" />
           Proceed to Checkout
           <ArrowRight className="w-4 h-4" />
@@ -337,8 +334,15 @@ const Cart = () => {
   function updateProductQnty(productId, variantId, quantity) {
     handleUpdateProductQuantity(productId, variantId, quantity);
   }
+  function removeItem(productId, variantId) {
+    handleRemoveProduct(productId, variantId);
+  }
   const navigate = useNavigate();
-  const { handleGetAllCartProducts, handleUpdateProductQuantity } = useCart();
+  const {
+    handleGetAllCartProducts,
+    handleUpdateProductQuantity,
+    handleRemoveProduct,
+  } = useCart();
 
   const cartItems = useSelector((state) => state.cart.allCartProducts);
   const loading = useSelector((state) => state.cart.loading);
@@ -429,9 +433,10 @@ const Cart = () => {
             <div className="space-y-4">
               {cartItems.map((item) => (
                 <CartItemCard
-                  key={item.productId}
+                  key={item?.variantId}
                   item={item}
                   updateProductQnty={updateProductQnty}
+                  removeItem={removeItem}
                 />
               ))}
 
@@ -450,9 +455,6 @@ const Cart = () => {
             {/* Right: order summary */}
             <OrderSummary
               items={cartItems}
-              onCheckout={() => {
-                /* hook up checkout route when ready */
-              }}
               onContinueShopping={() => navigate("/")}
             />
           </div>

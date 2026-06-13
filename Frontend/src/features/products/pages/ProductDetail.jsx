@@ -125,7 +125,7 @@ const ProductDetail = () => {
               className="cursor-pointer flex items-center gap-1.5 text-[11px] uppercase tracking-widest font-medium text-stone-900 hover:text-stone-600 transition-colors"
             >
               <ShoppingBag className="w-4 h-4" />
-              Bag ({cartItems?.length??0})
+              Bag ({cartItems?.length ?? 0})
             </button>
           )}
         </div>
