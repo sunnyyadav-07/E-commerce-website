@@ -51,10 +51,10 @@ export async function addToCartController(req, res) {
     );
     if (existingItem) {
       const cartItemnewQuantity = (existingItem.quantity += 1);
-      if (cartItemQnty > stock) {
-        return res.status(400).json({
+      if (cartItemnewQuantity > stock) {
+        return res.status(409).json({
           success: false,
-          message: `Only ${stock} items are left in stock and user already have ${cartItemQnty - 1}`,
+          message: `Only ${stock} items are left in stock and user already have ${cartItemnewQuantity - 1}`,
         });
       }
       await cart.save();

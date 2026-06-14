@@ -8,6 +8,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { config } from "./config/config.js";
 import productRouter from "./routes/product.route.js";
 import cartRouter from "./routes/cart.route.js";
+import wishListRouter from "./routes/wishlist.route.js";
 const app = express();
 app.use(morgan("dev"));
 // app.use(cors({
@@ -36,4 +37,5 @@ app.use(express.json());
 app.use("/api/auth", authRouter);
 app.use("/api/products", productRouter);
 app.use("/api/cart", cartRouter);
+app.use("/api/wishlist",wishListRouter)
 export default app;
