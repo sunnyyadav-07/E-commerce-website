@@ -10,7 +10,7 @@ import {
   getAllWishListItems,
   removeFromWishList,
 } from "../service/wishlist.api";
-const userWishList = () => {
+export const useWishList = () => {
   const dispatch = useDispatch();
   async function handleAddToWishList(data) {
     try {

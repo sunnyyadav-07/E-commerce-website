@@ -12,6 +12,7 @@ import CreateParentProduct from "../features/products/pages/Seller/CreateParentP
 import CreateProductVariants from "../features/products/pages/Seller/CreateProductVariants.jsx";
 import Cart from "../features/addToCart/pages/Cart.jsx";
 import CartProtected from "../features/addToCart/components/CartProtected.jsx";
+import WishList from "../features/wishList/pages/WishList.jsx";
 
 export const router = createBrowserRouter([
   {
@@ -36,6 +37,7 @@ export const router = createBrowserRouter([
           </CartProtected>
         ),
       },
+      { path: "wishlist", element: <WishList /> },
       {
         path: "seller",
         element: (

@@ -16,6 +16,7 @@ import {
   Layers,
 } from "lucide-react";
 import { useCart } from "../../addToCart/hooks/useCart";
+import { useWishList } from "../../wishList/hooks/useWishList";
 
 /* ─── Component ──────────────────────────────────────────── */
 const ProductDetail = () => {
@@ -24,13 +25,20 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [selectedVariantId, setSelectedVariantId] = useState(null);
   const [activeImg, setActiveImg] = useState(0);
-  const [wishlisted, setWishlisted] = useState(false);
   const { handleAddToCart } = useCart();
   const loading = useSelector((state) => state.product.loading);
   const user = useSelector((state) => state.auth.user);
   const isSeller = user?.role === "seller";
   const { handleGetProductDetails } = useProduct();
   const cartItems = useSelector((state) => state.cart.allCartProducts);
+  const { handleAddToWishList, handleGetAllWisgListItems } = useWishList();
+  const wishListItems = useSelector((state) => state.wishlist.allWishListItem);
+  console.log(wishListItems);
+  const wishListedItem = wishListItems.some(
+    (item) => item.variantId === selectedVariantId,
+  );
+  const [wishlisted, setWishlisted] = useState(wishListItems);
+
   useEffect(() => {
     (async () => {
       const data = await handleGetProductDetails(productId);
@@ -42,6 +50,7 @@ const ProductDetail = () => {
         setActiveImg(0);
       }
     })();
+    handleGetAllWisgListItems();
   }, [productId]);
   function addToCartHandle(variantId) {
     const data = {
@@ -248,7 +257,13 @@ const ProductDetail = () => {
               </h1>
               {!isSeller && (
                 <button
-                  onClick={() => setWishlisted((w) => !w)}
+                  onClick={() => {
+                    setWishlisted((w) => !w);
+                    handleAddToWishList({
+                      productId,
+                      variantId: selectedVariantId,
+                    });
+                  }}
                   className={`cursor-pointer shrink-0 mt-1 w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-200 ${
                     wishlisted
                       ? "border-red-300 bg-red-50 text-red-500"
