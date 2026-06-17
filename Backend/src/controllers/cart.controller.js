@@ -10,11 +10,9 @@ async function hasCart(userId, populate = false) {
   }
   const userCart = await query;
   if (!userCart) {
-    return res.status(404).json({
-      success: false,
-      message: "Cart not found",
-    });
+    throw new Error("cart not found");
   }
+
   return userCart;
 }
 
@@ -41,7 +39,7 @@ export async function addToCartController(req, res) {
       return res.status(201).json({
         success: true,
         message: "Added to cart successfully",
-        newCart,
+        cartItem: { productId, variantId },
       });
     }
     const existingItem = cart.items.find(
@@ -61,7 +59,7 @@ export async function addToCartController(req, res) {
       return res.status(200).json({
         success: true,
         message: "Quantity updated successfully",
-        cart,
+        cartItem: { productId, variantId },
       });
     }
     if (!existingItem) {
@@ -74,7 +72,7 @@ export async function addToCartController(req, res) {
       return res.status(200).json({
         success: true,
         message: "Product added in cart  successfully",
-        cart,
+        cartItem: { productId, variantId },
       });
     }
   } catch (error) {

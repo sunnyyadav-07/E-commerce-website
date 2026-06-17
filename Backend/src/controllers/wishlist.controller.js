@@ -8,11 +8,9 @@ async function getUserWishList(userId, populate = false) {
   }
   const userWishList = await query;
   if (!userWishList) {
-    return res.status(404).json({
-      success: false,
-      message: "Wishlist not found",
-    });
+    throw new Error("Wishlist not found");
   }
+
   return userWishList;
 }
 
@@ -33,7 +31,7 @@ export async function addToWishList(req, res) {
       return res.status(201).json({
         success: true,
         message: "Item is added to the wishlist",
-        wishList: newListItem,
+        wishlist: newListItem.products,
       });
     }
     const existingWishList = userWishList.products.find(
@@ -48,7 +46,7 @@ export async function addToWishList(req, res) {
       return res.status(200).json({
         success: true,
         message: "New Item added successfully in wishlist",
-        wishList: userWishList,
+        wishlist: userWishList.products,
       });
     }
 
@@ -56,7 +54,7 @@ export async function addToWishList(req, res) {
     return res.status(409).json({
       success: false,
       message: "Already in the wishlist",
-      wishList: userWishList,
+      wishlist: userWishList,
     });
   } catch (error) {
     console.log("error in add to wishlist API", error);
