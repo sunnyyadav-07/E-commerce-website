@@ -31,14 +31,26 @@ const ProductDetail = () => {
   const isSeller = user?.role === "seller";
   const { handleGetProductDetails } = useProduct();
   const cartItems = useSelector((state) => state.cart.allCartProducts);
-  const { handleAddToWishList, handleGetAllWisgListItems } = useWishList();
+  const {
+    handleAddToWishList,
+    handleGetAllWisgListItems,
+    handleRemoveItemFromWishList,
+  } = useWishList();
   const wishListItems = useSelector((state) => state.wishlist.allWishListItem);
-  console.log(wishListItems);
+
   const wishListedItem = wishListItems.some(
     (item) => item.variantId === selectedVariantId,
   );
-  const [wishlisted, setWishlisted] = useState(wishListItems);
-
+  function handleAddItemToWishList(productId, variantId) {
+    if (wishListedItem) {
+      handleRemoveItemFromWishList(productId, variantId);
+    } else {
+      handleAddToWishList({
+        productId,
+        variantId,
+      });
+    }
+  }
   useEffect(() => {
     (async () => {
       const data = await handleGetProductDetails(productId);
@@ -258,20 +270,16 @@ const ProductDetail = () => {
               {!isSeller && (
                 <button
                   onClick={() => {
-                    setWishlisted((w) => !w);
-                    handleAddToWishList({
-                      productId,
-                      variantId: selectedVariantId,
-                    });
+                    handleAddItemToWishList(productId, selectedVariantId);
                   }}
                   className={`cursor-pointer shrink-0 mt-1 w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-200 ${
-                    wishlisted
+                    wishListedItem
                       ? "border-red-300 bg-red-50 text-red-500"
                       : "border-stone-200 text-stone-400 hover:text-red-500 hover:border-red-300 hover:bg-red-50"
                   }`}
                 >
                   <Heart
-                    className={`w-5 h-5 ${wishlisted ? "fill-red-500" : ""}`}
+                    className={`w-5 h-5 ${wishListedItem ? "fill-red-500" : ""}`}
                   />
                 </button>
               )}

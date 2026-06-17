@@ -16,6 +16,8 @@ export const useWishList = () => {
     try {
       dispatch(setWishListLoading(true));
       const res = await addToWishList(data);
+      const item = await getAllWishListItems();
+      dispatch(setWishlistItems(item.wishlist));
       return res;
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;

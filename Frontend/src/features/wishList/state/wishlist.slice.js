@@ -19,12 +19,13 @@ const wishListSlice = createSlice({
     },
     removeItemFromWishList: (state, action) => {
       const { productId, variantId } = action.payload;
-      const items = state.allWishListItem.filter(
+      if (!productId || !variantId) return;
+      const cart = state.allWishListItem.filter(
         (item) =>
           !(item.productId === productId && item.variantId === variantId),
       );
-      if (item) {
-        state.allWishListItem = items;
+      if (cart) {
+        state.allWishListItem = cart;
       }
     },
   },

@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, current } from "@reduxjs/toolkit";
 
 const cartSlice = createSlice({
   name: "cart",
@@ -13,21 +13,6 @@ const cartSlice = createSlice({
     },
     setLoadingInCart: (state, action) => {
       state.loading = action.payload;
-    },
-    addProduct: (state, action) => {
-      const newProduct = action.payload;
-
-      const existingItem = state.allCartProducts.find(
-        (item) =>
-          item.productId === newProduct.productId &&
-          item.variantId === newProduct.variantId,
-      );
-
-      if (existingItem) {
-        existingItem.quantity += newProduct.quantity;
-      } else {
-        state.allCartProducts.push(newProduct);
-      }
     },
     updateQuantityOfProduct: (state, action) => {
       const { productId, variantId, quantity } = action.payload;
@@ -56,6 +41,5 @@ export const {
   setLoadingInCart,
   updateQuantityOfProduct,
   removeProduct,
-  addProduct,
 } = cartSlice.actions;
 export default cartSlice.reducer;

@@ -156,6 +156,16 @@ const Home = () => {
             </button>
             <button
               onClick={() => {
+                navigate("/wishlist");
+              }}
+              className="cursor-pointer flex items-center gap-1.5 text-[11px] uppercase tracking-widest font-medium text-stone-500 hover:text-rose-500 transition-colors group"
+              title="Wishlist"
+            >
+              <Heart className="w-4 h-4 group-hover:fill-rose-500 group-hover:text-rose-500 transition-all duration-200" />
+              Wishlist
+            </button>
+            <button
+              onClick={() => {
                 navigate("/my-cart");
               }}
               className="cursor-pointer flex items-center gap-1.5 text-[11px] uppercase tracking-widest font-medium text-stone-900 hover:text-stone-600 transition-colors"

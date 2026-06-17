@@ -10,7 +10,7 @@ export async function getAllWishListItems() {
 }
 export async function removeFromWishList(productId, variantId) {
   const response = await wishlistApiInstance.delete(
-    `/item/:${productId}/:${variantId}`,
+    `/item/${productId}/${variantId}`,
   );
   return response.data;
 }

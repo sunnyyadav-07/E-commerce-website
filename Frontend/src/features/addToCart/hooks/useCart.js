@@ -6,7 +6,6 @@ import {
   updateProductQuantity,
 } from "../services/cart.api";
 import {
-  addProduct,
   removeProduct,
   setCartProducts,
   setErrorInCart,
@@ -19,7 +18,8 @@ export const useCart = () => {
   async function handleAddToCart(data) {
     try {
       const res = await addToCart(data);
-      dispatch(addProduct(res.products));
+      const cart = await getAllCartProducts();
+      dispatch(setCartProducts(cart.products));
       return res;
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;

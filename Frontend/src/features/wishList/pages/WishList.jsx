@@ -35,7 +35,7 @@ const WishItemSkeleton = () => (
 );
 
 /* ── Wish Item Card ─────────────────────────────────────── */
-const WishItemCard = ({ item }) => (
+const WishItemCard = ({ item, removeItemFromWishList }) => (
   <div className="group relative flex gap-5 p-5 bg-white rounded-3xl border border-stone-100 shadow-sm hover:shadow-md transition-all duration-300">
     {/* Heart badge */}
     <div className="absolute -top-2.5 -right-2.5 w-7 h-7 bg-rose-500 rounded-full flex items-center justify-center shadow-md z-10">
@@ -76,7 +76,13 @@ const WishItemCard = ({ item }) => (
           <button className="cursor-pointer w-8 h-8 rounded-xl flex items-center justify-center text-stone-300 hover:text-stone-600 hover:bg-stone-50 transition-all duration-200">
             <Share2 className="w-4 h-4" />
           </button>
-          <button className="cursor-pointer w-8 h-8 rounded-xl flex items-center justify-center text-stone-300 hover:text-red-500 hover:bg-red-50 transition-all duration-200">
+          {/* delete button */}
+          <button
+            onClick={() => {
+              removeItemFromWishList(item.productId, item.variantId);
+            }}
+            className="cursor-pointer w-8 h-8 rounded-xl flex items-center justify-center text-stone-300 hover:text-red-500 hover:bg-red-50 transition-all duration-200"
+          >
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
@@ -232,10 +238,14 @@ const WishListSummary = ({ items, onContinueShopping }) => {
 /* ── Main WishList Page ──────────────────────────────────── */
 const WishList = () => {
   const navigate = useNavigate();
-  const { handleGetAllWisgListItems } = useWishList();
+  const { handleGetAllWisgListItems, handleRemoveItemFromWishList } =
+    useWishList();
   const wishlistItems =
     useSelector((state) => state.wishlist.allWishListItem) ?? [];
   const loading = useSelector((state) => state.wishlist.loading);
+  function removeItemFromWishList(productId, variantId) {
+    handleRemoveItemFromWishList(productId, variantId);
+  }
   useEffect(() => {
     handleGetAllWisgListItems();
   }, []);
@@ -320,7 +330,11 @@ const WishList = () => {
             {/* Left: item list */}
             <div className="space-y-4">
               {wishlistItems.map((item) => (
-                <WishItemCard key={item.variantId} item={item} />
+                <WishItemCard
+                  key={item.variantId}
+                  item={item}
+                  removeItemFromWishList={removeItemFromWishList}
+                />
               ))}
 
               {/* Continue shopping — mobile */}
