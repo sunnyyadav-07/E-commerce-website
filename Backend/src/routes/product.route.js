@@ -9,6 +9,7 @@ import {
   getAllProductsController,
   getProductDetailsController,
   getSellerProducts,
+  updateSellerProductController,
 } from "../controllers/product.controller.js";
 import multer from "multer";
 import {
@@ -16,6 +17,7 @@ import {
   parentProductValidator,
 } from "../validators/product.validator.js";
 import { validateImages } from "../middlewares/custom.middleware.js";
+import { updateProductValidator } from "../validators/updateProducts.validator.js";
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
@@ -42,4 +44,13 @@ productRouter.post(
 productRouter.get("/seller", authUser, authenticateSeller, getSellerProducts);
 productRouter.get("/", getAllProductsController);
 productRouter.get("/detail/:productId", getProductDetailsController);
+productRouter.patch(
+  "/:productId/:variantId",
+  authUser,
+  authenticateSeller,
+  upload.array("images", 7),
+  validateImages,
+  updateProductValidator,
+  updateSellerProductController,
+);
 export default productRouter;

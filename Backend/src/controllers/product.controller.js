@@ -185,3 +185,13 @@ export async function createParentProductController(req, res) {
     });
   }
 }
+
+export async function updateSellerProductController(req, res) {
+  const { title, price, stock, color, size, description } = req.body;
+  const { productId, variantId } = req.params;
+  const currProductInfo = await productModel.findOne({
+    _id: productId,
+    sellerId: req.user._id,
+  });
+  
+}
