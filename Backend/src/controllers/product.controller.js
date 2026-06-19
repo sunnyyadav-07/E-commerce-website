@@ -187,11 +187,84 @@ export async function createParentProductController(req, res) {
 }
 
 export async function updateSellerProductController(req, res) {
-  const { title, price, stock, color, size, description } = req.body;
   const { productId, variantId } = req.params;
   const currProductInfo = await productModel.findOne({
     _id: productId,
     sellerId: req.user._id,
   });
-  
+  if (!currProductInfo) {
+    return res.status(404).json({
+      success: false,
+      message: "Product not found",
+    });
+  }
+  const variantInfo = currProductInfo.variants.find(
+    (v) => v._id.toString() === variantId,
+  );
+  const finalFormattedProduct = {
+    title: currProductInfo.title,
+    description: currProductInfo.description,
+    stock: variantInfo.stock,
+    price: variantInfo.price.amount,
+    color: variantInfo.attributes.get("color"),
+    size: variantInfo.attributes.get("size"),
+  };
+
+  const allowedFields = [
+    "title",
+    "price",
+    "stock",
+    "color",
+    "size",
+    "description",
+  ];
+  const updatedData = {};
+  for (const field of allowedFields) {
+    if (
+      req.body[field] !== undefined &&
+      req.body[field] !== finalFormattedProduct[field]
+    ) {
+      updatedData[field] = req.body[field];
+    }
+  }
+  if (Object.keys(updatedData).length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "No changes detected",
+    });
+  }
+  for (const [field, value] of Object.entries(updatedData)) {
+    switch (field) {
+      case "title":
+        currProductInfo.title = value;
+        break;
+
+      case "description":
+        currProductInfo.description = value;
+        break;
+
+      case "stock":
+        variantInfo.stock = value;
+        break;
+
+      case "price":
+        variantInfo.price.amount = value;
+        break;
+
+      case "color":
+        variantInfo.attributes.set("color", value);
+        break;
+
+      case "size":
+        variantInfo.attributes.set("size", value);
+        break;
+    }
+  }
+
+  await currProductInfo.save();
+  return res.status(200).json({
+    success: true,
+    message: "Product updated successfully",
+    updatedData,
+  });
 }

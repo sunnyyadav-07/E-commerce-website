@@ -48,8 +48,6 @@ productRouter.patch(
   "/:productId/:variantId",
   authUser,
   authenticateSeller,
-  upload.array("images", 7),
-  validateImages,
   updateProductValidator,
   updateSellerProductController,
 );

@@ -35,7 +35,6 @@ export async function authUser(req, res, next) {
 
 export function authenticateSeller(req, res, next) {
   const userRole = req.user.role;
-  console.log(userRole);
   if (userRole !== "seller") {
     return res.status(400).json({
       success: false,
