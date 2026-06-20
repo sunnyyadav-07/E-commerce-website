@@ -6,10 +6,8 @@ import {
   Plus,
   ArrowUpRight,
   Package,
-  Edit3,
   Trash2,
   Search,
-  Eye,
   FilePen,
   Layers,
   ChevronRight,
@@ -235,25 +233,21 @@ const SellerDashboard = () => {
                 const defaultVariant =
                   product.variants?.find((v) => v.isDefault) ||
                   product.variants?.[0];
-                const imageUrl =
-                  defaultVariant?.images?.[0]?.url ||
-                  product.images?.[0]?.url ||
-                  "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=1000";
-                const price = defaultVariant?.price ||
-                  product.price || { amount: 0, currency: "INR" };
+                const imageUrl = defaultVariant?.images?.[0]?.url;
+                const price = defaultVariant?.price || {
+                  amount: 0,
+                  currency: "INR",
+                };
                 const currencySymbol =
                   price.currency === "INR"
                     ? "₹"
                     : price.currency === "USD"
                       ? "$"
                       : price.currency;
-                const totalStock =
-                  product.variants?.reduce(
-                    (sum, v) => sum + (v.stock || 0),
-                    0,
-                  ) ??
-                  product.stock ??
-                  0;
+                const totalStock = product.variants?.reduce(
+                  (sum, v) => sum + (v.stock || 0),
+                  0,
+                );
 
                 const colors = [
                   ...new Set(
@@ -279,7 +273,12 @@ const SellerDashboard = () => {
                     className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 group flex flex-col h-full"
                   >
                     {/* Image */}
-                    <div className="relative aspect-[4/5] overflow-hidden bg-slate-50">
+                    <div
+                      onClick={() => {
+                        navigate(`/product/${product._id}`);
+                      }}
+                      className="relative aspect-[4/5] overflow-hidden bg-slate-50"
+                    >
                       <img
                         src={imageUrl}
                         alt={product.title}
@@ -333,19 +332,6 @@ const SellerDashboard = () => {
 
                       {/* Hover Actions */}
                       <div className="absolute bottom-4 right-4 flex gap-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-20">
-                        <button
-                          onClick={() => navigate(`/product/${product._id}`)}
-                          className="p-2.5 bg-white rounded-full text-slate-600 hover:text-[#3b557e] hover:scale-110 shadow-lg transition-all cursor-pointer"
-                          title="View Product"
-                        >
-                          <Eye size={16} />
-                        </button>
-                        <button
-                          className="p-2.5 bg-white rounded-full text-slate-600 hover:text-[#3b557e] hover:scale-110 shadow-lg transition-all cursor-pointer"
-                          title="Edit Product"
-                        >
-                          <Edit3 size={16} />
-                        </button>
                         <button
                           className="p-2.5 bg-white rounded-full text-rose-500 hover:bg-rose-50 hover:scale-110 shadow-lg transition-all cursor-pointer"
                           title="Delete Product"

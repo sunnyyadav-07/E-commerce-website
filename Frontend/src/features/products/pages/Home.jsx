@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { Heart, ShoppingCart, Search, ShoppingBag } from "lucide-react";
-import { useCart } from "../../addToCart/hooks/useCart";
 
 const ProductCard = ({ product }) => {
   const [hovered, setHovered] = useState(false);
@@ -114,15 +113,14 @@ const ProductCard = ({ product }) => {
 
 const Home = () => {
   const products = useSelector((state) => state.product.allProducts);
+  const loading = useSelector((state) => state.product.loading);
   const cartItems = useSelector((state) => state.cart.allCartProducts);
   const cartProductCount = cartItems?.length ?? 0;
   const navigate = useNavigate();
   const { handleGetAllProducts } = useProduct();
-  const { handleGetAllCartProducts } = useCart();
 
   useEffect(() => {
     handleGetAllProducts();
-    handleGetAllCartProducts();
   }, []);
 
   return (
@@ -234,12 +232,19 @@ const Home = () => {
 
       {/* ── Product Grid ── */}
       <main className="max-w-7xl mx-auto px-6 md:px-10 pb-32">
-        {!products || products.length === 0 ? (
+        {loading ? (
+          /* Fetching from server */
           <div className="py-40 flex flex-col items-center justify-center gap-4">
             <div className="w-10 h-10 rounded-full border-4 border-stone-200 border-t-stone-700 animate-spin" />
             <p className="text-xs uppercase tracking-widest text-stone-400">
               Loading collection…
             </p>
+          </div>
+        ) : products.length === 0 ? (
+          /* Loaded but no products exist */
+          <div className="py-40 flex flex-col items-center justify-center gap-4">
+            <p className="text-sm font-semibold text-stone-500">No products found.</p>
+            <p className="text-xs text-stone-400">Check back soon for new arrivals.</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">

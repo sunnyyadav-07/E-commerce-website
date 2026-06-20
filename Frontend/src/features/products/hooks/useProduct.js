@@ -5,6 +5,7 @@ import {
   getAllProducts,
   getSellerProducts,
   getProductDetails,
+  updateProduct,
 } from "../services/product.api";
 import {
   setAllProducts,
@@ -35,7 +36,9 @@ const useProduct = () => {
       const data = await createProductVariant(productId, formData);
       return data.product;
     } catch (error) {
-      dispatch(setError(error.message));
+      const errMsg = error.response?.data?.message || error.message;
+      dispatch(setError(errMsg));
+       throw error;
     } finally {
       dispatch(setLoading(false));
     }
@@ -47,7 +50,8 @@ const useProduct = () => {
       dispatch(setSellerProduct(data.products));
       return data.products;
     } catch (error) {
-      dispatch(setError(error.message));
+      const errMsg = error.response?.data?.message || error.message;
+      dispatch(setError(errMsg));
     } finally {
       dispatch(setLoading(false));
     }
@@ -59,7 +63,8 @@ const useProduct = () => {
       dispatch(setAllProducts(data.products));
       return data.products;
     } catch (error) {
-      dispatch(setError(error.message));
+      const errMsg = error.response?.data?.message || error.message;
+      dispatch(setError(errMsg));
     } finally {
       dispatch(setLoading(false));
     }
@@ -70,7 +75,20 @@ const useProduct = () => {
       const data = await getProductDetails(productId);
       return data.product;
     } catch (error) {
-      dispatch(setError(error.message));
+      const errMsg = error.response?.data?.message || error.message;
+      dispatch(setError(errMsg));
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+  async function handleUpdateProduct(productId, variantId, updatedData) {
+    try {
+      dispatch(setLoading(true));
+      const data = await updateProduct(productId, variantId, updatedData);
+      return data.updatedData;
+    } catch (error) {
+      const errMsg = error.response?.data?.message || error.message;
+      dispatch(setError(errMsg));
     } finally {
       dispatch(setLoading(false));
     }
@@ -81,6 +99,7 @@ const useProduct = () => {
     handleGetSellerProduct,
     handleGetAllProducts,
     handleGetProductDetails,
+    handleUpdateProduct,
   };
 };
 export default useProduct;

@@ -23,3 +23,7 @@ export async function getProductDetails(productId) {
   const response = await api.get(`/detail/${productId}`);
   return response.data;
 }
+export async function updateProduct(productId, variantId, data) {
+  const response = await api.patch(`/${productId}/${variantId}`, data);
+  return response.data;
+}

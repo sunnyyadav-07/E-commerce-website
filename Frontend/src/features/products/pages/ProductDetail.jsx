@@ -14,6 +14,7 @@ import {
   RotateCcw,
   Tag,
   Layers,
+  Pencil,
 } from "lucide-react";
 import { useCart } from "../../addToCart/hooks/useCart";
 import { useWishList } from "../../wishList/hooks/useWishList";
@@ -33,7 +34,6 @@ const ProductDetail = () => {
   const cartItems = useSelector((state) => state.cart.allCartProducts);
   const {
     handleAddToWishList,
-    handleGetAllWisgListItems,
     handleRemoveItemFromWishList,
   } = useWishList();
   const wishListItems = useSelector((state) => state.wishlist.allWishListItem);
@@ -62,7 +62,6 @@ const ProductDetail = () => {
         setActiveImg(0);
       }
     })();
-    handleGetAllWisgListItems();
   }, [productId]);
   function addToCartHandle(variantId) {
     const data = {
@@ -408,19 +407,35 @@ const ProductDetail = () => {
 
             {/* CTA Buttons */}
             {isSeller ? (
-              <div className="flex items-start gap-3 p-4 bg-[#3b557e]/5 border border-[#3b557e]/15 rounded-2xl">
-                <div className="w-8 h-8 bg-[#3b557e]/10 rounded-xl flex items-center justify-center shrink-0">
-                  <ShoppingBag className="w-4 h-4 text-[#3b557e]" />
+              <div className="flex flex-col gap-3">
+                {/* Seller notice */}
+                <div className="flex items-start gap-3 p-4 bg-[#3b557e]/5 border border-[#3b557e]/15 rounded-2xl">
+                  <div className="w-8 h-8 bg-[#3b557e]/10 rounded-xl flex items-center justify-center shrink-0">
+                    <ShoppingBag className="w-4 h-4 text-[#3b557e]" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-[#3b557e] mb-0.5">
+                      Seller View
+                    </p>
+                    <p className="text-[11px] text-slate-500 leading-relaxed">
+                      Purchase actions are disabled in seller mode. Switch to a
+                      buyer account to shop.
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs font-bold text-[#3b557e] mb-0.5">
-                    Seller View
-                  </p>
-                  <p className="text-[11px] text-slate-500 leading-relaxed">
-                    Purchase actions are disabled in seller mode. Switch to a
-                    buyer account to shop.
-                  </p>
-                </div>
+
+                {/* Edit Product button — seller only */}
+                <button
+                  onClick={() =>
+                    navigate(
+                      `/seller/products/${productId}/edit?variant=${selectedVariantId}`,
+                    )
+                  }
+                  className="cursor-pointer w-full flex items-center justify-center gap-2 py-4 bg-[#3b557e] text-white text-sm font-bold uppercase tracking-widest rounded-2xl hover:bg-[#2d4363] active:scale-[0.98] transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  <Pencil className="w-5 h-5" />
+                  Edit Product
+                </button>
               </div>
             ) : (
               <div className="flex flex-col gap-3 pt-2">
