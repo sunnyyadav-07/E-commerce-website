@@ -12,6 +12,8 @@ const Navbar = () => {
   const navigate = useNavigate();
   const cartItems = useSelector((state) => state.cart.allCartProducts);
   const cartCount = cartItems?.length ?? 0;
+  const user = useSelector((state) => state.auth.user);
+  const isSeller = user?.role === "seller";
 
   return (
     <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-sm">
@@ -72,27 +74,31 @@ const Navbar = () => {
           </button>
 
           {/* Wishlist */}
-          <button
-            onClick={() => navigate("/wishlist")}
-            className="cursor-pointer flex items-center p-2 rounded-xl text-stone-500 hover:text-rose-500 hover:bg-rose-50 transition-colors group"
-            title="Wishlist"
-          >
-            <Heart className="w-[18px] h-[18px] group-hover:fill-rose-500 group-hover:text-rose-500 transition-all duration-200" />
-          </button>
+          {!isSeller && (
+            <button
+              onClick={() => navigate("/wishlist")}
+              className="cursor-pointer flex items-center p-2 rounded-xl text-stone-500 hover:text-rose-500 hover:bg-rose-50 transition-colors group"
+              title="Wishlist"
+            >
+              <Heart className="w-[18px] h-[18px] group-hover:fill-rose-500 group-hover:text-rose-500 transition-all duration-200" />
+            </button>
+          )}
 
           {/* Cart */}
-          <button
-            onClick={() => navigate("/my-cart")}
-            className="cursor-pointer flex items-center gap-2 pl-3 pr-4 py-2 bg-[#3b557e] text-white text-[11px] uppercase tracking-widest font-bold rounded-xl hover:bg-[#2d4363] active:scale-95 transition-all duration-200 shadow-sm"
-          >
-            <ShoppingBag className="w-4 h-4" />
-            Bag
-            {cartCount > 0 && (
-              <span className="bg-white text-[#3b557e] text-[10px] font-black rounded-full w-5 h-5 flex items-center justify-center leading-none">
-                {cartCount}
-              </span>
-            )}
-          </button>
+          {!isSeller && (
+            <button
+              onClick={() => navigate("/my-cart")}
+              className="cursor-pointer flex items-center gap-2 pl-3 pr-4 py-2 bg-[#3b557e] text-white text-[11px] uppercase tracking-widest font-bold rounded-xl hover:bg-[#2d4363] active:scale-95 transition-all duration-200 shadow-sm"
+            >
+              <ShoppingBag className="w-4 h-4" />
+              Bag
+              {cartCount > 0 && (
+                <span className="bg-white text-[#3b557e] text-[10px] font-black rounded-full w-5 h-5 flex items-center justify-center leading-none">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+          )}
 
           {/* Mobile Hamburger */}
           <button className="md:hidden cursor-pointer p-2 rounded-xl hover:bg-stone-100 transition-colors">
