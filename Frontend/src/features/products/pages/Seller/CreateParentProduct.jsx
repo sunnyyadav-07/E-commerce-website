@@ -10,16 +10,25 @@ import {
   BadgeCheck,
   LayoutGrid,
   ChevronDown,
+  Shirt,
 } from "lucide-react";
 import SellerNavigation from "../../../shared/components/SellerNavigation";
 import useProduct from "../../hooks/useProduct";
 import { toast } from "react-toastify";
-const CATEGORIES = ["Men's Clothing", "Women's Clothing"];
+const CATEGORIES = ["Men's Clothing", "Women's Clothing", "Kids' Clothing"];
 
 const SUBCATEGORIES = {
   "Men's Clothing": ["Top", "Bottom"],
   "Women's Clothing": ["Top", "Bottom"],
+  "Kids' Clothing": ["Full Set", "Top", "Bottom"],
 };
+
+const SUBCATEGORY_EMOJI = {
+  "Full Set": "👘",
+  "Top": "👕",
+  "Bottom": "👖",
+};
+
 
 const FormField = ({ label, icon: Icon, children }) => (
   <div className="group space-y-2.5">
@@ -45,17 +54,21 @@ const CreateParentProduct = () => {
     brand: "",
     category: "",
     subCategory: "",
+    productType: "",
+    kidsFor: "",
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // Reset subcategory whenever category changes
+    // Reset subcategory & productType whenever category changes
     if (name === "category") {
-      setFormData((prev) => ({ ...prev, category: value, subCategory: "" }));
+      setFormData((prev) => ({ ...prev, category: value, subCategory: "", productType: "", kidsFor: "" }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -239,12 +252,62 @@ const CreateParentProduct = () => {
                       className="appearance-none"
                       required
                     />
-                    {sub === "Top" ? "👕" : "👖"} {sub}
+                    {SUBCATEGORY_EMOJI[sub] ?? "👕"} {sub}
                   </label>
                 ))}
               </div>
             </FormField>
           )}
+
+          {/* Kids For — shown only when Kids' Clothing is selected */}
+          {formData.category === "Kids' Clothing" && (
+            <FormField label="Kids For" icon={LayoutGrid}>
+              <div className="flex gap-3">
+                {[
+                  { value: "Boy", emoji: "👦" },
+                  { value: "Girl", emoji: "👧" },
+                  { value: "Infant", emoji: "👶" },
+                ].map(({ value, emoji }) => (
+                  <label
+                    key={value}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 cursor-pointer transition-all text-sm font-bold tracking-wide select-none ${
+                      formData.kidsFor === value
+                        ? "border-[#3b557e] bg-[#3b557e]/5 text-[#3b557e]"
+                        : "border-slate-200 bg-[#f3f4f6] text-slate-500 hover:border-[#3b557e]/30 hover:text-[#3b557e]/70"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="kidsFor"
+                      value={value}
+                      checked={formData.kidsFor === value}
+                      onChange={handleChange}
+                      className="appearance-none"
+                      required
+                    />
+                    {emoji} {value}
+                  </label>
+                ))}
+              </div>
+            </FormField>
+          )}
+
+          {/* Product Type */}
+          <FormField label="Product Type" icon={Shirt}>
+            <input
+              type="text"
+              name="productType"
+              id="parent-product-type"
+              placeholder="e.g., T-Shirt, Kurta, Dress…"
+              value={formData.productType}
+              onChange={handleChange}
+              className={inputClass}
+            />
+            <p className="text-[9px] text-gray-400 font-medium pl-1">
+              Describe the type of product in your own words.
+            </p>
+          </FormField>
+
 
           {/* Description */}
           <FormField label="Product Description" icon={AlignLeft}>
