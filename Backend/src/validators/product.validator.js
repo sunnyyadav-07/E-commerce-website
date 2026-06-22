@@ -76,5 +76,12 @@ export const parentProductValidator = [
     .withMessage("Brand is required")
     .isString()
     .withMessage("Brand must be a string"),
+
+  body("productType")
+    .trim()
+    .notEmpty()
+    .withMessage("Type of product is required")
+    .isString()
+    .withMessage("Type of product must be a string"),
   validateRequest,
 ];

@@ -23,6 +23,15 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    productType: {
+      type: String,
+      required: true,
+    },
+    gender: {
+      type: String,
+      enum: ["boy", "girl", "infant"],
+      default: null,
+    },
     brand: {
       type: String,
       required: true,
@@ -31,6 +40,10 @@ const productSchema = new mongoose.Schema(
       type: String,
       enum: ["draft", "active", "archived"],
       default: "draft",
+    },
+    searchTerms: {
+      type: [String],
+      default: [],
     },
     variants: [
       {
@@ -84,6 +97,33 @@ const productSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+productSchema.pre("save", function (next) {
+  const searchKeywords = [
+    this.title,
+    this.brand,
+    this.category,
+    this.subCategory,
+    this.description,
+    this.productType,
+    this.gender,
+  ]
+    .filter(Boolean)
+    .map((v) => v.toLowerCase());
+  const variantKeywords = [];
+  for (const variant of this.variants) {
+    for (const value of variant.attributes.values()) {
+      if (value) {
+        variantKeywords.push(value.toLowerCase());
+      }
+    }
+  }
+  this.searchTerms = [...new Set([...searchKeywords, ...variantKeywords])];
 
+  next();
+});
+
+productSchema.index({
+  searchTerms: "text",
+});
 const productModel = mongoose.model("product", productSchema);
 export default productModel;
