@@ -182,7 +182,12 @@ export async function createParentProductController(req, res) {
       subCategory,
       sellerId,
       productType,
-      gender: category !== "Kids" ? null : gender,
+      gender:
+        category == "Men's Clothing"
+          ? "men"
+          : category == "Women's Clothing"
+            ? "women"
+            : gender,
     });
     res.status(201).json({
       success: true,

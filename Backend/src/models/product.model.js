@@ -29,7 +29,7 @@ const productSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
-      enum: ["boy", "girl", "infant"],
+      enum: ["boy", "men", "women", "girl", "infant"],
       default: null,
     },
     brand: {
@@ -97,7 +97,7 @@ const productSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
-productSchema.pre("save", function (next) {
+productSchema.pre("save", function () {
   const searchKeywords = [
     this.title,
     this.brand,
@@ -118,8 +118,6 @@ productSchema.pre("save", function (next) {
     }
   }
   this.searchTerms = [...new Set([...searchKeywords, ...variantKeywords])];
-
-  next();
 });
 
 productSchema.index({
