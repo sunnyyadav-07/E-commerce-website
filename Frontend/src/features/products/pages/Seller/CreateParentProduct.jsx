@@ -76,7 +76,7 @@ const CreateParentProduct = () => {
       const res = await handleCreateParentProduct(formData);
       if (res) {
         toast.success("Parent product created successfully!");
-        navigate(`/seller/create-product/:${res._id}/variant`);
+        navigate(`/seller/create-product/${res._id}/variant`);
       }
     } catch (error) {
       const errorMsg = error.response?.data?.message || error.message || "";

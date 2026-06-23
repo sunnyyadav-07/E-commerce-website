@@ -328,7 +328,6 @@ const ImageUploader = ({ images, onChange }) => {
 const CreateProductVariants = () => {
   const navigate = useNavigate();
   const { productId } = useParams();
-  console.log(productId);
   const { handleCreateProductVariant } = useProduct();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
