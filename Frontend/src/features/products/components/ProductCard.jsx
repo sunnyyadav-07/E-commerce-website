@@ -78,9 +78,9 @@ const ProductCard = ({ product }) => {
       </div>
 
       {/* Info */}
-      <div className="space-y-1 px-1">
-        <div className="flex justify-between items-start gap-2">
-          <h3 className="font-semibold text-stone-900 text-sm leading-snug">
+      <div className="flex flex-col px-1 pt-2 min-h-[130px]">
+        <div className="flex justify-between items-start gap-2 mb-1">
+          <h3 className="font-semibold text-stone-900 text-sm leading-snug line-clamp-2 capitalize flex-1">
             {product.title}
           </h3>
           <span className="font-bold text-stone-900 text-sm shrink-0">
@@ -90,7 +90,7 @@ const ProductCard = ({ product }) => {
         <p className="text-xs text-stone-500 line-clamp-2 leading-relaxed">
           {product.description}
         </p>
-        <div className="pt-3">
+        <div className="pt-3 mt-auto">
           <button
             className="cursor-pointer w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#3b557e] text-white text-[11px] font-bold uppercase tracking-widest rounded-xl hover:bg-[#2d4363] active:scale-95 transition-all duration-200 shadow-sm hover:shadow-md group/cart"
             onClick={(e) => e.stopPropagation()}

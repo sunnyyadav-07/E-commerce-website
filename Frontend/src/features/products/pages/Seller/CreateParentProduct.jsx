@@ -17,18 +17,6 @@ import useProduct from "../../hooks/useProduct";
 import { toast } from "react-toastify";
 const CATEGORIES = ["Men's Clothing", "Women's Clothing", "Kids' Clothing"];
 
-const SUBCATEGORIES = {
-  "Men's Clothing": ["Top", "Bottom"],
-  "Women's Clothing": ["Top", "Bottom"],
-  "Kids' Clothing": ["Full Set", "Top", "Bottom"],
-};
-
-const SUBCATEGORY_EMOJI = {
-  "Full Set": "👘",
-  "Top": "👕",
-  "Bottom": "👖",
-};
-
 
 const FormField = ({ label, icon: Icon, children }) => (
   <div className="group space-y-2.5">
@@ -53,7 +41,6 @@ const CreateParentProduct = () => {
     description: "",
     brand: "",
     category: "",
-    subCategory: "",
     productType: "",
     kidsFor: "",
   });
@@ -62,7 +49,7 @@ const CreateParentProduct = () => {
     const { name, value } = e.target;
     // Reset subcategory & productType whenever category changes
     if (name === "category") {
-      setFormData((prev) => ({ ...prev, category: value, subCategory: "", productType: "", kidsFor: "" }));
+      setFormData((prev) => ({ ...prev, category: value, productType: "", kidsFor: "" }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -230,35 +217,6 @@ const CreateParentProduct = () => {
             </FormField>
           </div>
 
-          {/* Subcategory — shown only after a category is selected */}
-          {formData.category && (
-            <FormField label="Subcategory" icon={LayoutGrid}>
-              <div className="flex gap-3">
-                {SUBCATEGORIES[formData.category].map((sub) => (
-                  <label
-                    key={sub}
-                    className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 cursor-pointer transition-all text-sm font-bold tracking-wide select-none ${
-                      formData.subCategory === sub
-                        ? "border-[#3b557e] bg-[#3b557e]/5 text-[#3b557e]"
-                        : "border-slate-200 bg-[#f3f4f6] text-slate-500 hover:border-[#3b557e]/30 hover:text-[#3b557e]/70"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="subCategory"
-                      value={sub}
-                      checked={formData.subCategory === sub}
-                      onChange={handleChange}
-                      className="appearance-none"
-                      required
-                    />
-                    {SUBCATEGORY_EMOJI[sub] ?? "👕"} {sub}
-                  </label>
-                ))}
-              </div>
-            </FormField>
-          )}
-
           {/* Kids For — shown only when Kids' Clothing is selected */}
           {formData.category === "Kids' Clothing" && (
             <FormField label="Kids For" icon={LayoutGrid}>
@@ -266,7 +224,6 @@ const CreateParentProduct = () => {
                 {[
                   { value: "Boy", emoji: "👦" },
                   { value: "Girl", emoji: "👧" },
-                  { value: "Infant", emoji: "👶" },
                 ].map(({ value, emoji }) => (
                   <label
                     key={value}

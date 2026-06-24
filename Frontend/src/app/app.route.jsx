@@ -14,6 +14,7 @@ import Cart from "../features/addToCart/pages/Cart.jsx";
 import CartProtected from "../features/addToCart/components/CartProtected.jsx";
 import WishList from "../features/wishList/pages/WishList.jsx";
 import EditProduct from "../features/products/pages/Seller/EditProduct.jsx";
+import Catalog from "../features/catalogs/Pages/Catalog.jsx";
 
 export const router = createBrowserRouter([
   {
@@ -38,6 +39,7 @@ export const router = createBrowserRouter([
           </CartProtected>
         ),
       },
+      { path: "products/catalog/:category", element: <Catalog /> },
       { path: "wishlist", element: <WishList /> },
       {
         path: "seller",
