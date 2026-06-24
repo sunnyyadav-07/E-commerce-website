@@ -19,18 +19,14 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    subCategory: {
+    gender: {
       type: String,
-      required: true,
+      enum: ["boy", "girl", "men", "women"],
+      default: null,
     },
     productType: {
       type: String,
       required: true,
-    },
-    gender: {
-      type: String,
-      enum: ["boy", "men", "women", "girl", "infant"],
-      default: null,
     },
     brand: {
       type: String,
@@ -102,7 +98,6 @@ productSchema.pre("save", function () {
     this.title,
     this.brand,
     this.category,
-    this.subCategory,
     this.description,
     this.productType,
     this.gender,

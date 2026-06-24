@@ -144,24 +144,15 @@ export async function getProductDetailsController(req, res) {
 
 export async function createParentProductController(req, res) {
   try {
-    const {
-      title,
-      description,
-      brand,
-      category,
-      subCategory,
-      productType,
-      gender,
-    } = req.body;
+    const { title, description, brand, category, gender, productType } =
+      req.body;
     const sellerId = req.user._id;
     const isProductExists = await productModel.findOne({
       title,
       brand,
       category,
-      subCategory,
       sellerId,
       productType,
-      gender,
     });
     if (isProductExists) {
       return res.status(400).json({
@@ -179,7 +170,6 @@ export async function createParentProductController(req, res) {
       description,
       brand,
       category,
-      subCategory,
       sellerId,
       productType,
       gender:
