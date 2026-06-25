@@ -13,6 +13,7 @@ const Navbar = () => {
   const cartItems = useSelector((state) => state.cart.allCartProducts);
   const cartCount = cartItems?.length ?? 0;
   const user = useSelector((state) => state.auth.user);
+  const authLoading = useSelector((state) => state.auth.loading);
   const isSeller = user?.role === "seller";
 
   return (
@@ -50,8 +51,8 @@ const Navbar = () => {
             <Search className="w-[18px] h-[18px]" />
           </button>
 
-          {/* Wishlist */}
-          {!isSeller && (
+          {/* Wishlist — only for buyers, hidden while auth resolves */}
+          {!authLoading && !isSeller && (
             <button
               onClick={() => navigate("/wishlist")}
               className="cursor-pointer flex items-center p-2 rounded-xl text-stone-500 hover:text-rose-500 hover:bg-rose-50 transition-colors group"
@@ -61,8 +62,8 @@ const Navbar = () => {
             </button>
           )}
 
-          {/* Cart */}
-          {!isSeller && (
+          {/* Cart — only for buyers, hidden while auth resolves */}
+          {!authLoading && !isSeller && (
             <button
               onClick={() => navigate("/my-cart")}
               className="cursor-pointer flex items-center gap-2 pl-3 pr-4 py-2 bg-[#3b557e] text-white text-[11px] uppercase tracking-widest font-bold rounded-xl hover:bg-[#2d4363] active:scale-95 transition-all duration-200 shadow-sm"

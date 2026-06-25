@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
 
-const FILTERS = ["All", "Tops", "Bottoms"];
+const FILTERS = ["All"];
 
 const FilterStrip = ({ totalCount = 0 }) => {
   const [active, setActive] = useState("All");

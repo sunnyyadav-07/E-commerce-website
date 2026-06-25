@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Heart, ShoppingCart } from "lucide-react";
+import { Heart } from "lucide-react";
 
 const ProductCard = ({ product }) => {
   const [hovered, setHovered] = useState(false);
@@ -22,7 +22,7 @@ const ProductCard = ({ product }) => {
       onMouseLeave={() => setHovered(false)}
     >
       {/* Image */}
-      <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-stone-100 mb-4">
+      <div className="relative aspect-3/4 overflow-hidden rounded-2xl bg-stone-100 mb-4">
         {images.length > 0 ? (
           <>
             <img
@@ -48,17 +48,6 @@ const ProductCard = ({ product }) => {
           </div>
         )}
 
-        {/* Quick View overlay */}
-        <div
-          className={`absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/70 to-transparent transition-all duration-300 ${
-            hovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
-        >
-          <button className="cursor-pointer w-full py-3 bg-white text-black text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-stone-100 transition-colors">
-            Quick View
-          </button>
-        </div>
-
         {/* Wishlist pill */}
         <button
           className={`cursor-pointer absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm transition-all duration-300 hover:scale-110 ${
@@ -78,7 +67,7 @@ const ProductCard = ({ product }) => {
       </div>
 
       {/* Info */}
-      <div className="flex flex-col px-1 pt-2 min-h-[130px]">
+      <div className="flex flex-col px-1 pt-2">
         <div className="flex justify-between items-start gap-2 mb-1">
           <h3 className="font-semibold text-stone-900 text-sm leading-snug line-clamp-2 capitalize flex-1">
             {product.title}
@@ -90,15 +79,6 @@ const ProductCard = ({ product }) => {
         <p className="text-xs text-stone-500 line-clamp-2 leading-relaxed">
           {product.description}
         </p>
-        <div className="pt-3 mt-auto">
-          <button
-            className="cursor-pointer w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#3b557e] text-white text-[11px] font-bold uppercase tracking-widest rounded-xl hover:bg-[#2d4363] active:scale-95 transition-all duration-200 shadow-sm hover:shadow-md group/cart"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <ShoppingCart className="w-4 h-4 transition-transform group-hover/cart:-translate-y-0.5" />
-            Add to Cart
-          </button>
-        </div>
       </div>
     </div>
   );
