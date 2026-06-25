@@ -5,7 +5,7 @@ const catalogSlice = createSlice({
   initialState: {
     catalogProducts: [],
     error: null,
-    loading: false,
+    loading: true,
   },
   reducers: {
     setCatalogProducts: (state, action) => {
