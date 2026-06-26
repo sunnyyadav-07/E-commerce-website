@@ -1,6 +1,10 @@
 import { Router } from "express";
-import { getCategoryController } from "../controllers/catalog.controller.js";
+import {
+  getCategoryController,
+  getSuggestionsController,
+} from "../controllers/catalog.controller.js";
 
 const catalogRouter = Router();
 catalogRouter.get("/", getCategoryController);
+catalogRouter.get("/suggestions", getSuggestionsController);
 export default catalogRouter;

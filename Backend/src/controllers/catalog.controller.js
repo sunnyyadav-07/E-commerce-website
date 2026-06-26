@@ -36,3 +36,7 @@ export async function getCategoryController(req, res) {
     });
   }
 }
+
+export async function getSuggestionsController(req, res) {
+  
+}
