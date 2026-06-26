@@ -14,7 +14,7 @@ const Catalog = () => {
 
   useEffect(() => {
     (async () => {
-      await getProductsCatalog(category);
+      await getProductsCatalog({ category });
     })();
   }, [category]);
 

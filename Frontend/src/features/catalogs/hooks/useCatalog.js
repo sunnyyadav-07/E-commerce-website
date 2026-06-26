@@ -13,6 +13,7 @@ const useCatalog = () => {
       dispatch(setLoading(true));
       const res = await getCatalogProducts(category);
       dispatch(setCatalogProducts(res.products));
+      return res.products;
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setError(errMsg));
@@ -22,4 +23,4 @@ const useCatalog = () => {
   }
   return { getProductsCatalog };
 };
-export default useCatalog
+export default useCatalog;

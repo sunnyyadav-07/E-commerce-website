@@ -309,7 +309,7 @@ const ProductDetail = () => {
             <div className="border-t border-stone-200" />
 
             {/* ── Colour selector ── */}
-            {colorVariants.length > 1 && (
+            {colorVariants.length >= 1 && (
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-stone-400 mb-3">
                   Colour —{" "}
