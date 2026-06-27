@@ -2,6 +2,8 @@ import { Heart, Search, ShoppingBag, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
+import { suggestProducts } from "../../search/service/suggestion.api";
+import Suggestions from "../../search/components/Suggestions";
 
 const NAV_CATEGORIES = [
   { label: "Men" },
@@ -21,6 +23,18 @@ const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const inputRef = useRef(null);
   const searchWrapperRef = useRef(null);
+  const [searchedItem, setSearchedItem] = useState([]);
+  const timerRef = useRef(null);
+  async function createSuggestions(inputs) {
+    const data = await suggestProducts(inputs);
+    setSearchedItem(data);
+  }
+  function search(value) {
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      createSuggestions(value);
+    }, 300);
+  }
 
   // Auto-focus input when opened
   useEffect(() => {
@@ -39,6 +53,7 @@ const Navbar = () => {
       ) {
         setSearchOpen(false);
         setSearchQuery("");
+        setSearchedItem([]);
       }
     };
     if (searchOpen) {
@@ -82,7 +97,7 @@ const Navbar = () => {
             >
               {label}
               {/* Animated underline */}
-              <span className="absolute bottom-3 left-5 right-5 h-[2px] bg-[#3b557e] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded-full" />
+              <span className="absolute bottom-3 left-5 right-5 h-0.5 bg-[#3b557e] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded-full" />
             </button>
           ))}
         </div>
@@ -90,7 +105,10 @@ const Navbar = () => {
         {/* Right Actions */}
         <div className="flex items-center gap-3">
           {/* Search */}
-          <div ref={searchWrapperRef} className="hidden md:flex items-center">
+          <div
+            ref={searchWrapperRef}
+            className="relative hidden md:flex items-center"
+          >
             <div
               style={{
                 width: searchOpen ? "220px" : "0px",
@@ -103,19 +121,25 @@ const Navbar = () => {
               }}
             >
               <div className="flex items-center gap-1 bg-stone-100 rounded-xl px-3 py-1.5 w-full border border-stone-200 focus-within:border-[#3b557e] focus-within:ring-2 focus-within:ring-[#3b557e]/20 transition-all">
-                <Search className="w-[14px] h-[14px] text-stone-400 shrink-0" />
+                <Search className="w-3.5 h-3.5 text-stone-400 shrink-0" />
                 <input
                   ref={inputRef}
                   type="text"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    search(e.target.value);
+                  }}
                   onKeyDown={handleSearchSubmit}
                   placeholder="Search products…"
                   className="bg-transparent text-[12px] text-stone-800 placeholder-stone-400 outline-none w-full"
                 />
                 {searchQuery && (
                   <button
-                    onClick={() => setSearchQuery("")}
+                    onClick={() => {
+                      setSearchQuery("");
+                      setSearchedItem([]);
+                    }}
                     className="text-stone-400 hover:text-stone-600 transition-colors"
                   >
                     <X className="w-3 h-3" />
@@ -128,6 +152,7 @@ const Navbar = () => {
                 if (searchOpen) {
                   setSearchOpen(false);
                   setSearchQuery("");
+                  setSearchedItem([]);
                 } else {
                   setSearchOpen(true);
                 }
@@ -136,11 +161,24 @@ const Navbar = () => {
               title="Search"
             >
               {searchOpen ? (
-                <X className="w-[18px] h-[18px]" />
+                <X className="w-4.5 h-4.5" />
               ) : (
-                <Search className="w-[18px] h-[18px]" />
+                <Search className="w-4.5 h-4.5" />
               )}
             </button>
+
+            {/* Suggestions dropdown */}
+            {searchOpen && searchedItem?.length > 0 && (
+              <Suggestions
+                items={searchedItem}
+                query={searchQuery}
+                onSelect={() => {
+                  setSearchOpen(false);
+                  setSearchQuery("");
+                  setSearchedItem([]);
+                }}
+              />
+            )}
           </div>
 
           {/* Wishlist — only for buyers, hidden while auth resolves */}
@@ -150,7 +188,7 @@ const Navbar = () => {
               className="cursor-pointer flex items-center p-2 rounded-xl text-stone-500 hover:text-rose-500 hover:bg-rose-50 transition-colors group"
               title="Wishlist"
             >
-              <Heart className="w-[18px] h-[18px] group-hover:fill-rose-500 group-hover:text-rose-500 transition-all duration-200" />
+              <Heart className="w-4.5 h-4.5 group-hover:fill-rose-500 group-hover:text-rose-500 transition-all duration-200" />
             </button>
           )}
 
