@@ -38,5 +38,44 @@ export async function getCategoryController(req, res) {
 }
 
 export async function getSuggestionsController(req, res) {
-  
+  try {
+    let { search } = req.query;
+    const query = {};
+    if (search?.trim()) {
+      query.$text = {
+        $search: search,
+      };
+    } else {
+      return res.status(200).json({
+        success: true,
+        products: [],
+      });
+    }
+    const products = await productModel
+      .find(query)
+      .select("_id title description variants.price variants.images")
+      .limit(8)
+      .lean();
+
+    const formattedInfo = products.map((p) => {
+      return {
+        _id: p._id,
+        title: p.title,
+        description: p.description,
+        image: p.variants[0].images[0],
+        price: p.variants[0].price.amount,
+      };
+    });
+    res.status(200).json({
+      success: true,
+      message: "Products fetched successfully",
+      products: formattedInfo,
+    });
+  } catch (error) {
+    console.log("Error in product suggestion api", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
 }
