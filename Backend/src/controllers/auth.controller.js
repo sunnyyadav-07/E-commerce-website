@@ -201,3 +201,7 @@ export function getMeController(req, res) {
     },
   });
 }
+
+export async function logoutController(req,res) {
+  
+}

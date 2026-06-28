@@ -30,4 +30,5 @@ authRouter.get(
 );
 authRouter.patch("/user/role", authUser, setUserRoleController);
 authRouter.get("/me", authUser, getMeController);
+
 export default authRouter;
