@@ -1,6 +1,7 @@
 import userModel from "../models/user.model.js";
 import { config } from "../config/config.js";
 import jwt from "jsonwebtoken";
+import blacklistModel from "../models/blackList.model.js";
 async function sendTokenRequest(user, res, message) {
   const token = jwt.sign(
     {
@@ -202,6 +203,14 @@ export function getMeController(req, res) {
   });
 }
 
-export async function logoutController(req,res) {
-  
+export async function logoutController(req, res) {
+  const token = req.cookies.token;
+  res.clearCookie("token");
+  await blacklistModel.create({
+    token,
+  });
+  res.status(200).json({
+    success: true,
+    message: "Logout successfully",
+  });
 }

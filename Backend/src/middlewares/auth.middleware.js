@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { config } from "../config/config.js";
 import userModel from "../models/user.model.js";
+import blacklistModel from "../models/blackList.model.js";
 
 export async function authUser(req, res, next) {
   const token = req.cookies.token;
@@ -11,7 +12,13 @@ export async function authUser(req, res, next) {
       err: "No token provided",
     });
   }
-
+  const isTokenBlacklisted = await blacklistModel.findOne({ token });
+  if (isTokenBlacklisted) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid token",
+    });
+  }
   try {
     const decoded = jwt.verify(token, config.JWT_SECRET);
     const user = await userModel.findById(decoded.id);
@@ -33,13 +40,14 @@ export async function authUser(req, res, next) {
   }
 }
 
-export function authenticateSeller(req, res, next) {
-  const userRole = req.user.role;
-  if (userRole !== "seller") {
-    return res.status(400).json({
-      success: false,
-      message: "Unauthorized user",
-    });
-  }
-  next();
+export function authorizeRole(role) {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+    if (req.user.role !== role) {
+      return res.status(403).json({ success: false, message: "Forbidden" });
+    }
+    next();
+  };
 }

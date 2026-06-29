@@ -4,6 +4,7 @@ import {
   getMeController,
   googleCallback,
   loginController,
+  logoutController,
   registerController,
   setUserRoleController,
 } from "../controllers/auth.controller.js";
@@ -30,5 +31,6 @@ authRouter.get(
 );
 authRouter.patch("/user/role", authUser, setUserRoleController);
 authRouter.get("/me", authUser, getMeController);
+authRouter.post("/logout", logoutController);
 
 export default authRouter;

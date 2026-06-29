@@ -1,8 +1,5 @@
 import { Router } from "express";
-import {
-  authenticateSeller,
-  authUser,
-} from "../middlewares/auth.middleware.js";
+import { authorizeRole, authUser } from "../middlewares/auth.middleware.js";
 import {
   createParentProductController,
   createProductVariantController,
@@ -28,26 +25,31 @@ const productRouter = Router();
 productRouter.post(
   "/create",
   authUser,
-  authenticateSeller,
+  authorizeRole("seller"),
   parentProductValidator,
   createParentProductController,
 );
 productRouter.post(
   "/:productId/variant",
   authUser,
-  authenticateSeller,
+  authorizeRole("seller"),
   upload.array("images", 7),
   validateImages,
   createProductVariantValidator,
   createProductVariantController,
 );
-productRouter.get("/seller", authUser, authenticateSeller, getSellerProducts);
+productRouter.get(
+  "/seller",
+  authUser,
+  authorizeRole("seller"),
+  getSellerProducts,
+);
 productRouter.get("/", getAllProductsController);
 productRouter.get("/detail/:productId", getProductDetailsController);
 productRouter.patch(
   "/:productId/:variantId",
   authUser,
-  authenticateSeller,
+  authorizeRole("seller"),
   updateProductValidator,
   updateSellerProductController,
 );
