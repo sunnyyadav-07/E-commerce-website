@@ -19,6 +19,15 @@ if (!process.env.IMAGEKIT_PRIVATE_KEY) {
     "IMAGEKIT_PRIVATE_KEY is undefined in the environment variable",
   );
 }
+if (!process.env.REDIS_HOST) {
+  throw new Error("REDIS_HOST is undefined in the environment variable");
+}
+if (!process.env.REDIS_PORT) {
+  throw new Error("REDIS_PORT is undefined in the environment variable");
+}
+if (!process.env.REDIS_PASSWORD) {
+  throw new Error("REDIS_PASSWORD is undefined in the environment variable");
+}
 export const config = {
   MONGO_URI: process.env.MONGO_URI,
   JWT_SECRET: process.env.JWT_SECRET,
@@ -26,4 +35,7 @@ export const config = {
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL,
   IMAGEKIT_PRIVATE_KEY: process.env.IMAGEKIT_PRIVATE_KEY,
+  REDIS_PASSWORD: process.env.REDIS_PASSWORD,
+  REDIS_PORT: process.env.REDIS_PORT,
+  REDIS_HOST: process.env.REDIS_HOST,
 };

@@ -1,7 +1,9 @@
 import userModel from "../models/user.model.js";
 import { config } from "../config/config.js";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import blacklistModel from "../models/blackList.model.js";
+import redis from "../config/cache.js";
 async function sendTokenRequest(user, res, message) {
   const token = jwt.sign(
     {
@@ -205,10 +207,14 @@ export function getMeController(req, res) {
 
 export async function logoutController(req, res) {
   const token = req.cookies.token;
+
   res.clearCookie("token");
-  await blacklistModel.create({
-    token,
-  });
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+  const decoded = jwt.verify(token, config.JWT_SECRET);
+  const ttl = decoded.exp - Math.floor(Date.now() / 1000);
+  if (ttl > 0) {
+    await redis.set(`bl:${tokenHash}`, 1, "EX", ttl);
+  }
   res.status(200).json({
     success: true,
     message: "Logout successfully",

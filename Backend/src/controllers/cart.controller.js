@@ -89,7 +89,7 @@ export async function getAllCartProducts(req, res) {
   try {
     const userId = req.user._id;
     const userCartProducts = await hasCart(userId, true);
-    if (!userCartProducts) {
+    if (userCartProducts.items.length === 0) {
       return res.status(404).json({
         success: false,
         message: "Do not have any product in cart",

@@ -2,27 +2,29 @@ import jwt from "jsonwebtoken";
 import { config } from "../config/config.js";
 import userModel from "../models/user.model.js";
 import blacklistModel from "../models/blackList.model.js";
-
+import crypto from "crypto";
+import redis from "../config/cache.js";
 export async function authUser(req, res, next) {
   const token = req.cookies.token;
   if (!token) {
-    return res.status(400).json({
+    return res.status(401).json({
       message: "Unauthorized",
       success: false,
       err: "No token provided",
     });
   }
-  const isTokenBlacklisted = await blacklistModel.findOne({ token });
-  if (isTokenBlacklisted) {
-    return res.status(401).json({
-      success: false,
-      message: "Invalid token",
-    });
-  }
+
   try {
     const decoded = jwt.verify(token, config.JWT_SECRET);
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const isTokenBlacklisted = await redis.exists(`bl:${tokenHash}`);
+    if (isTokenBlacklisted) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid token",
+      });
+    }
     const user = await userModel.findById(decoded.id);
-
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -32,7 +34,7 @@ export async function authUser(req, res, next) {
     req.user = user;
     next();
   } catch (error) {
-    return res.status(400).json({
+    return res.status(401).json({
       message: "Unauthorized",
       success: false,
       err: "Invalid token",
