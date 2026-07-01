@@ -4,8 +4,9 @@ import {
   loginUser,
   setUserRole,
   getMe,
+  logoutUser,
 } from "../service/auth.api";
-import { setError, setLoading, setUser } from "../state/auth.slice";
+import { clearUser, setError, setLoading, setUser } from "../state/auth.slice";
 
 const useAuth = () => {
   const dispatch = useDispatch();
@@ -28,7 +29,8 @@ const useAuth = () => {
       dispatch(setUser(data.user));
       return data;
     } catch (error) {
-      dispatch(setError(error.message));
+      const errMsg = error.response?.data?.message || error.message;
+      dispatch(setError(errMsg));
     } finally {
       dispatch(setLoading(false));
     }
@@ -40,7 +42,8 @@ const useAuth = () => {
       dispatch(setUser(data.user));
       return data;
     } catch (error) {
-      dispatch(setError(error.message));
+      const errMsg = error.response?.data?.message || error.message;
+      dispatch(setError(errMsg));
     } finally {
       dispatch(setLoading(false));
     }
@@ -49,10 +52,10 @@ const useAuth = () => {
     try {
       dispatch(setLoading(true));
       const data = await setUserRole({ role });
-      // dispatch(setUser(data));
       return data;
     } catch (error) {
-      dispatch(setError(error.message));
+      const errMsg = error.response?.data?.message || error.message;
+      dispatch(setError(errMsg));
     } finally {
       dispatch(setLoading(false));
     }
@@ -64,7 +67,21 @@ const useAuth = () => {
       dispatch(setUser(data.user));
       return data;
     } catch (error) {
-      dispatch(setError(error.message));
+      const errMsg = error.response?.data?.message || error.message;
+      dispatch(setError(errMsg));
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+  async function handleLogoutUser() {
+    try {
+      dispatch(setLoading(true));
+      const data = await logoutUser();
+      dispatch(clearUser());
+      return data;
+    } catch (error) {
+      const errMsg = error.response?.data?.message || error.message;
+      dispatch(setError(errMsg));
     } finally {
       dispatch(setLoading(false));
     }
@@ -74,6 +91,7 @@ const useAuth = () => {
     handleLoginUser,
     handleSetUserRole,
     handleGetMe,
+    handleLogoutUser,
   };
 };
 export default useAuth;

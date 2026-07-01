@@ -1,9 +1,11 @@
-import { Heart, Search, ShoppingBag, X } from "lucide-react";
+import { Heart, LogIn, LogOut, Search, ShoppingBag, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
+import { logoutUser } from "../../auth/service/auth.api";
 import { suggestProducts } from "../../search/service/suggestion.api";
 import Suggestions from "../../search/components/Suggestions";
+import useAuth from "../../auth/hooks/useAuth";
 
 const NAV_CATEGORIES = [
   { label: "Men" },
@@ -18,6 +20,12 @@ const Navbar = () => {
   const user = useSelector((state) => state.auth.user);
   const authLoading = useSelector((state) => state.auth.loading);
   const isSeller = user?.role === "seller";
+  const { handleLogoutUser } = useAuth();
+
+  const handleLogout = () => {
+    handleLogoutUser();
+    navigate("/login");
+  };
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -76,7 +84,7 @@ const Navbar = () => {
 
   return (
     <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-sm">
-      <div className="max-w-7xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 md:px-10 h-16 grid grid-cols-3 items-center">
         {/* Logo */}
         <a
           href="#"
@@ -86,7 +94,7 @@ const Navbar = () => {
         </a>
 
         {/* Centre — Category Links */}
-        <div className="hidden md:flex items-center gap-1">
+        <div className="hidden md:flex items-center gap-1 justify-self-center">
           {NAV_CATEGORIES.map(({ label }) => (
             <button
               onClick={() => {
@@ -103,109 +111,136 @@ const Navbar = () => {
         </div>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-3">
-          {/* Search */}
-          <div
-            ref={searchWrapperRef}
-            className="relative hidden md:flex items-center"
-          >
-            <div
-              style={{
-                width: searchOpen ? "220px" : "0px",
-                opacity: searchOpen ? 1 : 0,
-                overflow: "hidden",
-                transition:
-                  "width 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <div className="flex items-center gap-1 bg-stone-100 rounded-xl px-3 py-1.5 w-full border border-stone-200 focus-within:border-[#3b557e] focus-within:ring-2 focus-within:ring-[#3b557e]/20 transition-all">
-                <Search className="w-3.5 h-3.5 text-stone-400 shrink-0" />
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    search(e.target.value);
+        <div className="flex items-center gap-2 justify-self-end">
+          {authLoading ? (
+            /* Skeleton — shown while auth resolves so nothing pops in late */
+            <div className="flex items-center gap-2 animate-pulse">
+              <div className="w-8 h-8 rounded-xl bg-stone-200" />
+              <div className="w-8 h-8 rounded-xl bg-stone-200" />
+              <div className="w-20 h-8 rounded-xl bg-stone-200" />
+            </div>
+          ) : (
+            <>
+              {/* Search */}
+              <div
+                ref={searchWrapperRef}
+                className="relative hidden md:flex items-center"
+              >
+                <div
+                  style={{
+                    width: searchOpen ? "210px" : "0px",
+                    opacity: searchOpen ? 1 : 0,
+                    overflow: "hidden",
+                    transition:
+                      "width 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease",
+                    display: "flex",
+                    alignItems: "center",
                   }}
-                  onKeyDown={handleSearchSubmit}
-                  placeholder="Search products…"
-                  className="bg-transparent text-[12px] text-stone-800 placeholder-stone-400 outline-none w-full"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => {
+                >
+                  <div className="flex items-center gap-1 bg-stone-100 rounded-xl px-3 py-1.5 w-full border border-stone-200 focus-within:border-[#3b557e] focus-within:ring-2 focus-within:ring-[#3b557e]/20 transition-all">
+                    <Search className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        search(e.target.value);
+                      }}
+                      onKeyDown={handleSearchSubmit}
+                      placeholder="Search products…"
+                      className="bg-transparent text-[12px] text-stone-800 placeholder-stone-400 outline-none w-full"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => {
+                          setSearchQuery("");
+                          setSearchedItem([]);
+                        }}
+                        className="text-stone-400 hover:text-stone-600 transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    if (searchOpen) {
+                      setSearchOpen(false);
+                      setSearchQuery("");
+                      setSearchedItem([]);
+                    } else {
+                      setSearchOpen(true);
+                    }
+                  }}
+                  className="cursor-pointer flex items-center p-2 rounded-xl text-stone-500 hover:text-stone-900 hover:bg-stone-100 transition-colors ml-1"
+                >
+                  {searchOpen ? (
+                    <X className="w-4.5 h-4.5" />
+                  ) : (
+                    <Search className="w-4.5 h-4.5" />
+                  )}
+                </button>
+
+                {/* Suggestions dropdown */}
+                {searchOpen && searchedItem?.length > 0 && (
+                  <Suggestions
+                    items={searchedItem}
+                    query={searchQuery}
+                    onSelect={() => {
+                      setSearchOpen(false);
                       setSearchQuery("");
                       setSearchedItem([]);
                     }}
-                    className="text-stone-400 hover:text-stone-600 transition-colors"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
+                  />
                 )}
               </div>
-            </div>
-            <button
-              onClick={() => {
-                if (searchOpen) {
-                  setSearchOpen(false);
-                  setSearchQuery("");
-                  setSearchedItem([]);
-                } else {
-                  setSearchOpen(true);
-                }
-              }}
-              className="cursor-pointer flex items-center p-2 rounded-xl text-stone-500 hover:text-stone-900 hover:bg-stone-100 transition-colors ml-1"
-              title="Search"
-            >
-              {searchOpen ? (
-                <X className="w-4.5 h-4.5" />
+
+              {/* Wishlist — only for buyers */}
+              {!isSeller && (
+                <button
+                  onClick={() => navigate("/wishlist")}
+                  className="cursor-pointer flex items-center p-2 rounded-xl text-stone-500 hover:text-rose-500 hover:bg-rose-50 transition-colors group"
+                >
+                  <Heart className="w-4.5 h-4.5 group-hover:fill-rose-500 group-hover:text-rose-500 transition-all duration-200" />
+                </button>
+              )}
+
+              {/* Cart — only for buyers */}
+              {!isSeller && (
+                <button
+                  onClick={() => navigate("/my-cart")}
+                  className="cursor-pointer flex items-center gap-2 pl-3 pr-4 py-2 bg-[#3b557e] text-white text-[11px] uppercase tracking-widest font-bold rounded-xl hover:bg-[#2d4363] active:scale-95 transition-all duration-200 shadow-sm"
+                >
+                  <ShoppingBag className="w-4 h-4" />
+                  {cartCount > 0 && (
+                    <span className="bg-white text-[#3b557e] text-[10px] font-black rounded-full w-5 h-5 flex items-center justify-center leading-none">
+                      {cartCount}
+                    </span>
+                  )}
+                </button>
+              )}
+
+              {/* Auth button — Logout or Login */}
+              {user ? (
+                <button
+                  onClick={handleLogout}
+                  className="cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl text-stone-500 hover:text-red-500 hover:bg-red-50 transition-colors duration-200 text-[11px] uppercase tracking-widest font-bold group"
+                >
+                  <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-200" />
+                  <span className="hidden md:inline">Logout</span>
+                </button>
               ) : (
-                <Search className="w-4.5 h-4.5" />
+                <button
+                  onClick={() => navigate("/login")}
+                  className="cursor-pointer flex items-center gap-1.5 pl-3 pr-4 py-2 bg-[#3b557e] text-white text-[11px] uppercase tracking-widest font-bold rounded-xl hover:bg-[#2d4363] active:scale-95 transition-all duration-200 shadow-sm group"
+                >
+                  <LogIn className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform duration-200" />
+                  <span className="hidden md:inline">Login</span>
+                </button>
               )}
-            </button>
-
-            {/* Suggestions dropdown */}
-            {searchOpen && searchedItem?.length > 0 && (
-              <Suggestions
-                items={searchedItem}
-                query={searchQuery}
-                onSelect={() => {
-                  setSearchOpen(false);
-                  setSearchQuery("");
-                  setSearchedItem([]);
-                }}
-              />
-            )}
-          </div>
-
-          {/* Wishlist — only for buyers, hidden while auth resolves */}
-          {!authLoading && !isSeller && (
-            <button
-              onClick={() => navigate("/wishlist")}
-              className="cursor-pointer flex items-center p-2 rounded-xl text-stone-500 hover:text-rose-500 hover:bg-rose-50 transition-colors group"
-              title="Wishlist"
-            >
-              <Heart className="w-4.5 h-4.5 group-hover:fill-rose-500 group-hover:text-rose-500 transition-all duration-200" />
-            </button>
-          )}
-
-          {/* Cart — only for buyers, hidden while auth resolves */}
-          {!authLoading && !isSeller && (
-            <button
-              onClick={() => navigate("/my-cart")}
-              className="cursor-pointer flex items-center gap-2 pl-3 pr-4 py-2 bg-[#3b557e] text-white text-[11px] uppercase tracking-widest font-bold rounded-xl hover:bg-[#2d4363] active:scale-95 transition-all duration-200 shadow-sm"
-            >
-              <ShoppingBag className="w-4 h-4" />
-              Bag
-              {cartCount > 0 && (
-                <span className="bg-white text-[#3b557e] text-[10px] font-black rounded-full w-5 h-5 flex items-center justify-center leading-none">
-                  {cartCount}
-                </span>
-              )}
-            </button>
+            </>
           )}
 
           {/* Mobile Hamburger */}

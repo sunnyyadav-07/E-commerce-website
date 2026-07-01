@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useSelector } from "react-redux";
 import { Heart } from "lucide-react";
 
 const ProductCard = ({ product }) => {
   const [hovered, setHovered] = useState(false);
   const navigate = useNavigate();
+  const user = useSelector((state) => state.auth.user);
+  const isSeller = user?.role === "seller";
 
   const defaultVariant =
     product.variants?.find((v) => v.isDefault) || product.variants?.[0];
@@ -48,15 +51,17 @@ const ProductCard = ({ product }) => {
           </div>
         )}
 
-        {/* Wishlist pill */}
-        <button
-          className={`cursor-pointer absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm transition-all duration-300 hover:scale-110 ${
-            hovered ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
-          }`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <Heart className="w-4 h-4 text-stone-700" />
-        </button>
+        {/* Wishlist pill — hidden for sellers */}
+        {!isSeller && (
+          <button
+            className={`cursor-pointer absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm transition-all duration-300 hover:scale-110 ${
+              hovered ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Heart className="w-4 h-4 text-stone-700" />
+          </button>
+        )}
 
         {/* Photo count badge */}
         {images.length > 1 && (
