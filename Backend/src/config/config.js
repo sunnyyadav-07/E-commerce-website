@@ -28,6 +28,24 @@ if (!process.env.REDIS_PORT) {
 if (!process.env.REDIS_PASSWORD) {
   throw new Error("REDIS_PASSWORD is undefined in the environment variable");
 }
+if (!process.env.GOOGLE_REFRESH_TOKEN) {
+  throw new Error(
+    "GOOGLE_REFRESH_TOKEN is undefined in the environment variable",
+  );
+}
+if (!process.env.GOOGLE_USER) {
+  throw new Error("GOOGLE_USER is undefined in the environment variable");
+}
+if (!process.env.GOOGLE_MAILER_CLIENT_SECRET) {
+  throw new Error(
+    "GOOGLE_MAILER_CLIENT_SECRET is undefined in the environment variable",
+  );
+}
+if (!process.env.GOOGLE_MAILER_CLIENT_ID) {
+  throw new Error(
+    "GOOGLE_MAILER_CLIENT_ID is undefined in the environment variable",
+  );
+}
 export const config = {
   MONGO_URI: process.env.MONGO_URI,
   JWT_SECRET: process.env.JWT_SECRET,
@@ -38,4 +56,8 @@ export const config = {
   REDIS_PASSWORD: process.env.REDIS_PASSWORD,
   REDIS_PORT: process.env.REDIS_PORT,
   REDIS_HOST: process.env.REDIS_HOST,
+  GOOGLE_MAILER_CLIENT_ID: process.env.GOOGLE_MAILER_CLIENT_ID,
+  GOOGLE_MAILER_CLIENT_SECRET: process.env.GOOGLE_MAILER_CLIENT_SECRET,
+  GOOGLE_USER: process.env.GOOGLE_USER,
+  GOOGLE_REFRESH_TOKEN: process.env.GOOGLE_REFRESH_TOKEN,
 };

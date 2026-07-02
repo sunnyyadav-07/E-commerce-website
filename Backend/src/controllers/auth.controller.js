@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import blacklistModel from "../models/blackList.model.js";
 import redis from "../config/cache.js";
+import { sendEmail } from "../services/mail.service.js";
 async function sendTokenRequest(user, res, message) {
   const token = jwt.sign(
     {
@@ -218,5 +219,26 @@ export async function logoutController(req, res) {
   res.status(200).json({
     success: true,
     message: "Logout successfully",
+  });
+}
+export async function forgotPasswordController(req, res) {
+  const { email } = req.body;
+  const user = await userModel.findOne({
+    email,
+  });
+  if (user) {
+    const rawToken = crypto.randomBytes(32).toString();
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(rawToken)
+      .digest("hex");
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 min
+    await user.save();
+    await sendEmail({ toEmail: "yadavsunny1916@gmail.com", rawToken });
+  }
+  return res.status(200).json({
+    success: true,
+    message: "If this email exists, a reset link has been sent.",
   });
 }

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import passport from "passport";
 import {
+  forgotPasswordController,
   getMeController,
   googleCallback,
   loginController,
@@ -32,5 +33,6 @@ authRouter.get(
 authRouter.patch("/user/role", authUser, setUserRoleController);
 authRouter.get("/me", authUser, getMeController);
 authRouter.post("/logout", logoutController);
+authRouter.post("/forgot/password", forgotPasswordController);
 
 export default authRouter;

@@ -38,6 +38,16 @@ const userSchema = new mongoose.Schema({
     enum: ["buyer", "seller"],
     default: null,
   },
+  resetPasswordToken: {
+    type: String,
+    default: undefined,
+    select: false,
+  },
+  resetPasswordExpires: {
+    type: Date,
+    default: undefined,
+    select: false,
+  },
 });
 
 userSchema.pre("save", async function () {
