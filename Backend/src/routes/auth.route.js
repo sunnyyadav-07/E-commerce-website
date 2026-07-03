@@ -7,6 +7,7 @@ import {
   loginController,
   logoutController,
   registerController,
+  resetPasswordController,
   setUserRoleController,
 } from "../controllers/auth.controller.js";
 import {
@@ -33,6 +34,7 @@ authRouter.get(
 authRouter.patch("/user/role", authUser, setUserRoleController);
 authRouter.get("/me", authUser, getMeController);
 authRouter.post("/logout", logoutController);
-authRouter.post("/forgot/password", forgotPasswordController);
+authRouter.post("/forgot-password", forgotPasswordController);
+authRouter.post("/reset-password", resetPasswordController);
 
 export default authRouter;

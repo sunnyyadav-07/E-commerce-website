@@ -5,6 +5,7 @@ import crypto from "crypto";
 import blacklistModel from "../models/blackList.model.js";
 import redis from "../config/cache.js";
 import { sendEmail } from "../services/mail.service.js";
+import bcrypt from "bcryptjs";
 async function sendTokenRequest(user, res, message) {
   const token = jwt.sign(
     {
@@ -136,7 +137,6 @@ export async function googleCallback(req, res) {
     );
     res.cookie("token", token);
     if (!user.role) {
-      console.log("aaya kya role");
       return res.redirect("http://localhost:5173/select-role");
     } else {
       if (user.role == "buyer") {
@@ -221,24 +221,104 @@ export async function logoutController(req, res) {
     message: "Logout successfully",
   });
 }
+
 export async function forgotPasswordController(req, res) {
-  const { email } = req.body;
-  const user = await userModel.findOne({
-    email,
-  });
-  if (user) {
-    const rawToken = crypto.randomBytes(32).toString();
-    const hashedToken = crypto
-      .createHash("sha256")
-      .update(rawToken)
-      .digest("hex");
-    user.resetPasswordToken = hashedToken;
-    user.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 min
-    await user.save();
-    await sendEmail({ toEmail: "yadavsunny1916@gmail.com", rawToken });
+  try {
+    const { email } = req.body;
+    const user = await userModel.findOne({
+      email,
+    });
+    if (user) {
+      const rawToken = crypto.randomBytes(32).toString("hex");
+      const hashedToken = crypto
+        .createHash("sha256")
+        .update(rawToken)
+        .digest("hex");
+      user.resetPasswordToken = hashedToken;
+      user.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 min
+      await user.save();
+      const info = await sendEmail({
+        toEmail: "yadavsunny1916@gmail.com",
+        rawToken,
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "If this email exists, a reset link has been sent.",
+    });
+  } catch (error) {
+    console.log("Error in reset password send mail logic", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
-  return res.status(200).json({
-    success: true,
-    message: "If this email exists, a reset link has been sent.",
-  });
+}
+async function sendPasswordChangedNotification(email) {
+  const mailOptions = {
+    from: config.GOOGLE_USER,
+    to: email,
+    subject: "Password Reset Successful",
+    html: `<h1>ATELIER</h1>
+        <p>Your password has been reset sucessfully</p>
+        <p>With regards</p>
+        <p>Atelier team</p>
+        `,
+  };
+  await transporter.sendMail(mailOptions);
+}
+export async function resetPasswordController(req, res) {
+  try {
+    const { token, newPassword } = req.body;
+    if (!token || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Token and new password are required.",
+      });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters long.",
+      });
+    }
+    const userSideHashedToken = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const user = await userModel.findOneAndUpdate(
+      {
+        resetPasswordToken: userSideHashedToken,
+        resetPasswordExpires: { $gt: Date.now() },
+      },
+      {
+        password: hashedPassword,
+        resetPasswordToken: undefined,
+        resetPasswordExpires: undefined,
+      },
+      { new: true },
+    );
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Token is invalid or has expired. Please request a new password reset.",
+      });
+    }
+    sendPasswordChangedNotification(user.email).catch((err) =>
+      console.error("Failed to send password change notification:", err),
+    );
+    return res.status(200).json({
+      success: true,
+      message: "password has been reset successfully",
+    });
+  } catch (error) {
+    console.log("Error in reset password logic", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
 }

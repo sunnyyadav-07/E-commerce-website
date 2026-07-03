@@ -19,7 +19,7 @@ transporter
     console.error("Email transporter verification failed");
   });
 export async function sendEmail({ toEmail, rawToken }) {
-  const resetUrl = `http://localhost:5173/reset-password/${rawToken}`;
+  const resetUrl = `http://localhost:5173/reset-password/?token=${rawToken}`;
   const mailOptions = {
     from: config.GOOGLE_USER,
     to: toEmail,
@@ -27,10 +27,10 @@ export async function sendEmail({ toEmail, rawToken }) {
     html: `<h1>ATELIER</h1>
       <p>You requested a password reset.</p>
       <p>Click the link below to reset your password. This link expires in 10 minutes.</p>
-      <a href="${resetUrl}">${resetUrl}</a>
+      <a href="${resetUrl}">click here...</a>
       <p>If you didn't request this, please ignore this email.</p>
       `,
   };
   const details = await transporter.sendMail(mailOptions);
-  console.log("Email sent", details);
+  return details;
 }
