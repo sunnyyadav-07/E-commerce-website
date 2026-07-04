@@ -4,6 +4,7 @@ import useAuth from "../hooks/useAuth";
 import ContinueWithGoogle from "../components/ContinueWithGoogle";
 import Footer from "../components/Footer";
 import Heading from "../components/Heading";
+import PasswordToggleIcon from "../components/PasswordToggleIcon";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -117,42 +118,7 @@ const Login = () => {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#3b557e] transition-colors cursor-pointer"
                     >
-                      {showPassword ? (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M9.88 9.88 3.59 3.59" />
-                          <path d="m21 21-6.3-6.3" />
-                          <path d="M2 12s3-7 10-7a7.14 7.14 0 0 1 3.86 1.14" />
-                          <path d="M22 12s-3 7-10 7a7 7 0 0 1-4.71-1.89" />
-                          <path d="M9 10.11V10a3 3 0 0 1 4.5-2.59" />
-                          <path d="M11 14a3 3 0 0 0 4 0" />
-                          <path d="m15 9 3-3" />
-                        </svg>
-                      ) : (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                          <circle cx="12" cy="12" r="3" />
-                        </svg>
-                      )}
+                      <PasswordToggleIcon show={showPassword} />
                     </button>
                   </div>
                 </div>

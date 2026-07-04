@@ -16,6 +16,7 @@ import WishList from "../features/wishList/pages/WishList.jsx";
 import EditProduct from "../features/products/pages/Seller/EditProduct.jsx";
 import Catalog from "../features/catalogs/Pages/Catalog.jsx";
 import SearchedProducts from "../features/search/pages/SearchedProducts.jsx";
+import ResetPassword from "../features/auth/pages/ResetPassword.jsx";
 
 export const router = createBrowserRouter([
   {
@@ -40,6 +41,7 @@ export const router = createBrowserRouter([
           </CartProtected>
         ),
       },
+      { path: "reset-password", element: <ResetPassword /> },
       { path: "products/catalog/:category", element: <Catalog /> },
       { path: "wishlist", element: <WishList /> },
       { path: "products", element: <SearchedProducts /> },
