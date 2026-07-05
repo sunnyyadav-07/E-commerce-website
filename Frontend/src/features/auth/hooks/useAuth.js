@@ -5,6 +5,8 @@ import {
   setUserRole,
   getMe,
   logoutUser,
+  sendEmailForgotPassword,
+  resetPassword,
 } from "../service/auth.api";
 import { clearUser, setError, setLoading, setUser } from "../state/auth.slice";
 
@@ -86,12 +88,38 @@ const useAuth = () => {
       dispatch(setLoading(false));
     }
   }
+  async function handleSendEmailForgotPassword(email) {
+    try {
+      dispatch(setLoading(true));
+      const data = await sendEmailForgotPassword(email);
+      return data;
+    } catch (error) {
+      const errMsg = error.response?.data?.message || error.message;
+      dispatch(setError(errMsg));
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+  async function handleResetPassword(data) {
+    try {
+      dispatch(setLoading(true));
+      const data = await resetPassword(data);
+      return data;
+    } catch (error) {
+      const errMsg = error.response?.data?.message || error.message;
+      dispatch(setError(errMsg));
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
   return {
     handleRegisterUser,
     handleLoginUser,
     handleSetUserRole,
     handleGetMe,
     handleLogoutUser,
+    handleResetPassword,
+    handleSendEmailForgotPassword,
   };
 };
 export default useAuth;

@@ -30,7 +30,6 @@ const Login = () => {
       email: formData.email,
       password: formData.password,
     });
-    // sirf success pe navigate karo
     if (res.user.role == "buyer") {
       navigate("/");
     } else if (res.user.role == "seller") {
@@ -98,6 +97,9 @@ const Login = () => {
                     </label>
                     <button
                       type="button"
+                      onClick={() => {
+                        navigate("/forgot-password");
+                      }}
                       className="text-[9px] font-bold text-gray-400 hover:text-[#3b557e] transition-colors uppercase tracking-widest cursor-pointer"
                     >
                       Forgot?
@@ -115,7 +117,7 @@ const Login = () => {
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
+                      onClick={() => setShowPassword((prev) => !prev)}
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#3b557e] transition-colors cursor-pointer"
                     >
                       <PasswordToggleIcon show={showPassword} />

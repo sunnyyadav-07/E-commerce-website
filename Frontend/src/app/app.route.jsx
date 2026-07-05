@@ -17,6 +17,7 @@ import EditProduct from "../features/products/pages/Seller/EditProduct.jsx";
 import Catalog from "../features/catalogs/Pages/Catalog.jsx";
 import SearchedProducts from "../features/search/pages/SearchedProducts.jsx";
 import ResetPassword from "../features/auth/pages/ResetPassword.jsx";
+import ForgotPassword from "../features/auth/pages/ForgotPassword.jsx";
 
 export const router = createBrowserRouter([
   {
@@ -42,6 +43,7 @@ export const router = createBrowserRouter([
         ),
       },
       { path: "reset-password", element: <ResetPassword /> },
+      { path: "forgot-password", element: <ForgotPassword /> },
       { path: "products/catalog/:category", element: <Catalog /> },
       { path: "wishlist", element: <WishList /> },
       { path: "products", element: <SearchedProducts /> },
