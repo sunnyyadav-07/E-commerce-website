@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { useSearchParams } from "react-router";
+import { useSelector } from "react-redux";
+import { useNavigate, useSearchParams } from "react-router";
 import { Lock, Check } from "lucide-react";
 import Heading from "../components/Heading";
 import Footer from "../components/Footer";
 import PasswordToggleIcon from "../components/PasswordToggleIcon";
-
+import useAuth from "../hooks/useAuth";
+import Loading from "../../shared/components/Loading";
 
 /* ---------- password strength helper ---------- */
 const getStrength = (pw) => {
@@ -25,8 +27,10 @@ const strengthColor = [
   "bg-emerald-400",
 ];
 
-
 const ResetPassword = () => {
+  const navigate = useNavigate();
+  const { handleResetPassword } = useAuth();
+  const loading = useSelector((state) => state.auth.loading);
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
 
@@ -36,12 +40,24 @@ const ResetPassword = () => {
   });
 
   const [show, setShow] = useState({ new: false, confirm: false });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    const res = await handleResetPassword({
+      token,
+      newPassword: formData.confirmPassword,
+    });
+    setIsSubmitting(false);
+    if (res) {
+      navigate("/login");
+    }
+  };
   const strength = getStrength(formData.newPassword);
   const passwordsMatch =
     formData.newPassword &&
@@ -57,6 +73,7 @@ const ResetPassword = () => {
       met: /[^A-Za-z0-9]/.test(formData.newPassword),
     },
   ];
+
 
   return (
     <div className="h-screen bg-white flex flex-col font-sans text-gray-800 overflow-hidden">
@@ -125,7 +142,7 @@ const ResetPassword = () => {
                 Choose a new password for your account.
               </p>
 
-              <form className="space-y-5">
+              <form className="space-y-5" onSubmit={handleSubmit}>
                 {/* ── New Password ── */}
                 <div className="group">
                   <label className="text-[9px] font-bold text-gray-400 tracking-[0.2em] uppercase mb-1.5 block group-focus-within:text-[#3b557e] transition-colors">
@@ -221,7 +238,9 @@ const ResetPassword = () => {
                         passwordsMatch ? "text-emerald-500" : "text-red-400"
                       }`}
                     >
-                      {passwordsMatch ? "✓ Passwords match" : "✗ Passwords do not match"}
+                      {passwordsMatch
+                        ? "✓ Passwords match"
+                        : "✗ Passwords do not match"}
                     </p>
                   )}
                 </div>
@@ -258,9 +277,17 @@ const ResetPassword = () => {
                 {/* ── Submit ── */}
                 <button
                   type="submit"
-                  className="w-full bg-[#3b557e] text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-[#2d4363] hover:shadow-lg transition-all uppercase tracking-[0.2em] text-[10px] mt-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                  disabled={isSubmitting}
+                  className="w-full bg-[#3b557e] text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-[#2d4363] hover:shadow-lg transition-all uppercase tracking-[0.2em] text-[10px] mt-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Update Password
+                  {isSubmitting ? (
+                    <>
+                      <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    "Update Password"
+                  )}
                 </button>
               </form>
             </div>

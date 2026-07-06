@@ -1,31 +1,28 @@
 import { Mail, ArrowRight, CheckCircle } from "lucide-react";
 import Heading from "../components/Heading";
 import Footer from "../components/Footer";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import useAuth from "../hooks/useAuth";
 
 const ForgotPassword = () => {
   const { handleSendEmailForgotPassword } = useAuth();
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [email, setEmail] = useState("");
   const [error, setError] = useState("");
-  const emailRef = useRef(null);
-  const sendMailForForgotPassword = async () => {
-    setIsSubmitted(true);
-    const data = await handleSendEmailForgotPassword();
-  };
-  const handleChange = (e) => {
-    emailRef.current = e.target.value;
-  };
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!emailRef.current) {
-      setError("enter the email first");
+    if (!email.trim()) {
+      setError("Please enter your email address.");
       return;
     }
-    if (!emailRegex.test(emailRef.current)) {
-      setError("Invalid email");
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address.");
+      return;
     }
+    setError("");
+    setIsSubmitted(true);
+    await handleSendEmailForgotPassword(email);
   };
   return (
     <div className="h-screen bg-white flex flex-col font-sans text-gray-800 overflow-hidden">
@@ -53,12 +50,15 @@ const ForgotPassword = () => {
                       </label>
                       <div className="relative">
                         <input
-                          type="text"
+                          type="email"
                           name="email"
-                          ref={emailRef}
+                          value={email}
                           placeholder="you@example.com"
                           autoComplete="email"
-                          onChange={handleChange}
+                          onChange={(e) => {
+                            setEmail(e.target.value);
+                            if (error) setError("");
+                          }}
                           className="w-full bg-[#f3f4f6] border-none rounded-xl px-4 py-3.5 text-sm placeholder:text-gray-300 focus:ring-2 focus:ring-[#3b557e]/10 outline-none transition-all text-[#1a1a1a] pr-12"
                         />
                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none">
@@ -73,7 +73,6 @@ const ForgotPassword = () => {
                     {/* ── Submit button ── */}
                     <button
                       type="submit"
-                      onClick={handleSendEmailForgotPassword}
                       className="w-full bg-[#3b557e] text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-[#2d4363] hover:shadow-lg transition-all uppercase tracking-[0.2em] text-[10px] mt-2 cursor-pointer flex items-center justify-center gap-2"
                     >
                       Send Reset Link

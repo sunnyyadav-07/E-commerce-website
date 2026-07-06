@@ -103,8 +103,8 @@ const useAuth = () => {
   async function handleResetPassword(data) {
     try {
       dispatch(setLoading(true));
-      const data = await resetPassword(data);
-      return data;
+      const res = await resetPassword(data);
+      return res;
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setError(errMsg));
