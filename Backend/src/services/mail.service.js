@@ -34,3 +34,16 @@ export async function sendEmail({ toEmail, rawToken }) {
   const details = await transporter.sendMail(mailOptions);
   return details;
 }
+export async function sendPasswordChangedNotification(email) {
+  const mailOptions = {
+    from: config.GOOGLE_USER,
+    to: email,
+    subject: "Password Reset Successful",
+    html: `<h1>ATELIER</h1>
+        <p>Your password has been reset sucessfully</p>
+        <p>With regards</p>
+        <p>Atelier team</p>
+        `,
+  };
+  await transporter.sendMail(mailOptions);
+}

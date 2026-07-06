@@ -1,6 +1,6 @@
 import productModel from "../models/product.model.js";
 
-export async function getCategoryController(req, res) {
+export async function getCategoryController(req, res, next) {
   try {
     let { category, search } = req.query;
     const query = {};
@@ -17,11 +17,7 @@ export async function getCategoryController(req, res) {
     }
     let products = await productModel.find(query).select("-searchTerms");
     if (products.length == 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Not found",
-        products: [],
-      });
+      throw new AppError("Not found", 404);
     }
     res.status(200).json({
       success: true,
@@ -30,14 +26,11 @@ export async function getCategoryController(req, res) {
     });
   } catch (error) {
     console.log("Error in product catalog api", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
+    next(error);
   }
 }
 
-export async function getSuggestionsController(req, res) {
+export async function getSuggestionsController(req, res, next) {
   try {
     let { search } = req.query;
     const query = {};
@@ -73,9 +66,6 @@ export async function getSuggestionsController(req, res) {
     });
   } catch (error) {
     console.log("Error in product suggestion api", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
+    next(error);
   }
 }

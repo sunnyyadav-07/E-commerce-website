@@ -1,6 +1,7 @@
 import { stockOfProduct } from "../dao/product.dao.js";
 import cartModel from "../models/cart.model.js";
 import productModel from "../models/product.model.js";
+import { AppError } from "../utils/appError.js";
 async function hasCart(userId, populate = false) {
   let query = cartModel.findOne({
     userId,
@@ -10,13 +11,13 @@ async function hasCart(userId, populate = false) {
   }
   const userCart = await query;
   if (!userCart) {
-    throw new Error("cart not found");
+    throw new AppError("Cart not found", 404);
   }
 
   return userCart;
 }
 
-export async function addToCartController(req, res) {
+export async function addToCartController(req, res, next) {
   try {
     const userId = req.user._id;
     const { productId, variantId } = req.body;
@@ -27,10 +28,7 @@ export async function addToCartController(req, res) {
 
     if (!cart) {
       if (stock <= 0) {
-        return res.status(409).json({
-          success: false,
-          message: "This product is currently out of stock.",
-        });
+        throw new AppError("This product is currently out of stock.", 409);
       }
       const newCart = await cartModel.create({
         userId,
@@ -50,10 +48,10 @@ export async function addToCartController(req, res) {
     if (existingItem) {
       const cartItemnewQuantity = (existingItem.quantity += 1);
       if (cartItemnewQuantity > stock) {
-        return res.status(409).json({
-          success: false,
-          message: `Only ${stock} items are left in stock and user already have ${cartItemnewQuantity - 1}`,
-        });
+        throw new AppError(
+          `Only ${stock} items are left in stock and user already have ${cartItemnewQuantity - 1}`,
+          409,
+        );
       }
       await cart.save();
       return res.status(200).json({
@@ -77,23 +75,16 @@ export async function addToCartController(req, res) {
     }
   } catch (error) {
     console.log("Error in addToCart api", error);
-    return res.status(500).json({
-      success: false,
-      message: "Server error",
-      error,
-    });
+    next(error);
   }
 }
 
-export async function getAllCartProducts(req, res) {
+export async function getAllCartProducts(req, res, next) {
   try {
     const userId = req.user._id;
     const userCartProducts = await hasCart(userId, true);
     if (userCartProducts.items.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Do not have any product in cart",
-      });
+      throw new AppError("Do not have any product in cart", 404);
     }
     const formattedCartItems = userCartProducts.items.map((item) => {
       const variant = item.productId.variants.id(item.variantId);
@@ -120,23 +111,16 @@ export async function getAllCartProducts(req, res) {
     });
   } catch (error) {
     console.log("Error in get all cart products api", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-      error,
-    });
+    next(error);
   }
 }
 
-export async function updateQuantityOfProductController(req, res) {
+export async function updateQuantityOfProductController(req, res, next) {
   try {
     const { productId, variantId } = req.params;
     const { quantity } = req.body;
     if (!quantity || !productId || !variantId) {
-      return res.status(400).json({
-        success: false,
-        message: "fields are required to update quantity",
-      });
+      throw new AppError("fields are required to update quantity", 400);
     }
     const userId = req.user._id;
     const userCart = await hasCart(userId);
@@ -146,24 +130,15 @@ export async function updateQuantityOfProductController(req, res) {
     );
 
     if (!item) {
-      return res.status(404).json({
-        success: false,
-        message: "Product not found",
-      });
+      throw new AppError("Product not found", 404);
     }
     const stock = await stockOfProduct(productId, variantId);
     const newQuantity = item.quantity + quantity;
     if (newQuantity > stock) {
-      return res.status(409).json({
-        success: false,
-        message: "Maximum available quantity reached.",
-      });
+      throw new AppError("Maximum available quantity reached.", 409);
     }
     if (newQuantity < 1) {
-      return res.status(400).json({
-        success: false,
-        message: "Quantity cannot be less than 1.",
-      });
+      throw new AppError("Quantity can not be less than 1", 400);
     }
     item.quantity += quantity;
     await userCart.save();
@@ -174,22 +149,15 @@ export async function updateQuantityOfProductController(req, res) {
     });
   } catch (error) {
     console.log("Error in quantity increment API", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-      error,
-    });
+    next(error);
   }
 }
 
-export async function removeProductFromCartController(req, res) {
+export async function removeProductFromCartController(req, res, next) {
   try {
     const { productId, variantId } = req.params;
     if (!productId || !variantId) {
-      return res.status(400).json({
-        success: false,
-        message: "fields are required to update quantity",
-      });
+      throw new AppError("fields are required to update quantity", 400);
     }
     const userId = req.user._id;
     const userCart = await hasCart(userId);
@@ -198,10 +166,7 @@ export async function removeProductFromCartController(req, res) {
         item.productId.equals(productId) && item.variantId.equals(variantId),
     );
     if (!productToBeDeleted) {
-      return res.status(404).json({
-        success: false,
-        message: "Product not found in cart",
-      });
+      throw new AppError("Product do not found in cart.", 404);
     }
     productToBeDeleted.deleteOne();
 
@@ -213,10 +178,6 @@ export async function removeProductFromCartController(req, res) {
     });
   } catch (error) {
     console.log("Error in remove product from cart API", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-      error,
-    });
+    next(error);
   }
 }

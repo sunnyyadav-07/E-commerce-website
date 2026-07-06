@@ -4,8 +4,12 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import blacklistModel from "../models/blackList.model.js";
 import redis from "../config/cache.js";
-import { sendEmail } from "../services/mail.service.js";
+import {
+  sendEmail,
+  sendPasswordChangedNotification,
+} from "../services/mail.service.js";
 import bcrypt from "bcryptjs";
+import { AppError } from "../utils/appError.js";
 async function sendTokenRequest(user, res, message) {
   const token = jwt.sign(
     {
@@ -27,7 +31,7 @@ async function sendTokenRequest(user, res, message) {
     },
   });
 }
-export async function registerController(req, res) {
+export async function registerController(req, res, next) {
   const { fullname, email, isSeller, password, contact } = req.body;
 
   try {
@@ -45,10 +49,7 @@ export async function registerController(req, res) {
         });
       }
 
-      return res.status(400).json({
-        success: false,
-        message: "User with this email or contact already exists",
-      });
+      throw new AppError("User with this email or contact already exists",409);
     }
 
     const user = await userModel.create({
@@ -60,48 +61,38 @@ export async function registerController(req, res) {
     });
     sendTokenRequest(user, res, "User register successfully");
   } catch (error) {
-    console.log(error);
-    //  Handle duplicate key error
-    if (error.code === 11000) {
-      return res.status(400).json({
-        success: false,
-        message: "Email or contact already exists",
-      });
-    }
-
-    return res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
+    console.log("error in register logic");
+    next(error);
   }
 }
 
-export async function loginController(req, res) {
-  const { email, password } = req.body;
+export async function loginController(req, res, next) {
+  try {
+    const { email, password } = req.body;
 
-  const user = await userModel.findOne({ email });
-  if (!user) {
-    return res.status(400).json({
-      message: "Invalid credentials",
-    });
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid credentials",
+      });
+    }
+    // if user login with google
+    if (user.authProvider === "google") {
+      return res.status(400).json({
+        success: false,
+        message:
+          "This account was created with Google. Please continue with Google.",
+        provider: "google",
+      });
+    }
+    const isPasswordMatched = await user.comparePassword(password);
+    if (!isPasswordMatched) {
+      throw new AppError("Invalid credentials",400)
+    }
+    sendTokenRequest(user, res, "Login successfully");
+  } catch (error) {
+    next(error);
   }
-  // if user login with google
-  if (user.authProvider === "google") {
-    return res.status(400).json({
-      success: false,
-      message:
-        "This account was created with Google. Please continue with Google.",
-      provider: "google",
-    });
-  }
-  const isPasswordMatched = await user.comparePassword(password);
-  if (!isPasswordMatched) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid credentials",
-    });
-  }
-  sendTokenRequest(user, res, "Login successfully");
 }
 
 export async function googleCallback(req, res) {
@@ -151,21 +142,16 @@ export async function googleCallback(req, res) {
   }
 }
 
-export async function setUserRoleController(req, res) {
+export async function setUserRoleController(req, res, next) {
   try {
     const { role } = req.body;
     const user = req.user;
     if (!["buyer", "seller"].includes(role)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid role",
-      });
+
+      throw new AppError("Invalid role",400)
     }
     if (user.role) {
-      return res.status(400).json({
-        success: false,
-        message: "Role already selected",
-      });
+      throw new AppError("Role already selected",400)
     }
     user.role = role;
     await user.save();
@@ -184,11 +170,8 @@ export async function setUserRoleController(req, res) {
       role: user.role,
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
+    console.log("error in set user role logic");
+    next(error);
   }
 }
 
@@ -206,23 +189,27 @@ export function getMeController(req, res) {
   });
 }
 
-export async function logoutController(req, res) {
-  const token = req.cookies.token;
+export async function logoutController(req, res, next) {
+  try {
+    const token = req.cookies.token;
 
-  res.clearCookie("token");
-  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
-  const decoded = jwt.verify(token, config.JWT_SECRET);
-  const ttl = decoded.exp - Math.floor(Date.now() / 1000);
-  if (ttl > 0) {
-    await redis.set(`bl:${tokenHash}`, 1, "EX", ttl);
+    res.clearCookie("token");
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const decoded = jwt.verify(token, config.JWT_SECRET);
+    const ttl = decoded.exp - Math.floor(Date.now() / 1000);
+    if (ttl > 0) {
+      await redis.set(`bl:${tokenHash}`, 1, "EX", ttl);
+    }
+    res.status(200).json({
+      success: true,
+      message: "Logout successfully",
+    });
+  } catch (error) {
+    next(error);
   }
-  res.status(200).json({
-    success: true,
-    message: "Logout successfully",
-  });
 }
 
-export async function forgotPasswordController(req, res) {
+export async function forgotPasswordController(req, res, next) {
   try {
     const { email } = req.body;
     const user = await userModel.findOne({
@@ -248,40 +235,19 @@ export async function forgotPasswordController(req, res) {
     });
   } catch (error) {
     console.log("Error in reset password send mail logic", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
+    next(error);
   }
 }
-async function sendPasswordChangedNotification(email) {
-  const mailOptions = {
-    from: config.GOOGLE_USER,
-    to: email,
-    subject: "Password Reset Successful",
-    html: `<h1>ATELIER</h1>
-        <p>Your password has been reset sucessfully</p>
-        <p>With regards</p>
-        <p>Atelier team</p>
-        `,
-  };
-  await transporter.sendMail(mailOptions);
-}
-export async function resetPasswordController(req, res) {
+
+export async function resetPasswordController(req, res, next) {
   try {
     const { token, newPassword } = req.body;
     if (!token || !newPassword) {
-      return res.status(400).json({
-        success: false,
-        message: "Token and new password are required.",
-      });
+      throw new AppError("Token and new passwors are required",400)
     }
 
     if (newPassword.length < 8) {
-      return res.status(400).json({
-        success: false,
-        message: "Password must be at least 8 characters long.",
-      });
+      throw new AppError("Password must be at least 8 characters long.",400)
     }
     const userSideHashedToken = crypto
       .createHash("sha256")
@@ -298,16 +264,15 @@ export async function resetPasswordController(req, res) {
         resetPasswordToken: undefined,
         resetPasswordExpires: undefined,
       },
-      { new: true },
+      { returnDocument: "after" },
     );
     if (!user) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Token is invalid or has expired. Please request a new password reset.",
-      });
+       throw new AppError(
+         "Token is invalid or has expired. Please request a new password reset.",
+         400,
+       );
     }
-    sendPasswordChangedNotification(user.email).catch((err) =>
+    sendPasswordChangedNotification("yadavsunny1916@gmail.com").catch((err) =>
       console.error("Failed to send password change notification:", err),
     );
     return res.status(200).json({
@@ -316,9 +281,6 @@ export async function resetPasswordController(req, res) {
     });
   } catch (error) {
     console.log("Error in reset password logic", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
+    next(error);
   }
 }
