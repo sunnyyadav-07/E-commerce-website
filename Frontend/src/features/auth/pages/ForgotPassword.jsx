@@ -1,29 +1,32 @@
+import { useState } from "react";
 import { Mail, ArrowRight, CheckCircle } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Heading from "../components/Heading";
 import Footer from "../components/Footer";
-import { useState } from "react";
+import FormField from "../components/FormField";
 import useAuth from "../hooks/useAuth";
+import { forgotPasswordSchema } from "../schemas/authSchemas";
 
 const ForgotPassword = () => {
   const { handleSendEmailForgotPassword } = useAuth();
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!email.trim()) {
-      setError("Please enter your email address.");
-      return;
-    }
-    if (!emailRegex.test(email)) {
-      setError("Please enter a valid email address.");
-      return;
-    }
-    setError("");
+
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(forgotPasswordSchema),
+    mode: "onBlur",
+  });
+
+  const onSubmit = async (data) => {
+    await handleSendEmailForgotPassword(data.email);
     setIsSubmitted(true);
-    await handleSendEmailForgotPassword(email);
   };
+
   return (
     <div className="h-screen bg-white flex flex-col font-sans text-gray-800 overflow-hidden">
       <main className="flex-1 overflow-hidden">
@@ -42,41 +45,45 @@ const ForgotPassword = () => {
                     reset your password.
                   </p>
 
-                  <form className="space-y-5" onSubmit={handleSubmit}>
+                  <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
                     {/* ── Email field ── */}
-                    <div className="group">
-                      <label className="text-[9px] font-bold text-gray-400 tracking-[0.2em] uppercase mb-1.5 block group-focus-within:text-[#3b557e] transition-colors">
-                        Email Address
-                      </label>
+                    <FormField
+                      label="Email Address"
+                      id="email"
+                      error={errors.email?.message}
+                    >
                       <div className="relative">
                         <input
+                          id="email"
                           type="email"
-                          name="email"
-                          value={email}
                           placeholder="you@example.com"
                           autoComplete="email"
-                          onChange={(e) => {
-                            setEmail(e.target.value);
-                            if (error) setError("");
-                          }}
+                          {...register("email")}
                           className="w-full bg-[#f3f4f6] border-none rounded-xl px-4 py-3.5 text-sm placeholder:text-gray-300 focus:ring-2 focus:ring-[#3b557e]/10 outline-none transition-all text-[#1a1a1a] pr-12"
                         />
                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none">
                           <Mail size={16} strokeWidth={1.5} />
                         </span>
                       </div>
-                      {error && (
-                        <p className="text-red-600 text-[13px]">{error}</p>
-                      )}
-                    </div>
+                    </FormField>
 
                     {/* ── Submit button ── */}
                     <button
                       type="submit"
-                      className="w-full bg-[#3b557e] text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-[#2d4363] hover:shadow-lg transition-all uppercase tracking-[0.2em] text-[10px] mt-2 cursor-pointer flex items-center justify-center gap-2"
+                      disabled={isSubmitting}
+                      className="w-full bg-[#3b557e] text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-[#2d4363] hover:shadow-lg transition-all uppercase tracking-[0.2em] text-[10px] mt-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                      Send Reset Link
-                      <ArrowRight size={13} strokeWidth={2.5} />
+                      {isSubmitting ? (
+                        <>
+                          <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          Send Reset Link
+                          <ArrowRight size={13} strokeWidth={2.5} />
+                        </>
+                      )}
                     </button>
                   </form>
 
@@ -92,6 +99,7 @@ const ForgotPassword = () => {
                   </p>
                 </div>
               )}
+
               {/* ── Success message ── */}
               {isSubmitted && (
                 <div className="mt-8 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-5 flex flex-col items-center text-center gap-3">
@@ -107,7 +115,8 @@ const ForgotPassword = () => {
                       Check your inbox!
                     </p>
                     <p className="text-[11px] text-emerald-600/80 leading-relaxed">
-                      We&apos;ve sent a reset link to your email address.
+                      We&apos;ve sent a reset link to{" "}
+                      <span className="font-semibold">{getValues("email")}</span>.
                     </p>
                   </div>
                   <div className="w-full border-t border-emerald-100 pt-3 text-[10px] text-gray-400 leading-relaxed">
@@ -118,9 +127,7 @@ const ForgotPassword = () => {
                     or{" "}
                     <button
                       type="button"
-                      onClick={() => {
-                        setIsSubmitted(false);
-                      }}
+                      onClick={() => setIsSubmitted(false)}
                       className="font-semibold text-[#3b557e] hover:underline cursor-pointer"
                     >
                       try again

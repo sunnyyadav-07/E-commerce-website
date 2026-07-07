@@ -1,45 +1,42 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import useAuth from "../hooks/useAuth";
+import { registerSchema } from "../schemas/authSchemas";
 import ContinueWithGoogle from "../components/ContinueWithGoogle";
 import Footer from "../components/Footer";
 import Heading from "../components/Heading";
+import FormField from "../components/FormField";
 import PasswordToggleIcon from "../components/PasswordToggleIcon";
 
 const Register = () => {
   const navigate = useNavigate();
   const { handleRegisterUser } = useAuth();
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    contact: "",
-    password: "",
-    isSeller: false,
-  });
-
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(registerSchema),
+    mode: "onBlur",
+    defaultValues: { isSeller: false },
+  });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     const res = await handleRegisterUser({
-      email: formData.email,
-      password: formData.password,
-      fullname: formData.fullName,
-      contact: formData.contact,
-      isSeller: formData.isSeller,
+      email: data.email,
+      password: data.password,
+      fullname: data.fullName,
+      contact: data.contact,
+      isSeller: data.isSeller,
     });
-    console.log("Registering:", formData);
-    if (res.user.role == "buyer") {
+    if (!res) return; // API error — useAuth already dispatched the error
+    if (res.user.role === "buyer") {
       navigate("/");
-    } else if (res.user.role == "seller") {
+    } else if (res.user.role === "seller") {
       navigate("/seller/dashboard");
     }
   };
@@ -79,74 +76,85 @@ const Register = () => {
                 Join our community of curators and creators.
               </p>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 {/* Full Name */}
-                <div className="group">
-                  <label className="text-[9px] font-bold text-gray-400 tracking-[0.2em] uppercase mb-1.5 block group-focus-within:text-[#3b557e] transition-colors">
-                    Full Name
-                  </label>
+                <FormField
+                  label="Full Name"
+                  id="fullName"
+                  error={errors.fullName?.message}
+                >
                   <input
+                    id="fullName"
                     type="text"
-                    name="fullName"
                     placeholder="John Doe"
-                    value={formData.fullName}
-                    onChange={handleChange}
+                    autoComplete="name"
+                    {...register("fullName")}
                     className="w-full bg-[#f3f4f6] border-none rounded-xl px-4 py-3.5 text-sm placeholder:text-gray-300 focus:ring-2 focus:ring-[#3b557e]/5 outline-none transition-all text-[#1a1a1a]"
                   />
-                </div>
+                </FormField>
 
                 {/* Email Address */}
-                <div className="group">
-                  <label className="text-[9px] font-bold text-gray-400 tracking-[0.2em] uppercase mb-1.5 block group-focus-within:text-[#3b557e] transition-colors">
-                    Email Address
-                  </label>
+                <FormField
+                  label="Email Address"
+                  id="email"
+                  error={errors.email?.message}
+                >
                   <input
+                    id="email"
                     type="email"
-                    name="email"
                     placeholder="name@atelier.com"
-                    value={formData.email}
-                    onChange={handleChange}
+                    autoComplete="email"
+                    {...register("email")}
                     className="w-full bg-[#f3f4f6] border-none rounded-xl px-4 py-3.5 text-sm placeholder:text-gray-300 focus:ring-2 focus:ring-[#3b557e]/5 outline-none transition-all text-[#1a1a1a]"
                   />
-                </div>
+                </FormField>
 
                 {/* Contact Number */}
-                <div className="group">
-                  <label className="text-[9px] font-bold text-gray-400 tracking-[0.2em] uppercase mb-1.5 block group-focus-within:text-[#3b557e] transition-colors">
-                    Contact Number
-                  </label>
+                <FormField
+                  label="Contact Number"
+                  id="contact"
+                  error={errors.contact?.message}
+                >
                   <input
+                    id="contact"
                     type="tel"
-                    name="contact"
                     placeholder="+1 (555) 000-0000"
-                    value={formData.contact}
-                    onChange={handleChange}
+                    autoComplete="tel"
+                    {...register("contact")}
                     className="w-full bg-[#f3f4f6] border-none rounded-xl px-4 py-3.5 text-sm placeholder:text-gray-300 focus:ring-2 focus:ring-[#3b557e]/5 outline-none transition-all text-[#1a1a1a]"
                   />
-                </div>
+                </FormField>
 
                 {/* Password */}
                 <div className="group">
-                  <label className="text-[9px] font-bold text-gray-400 tracking-[0.2em] uppercase mb-1.5 block group-focus-within:text-[#3b557e] transition-colors">
+                  <label
+                    htmlFor="password"
+                    className="text-[9px] font-bold text-gray-400 tracking-[0.2em] uppercase mb-1.5 block group-focus-within:text-[#3b557e] transition-colors"
+                  >
                     Password
                   </label>
                   <div className="relative">
                     <input
+                      id="password"
                       type={showPassword ? "text" : "password"}
-                      name="password"
                       placeholder="••••••••"
-                      value={formData.password}
-                      onChange={handleChange}
+                      autoComplete="new-password"
+                      {...register("password")}
                       className="w-full bg-[#f3f4f6] border-none rounded-xl px-4 py-3.5 text-sm placeholder:text-gray-300 focus:ring-2 focus:ring-[#3b557e]/5 outline-none transition-all text-[#1a1a1a]"
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
+                      onClick={() => setShowPassword((prev) => !prev)}
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#3b557e] transition-colors cursor-pointer"
                     >
                       <PasswordToggleIcon show={showPassword} />
                     </button>
                   </div>
+                  {errors.password && (
+                    <p className="mt-1.5 text-[10px] font-semibold text-red-400 tracking-wide">
+                      {errors.password.message}
+                    </p>
+                  )}
                 </div>
 
                 {/* Checkbox */}
@@ -154,9 +162,7 @@ const Register = () => {
                   <input
                     type="checkbox"
                     id="isSeller"
-                    name="isSeller"
-                    checked={formData.isSeller}
-                    onChange={handleChange}
+                    {...register("isSeller")}
                     className="w-4 h-4 rounded border-gray-300 text-[#3b557e] focus:ring-[#3b557e] transition-all cursor-pointer"
                   />
                   <label
@@ -170,9 +176,17 @@ const Register = () => {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  className="w-full bg-[#3b557e] text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-[#2d4363] hover:shadow-lg transition-all uppercase tracking-[0.2em] text-[10px] mt-4 cursor-pointer"
+                  disabled={isSubmitting}
+                  className="w-full bg-[#3b557e] text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-[#2d4363] hover:shadow-lg transition-all uppercase tracking-[0.2em] text-[10px] mt-4 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Register
+                  {isSubmitting ? (
+                    <>
+                      <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                      Registering...
+                    </>
+                  ) : (
+                    "Register"
+                  )}
                 </button>
 
                 <div className="flex items-center my-6">

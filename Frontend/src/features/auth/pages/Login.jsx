@@ -1,38 +1,38 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import useAuth from "../hooks/useAuth";
+import { loginSchema } from "../schemas/authSchemas";
 import ContinueWithGoogle from "../components/ContinueWithGoogle";
 import Footer from "../components/Footer";
 import Heading from "../components/Heading";
+import FormField from "../components/FormField";
 import PasswordToggleIcon from "../components/PasswordToggleIcon";
 
 const Login = () => {
   const navigate = useNavigate();
   const { handleLoginUser } = useAuth();
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+    mode: "onBlur",
+  });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     const res = await handleLoginUser({
-      email: formData.email,
-      password: formData.password,
+      email: data.email,
+      password: data.password,
     });
-    if (res.user.role == "buyer") {
+    if (!res) return; // API error — useAuth already dispatched the error
+    if (res.user.role === "buyer") {
       navigate("/");
-    } else if (res.user.role == "seller") {
+    } else if (res.user.role === "seller") {
       navigate("/seller/dashboard");
     }
   };
@@ -60,7 +60,7 @@ const Login = () => {
           </div>
         </div>
 
-        {/* Right Side Form - Compact & Centered */}
+        {/* Right Side Form */}
         <div className="w-full lg:w-1/2 overflow-y-auto bg-[#fcfcfc] flex flex-col no-scrollbar">
           <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 lg:p-14">
             <div className="w-full max-w-[340px]">
@@ -72,34 +72,35 @@ const Login = () => {
                 Welcome back to your personalized boutique.
               </p>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 {/* Email Address */}
-                <div className="group">
-                  <label className="text-[9px] font-bold text-gray-400 tracking-[0.2em] uppercase mb-1.5 block group-focus-within:text-[#3b557e] transition-colors">
-                    Email Address
-                  </label>
+                <FormField
+                  label="Email Address"
+                  id="email"
+                  error={errors.email?.message}
+                >
                   <input
+                    id="email"
                     type="email"
-                    name="email"
                     placeholder="name@atelier.com"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
+                    autoComplete="email"
+                    {...register("email")}
                     className="w-full bg-[#f3f4f6] border-none rounded-xl px-4 py-3.5 text-sm placeholder:text-gray-300 focus:ring-2 focus:ring-[#3b557e]/5 outline-none transition-all text-[#1a1a1a]"
                   />
-                </div>
+                </FormField>
 
                 {/* Password */}
                 <div className="group">
                   <div className="flex justify-between items-center mb-1.5">
-                    <label className="text-[9px] font-bold text-gray-400 tracking-[0.2em] uppercase block group-focus-within:text-[#3b557e] transition-colors">
+                    <label
+                      htmlFor="password"
+                      className="text-[9px] font-bold text-gray-400 tracking-[0.2em] uppercase block group-focus-within:text-[#3b557e] transition-colors"
+                    >
                       Password
                     </label>
                     <button
                       type="button"
-                      onClick={() => {
-                        navigate("/forgot-password");
-                      }}
+                      onClick={() => navigate("/forgot-password")}
                       className="text-[9px] font-bold text-gray-400 hover:text-[#3b557e] transition-colors uppercase tracking-widest cursor-pointer"
                     >
                       Forgot?
@@ -107,12 +108,11 @@ const Login = () => {
                   </div>
                   <div className="relative">
                     <input
+                      id="password"
                       type={showPassword ? "text" : "password"}
-                      name="password"
                       placeholder="••••••••"
-                      required
-                      value={formData.password}
-                      onChange={handleChange}
+                      autoComplete="current-password"
+                      {...register("password")}
                       className="w-full bg-[#f3f4f6] border-none rounded-xl px-4 py-3.5 text-sm placeholder:text-gray-300 focus:ring-2 focus:ring-[#3b557e]/5 outline-none transition-all text-[#1a1a1a]"
                     />
                     <button
@@ -123,14 +123,27 @@ const Login = () => {
                       <PasswordToggleIcon show={showPassword} />
                     </button>
                   </div>
+                  {errors.password && (
+                    <p className="mt-1.5 text-[10px] font-semibold text-red-400 tracking-wide">
+                      {errors.password.message}
+                    </p>
+                  )}
                 </div>
 
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  className="w-full bg-[#3b557e] text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-[#2d4363] hover:shadow-lg transition-all uppercase tracking-[0.2em] text-[10px] mt-4 cursor-pointer"
+                  disabled={isSubmitting}
+                  className="w-full bg-[#3b557e] text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-[#2d4363] hover:shadow-lg transition-all uppercase tracking-[0.2em] text-[10px] mt-4 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Sign In
+                  {isSubmitting ? (
+                    <>
+                      <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                      Signing In...
+                    </>
+                  ) : (
+                    "Sign In"
+                  )}
                 </button>
 
                 <div className="flex items-center my-6">

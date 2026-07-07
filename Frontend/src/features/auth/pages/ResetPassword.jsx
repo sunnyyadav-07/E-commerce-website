@@ -1,12 +1,15 @@
 import { useState } from "react";
-import { useSelector } from "react-redux";
+
 import { useNavigate, useSearchParams } from "react-router";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock, Check } from "lucide-react";
 import Heading from "../components/Heading";
 import Footer from "../components/Footer";
+import FormField from "../components/FormField";
 import PasswordToggleIcon from "../components/PasswordToggleIcon";
 import useAuth from "../hooks/useAuth";
-import Loading from "../../shared/components/Loading";
+import { resetPasswordSchema } from "../schemas/authSchemas";
 
 /* ---------- password strength helper ---------- */
 const getStrength = (pw) => {
@@ -30,50 +33,49 @@ const strengthColor = [
 const ResetPassword = () => {
   const navigate = useNavigate();
   const { handleResetPassword } = useAuth();
-  const loading = useSelector((state) => state.auth.loading);
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
 
-  const [formData, setFormData] = useState({
-    newPassword: "",
-    confirmPassword: "",
+  const [show, setShow] = useState({ new: false, confirm: false });
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(resetPasswordSchema),
+    mode: "onBlur",
   });
 
-  const [show, setShow] = useState({ new: false, confirm: false });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // watch only newPassword for the live strength bar & requirements list.
+  // This is intentional — the strength UI *needs* live updates per keystroke.
+  const newPassword = watch("newPassword", "");
+  const confirmPassword = watch("confirmPassword", "");
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  const strength = getStrength(newPassword);
+  const passwordsMatch =
+    newPassword && confirmPassword && newPassword === confirmPassword;
+
+  const requirements = [
+    { label: "At least 8 characters", met: newPassword.length >= 8 },
+    { label: "One uppercase letter", met: /[A-Z]/.test(newPassword) },
+    { label: "One number", met: /[0-9]/.test(newPassword) },
+    {
+      label: "One special character",
+      met: /[^A-Za-z0-9]/.test(newPassword),
+    },
+  ];
+
+  const onSubmit = async (data) => {
     const res = await handleResetPassword({
       token,
-      newPassword: formData.confirmPassword,
+      newPassword: data.confirmPassword,
     });
-    setIsSubmitting(false);
     if (res) {
       navigate("/login");
     }
   };
-  const strength = getStrength(formData.newPassword);
-  const passwordsMatch =
-    formData.newPassword &&
-    formData.confirmPassword &&
-    formData.newPassword === formData.confirmPassword;
-
-  const requirements = [
-    { label: "At least 8 characters", met: formData.newPassword.length >= 8 },
-    { label: "One uppercase letter", met: /[A-Z]/.test(formData.newPassword) },
-    { label: "One number", met: /[0-9]/.test(formData.newPassword) },
-    {
-      label: "One special character",
-      met: /[^A-Za-z0-9]/.test(formData.newPassword),
-    },
-  ];
-
 
   return (
     <div className="h-screen bg-white flex flex-col font-sans text-gray-800 overflow-hidden">
@@ -142,19 +144,22 @@ const ResetPassword = () => {
                 Choose a new password for your account.
               </p>
 
-              <form className="space-y-5" onSubmit={handleSubmit}>
+              <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
                 {/* ── New Password ── */}
                 <div className="group">
-                  <label className="text-[9px] font-bold text-gray-400 tracking-[0.2em] uppercase mb-1.5 block group-focus-within:text-[#3b557e] transition-colors">
+                  <label
+                    htmlFor="newPassword"
+                    className="text-[9px] font-bold text-gray-400 tracking-[0.2em] uppercase mb-1.5 block group-focus-within:text-[#3b557e] transition-colors"
+                  >
                     New Password
                   </label>
                   <div className="relative">
                     <input
+                      id="newPassword"
                       type={show.new ? "text" : "password"}
-                      name="newPassword"
                       placeholder="••••••••"
-                      value={formData.newPassword}
-                      onChange={handleChange}
+                      autoComplete="new-password"
+                      {...register("newPassword")}
                       className="w-full bg-[#f3f4f6] border-none rounded-xl px-4 py-3.5 text-sm placeholder:text-gray-300 focus:ring-2 focus:ring-[#3b557e]/10 outline-none transition-all text-[#1a1a1a] pr-12"
                     />
                     <button
@@ -168,8 +173,8 @@ const ResetPassword = () => {
                     </button>
                   </div>
 
-                  {/* strength bar */}
-                  {formData.newPassword && (
+                  {/* strength bar — shown while typing, driven by watch() */}
+                  {newPassword && (
                     <div className="mt-2.5 space-y-1.5">
                       <div className="flex gap-1">
                         {[1, 2, 3, 4].map((i) => (
@@ -198,22 +203,31 @@ const ResetPassword = () => {
                       </p>
                     </div>
                   )}
+
+                  {errors.newPassword && (
+                    <p className="mt-1.5 text-[10px] font-semibold text-red-400 tracking-wide">
+                      {errors.newPassword.message}
+                    </p>
+                  )}
                 </div>
 
                 {/* ── Confirm Password ── */}
                 <div className="group">
-                  <label className="text-[9px] font-bold text-gray-400 tracking-[0.2em] uppercase mb-1.5 block group-focus-within:text-[#3b557e] transition-colors">
+                  <label
+                    htmlFor="confirmPassword"
+                    className="text-[9px] font-bold text-gray-400 tracking-[0.2em] uppercase mb-1.5 block group-focus-within:text-[#3b557e] transition-colors"
+                  >
                     Confirm Password
                   </label>
                   <div className="relative">
                     <input
+                      id="confirmPassword"
                       type={show.confirm ? "text" : "password"}
-                      name="confirmPassword"
                       placeholder="••••••••"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
+                      autoComplete="new-password"
+                      {...register("confirmPassword")}
                       className={`w-full bg-[#f3f4f6] border-none rounded-xl px-4 py-3.5 text-sm placeholder:text-gray-300 outline-none transition-all text-[#1a1a1a] pr-12 ${
-                        formData.confirmPassword
+                        confirmPassword
                           ? passwordsMatch
                             ? "focus:ring-2 focus:ring-emerald-400/20"
                             : "focus:ring-2 focus:ring-red-400/20"
@@ -223,7 +237,10 @@ const ResetPassword = () => {
                     <button
                       type="button"
                       onClick={() =>
-                        setShow((prev) => ({ ...prev, confirm: !prev.confirm }))
+                        setShow((prev) => ({
+                          ...prev,
+                          confirm: !prev.confirm,
+                        }))
                       }
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#3b557e] transition-colors cursor-pointer"
                     >
@@ -232,7 +249,7 @@ const ResetPassword = () => {
                   </div>
 
                   {/* match indicator */}
-                  {formData.confirmPassword && (
+                  {confirmPassword && (
                     <p
                       className={`mt-1.5 text-[9px] font-bold tracking-widest uppercase transition-colors ${
                         passwordsMatch ? "text-emerald-500" : "text-red-400"
@@ -243,10 +260,16 @@ const ResetPassword = () => {
                         : "✗ Passwords do not match"}
                     </p>
                   )}
+
+                  {errors.confirmPassword && (
+                    <p className="mt-1 text-[10px] font-semibold text-red-400 tracking-wide">
+                      {errors.confirmPassword.message}
+                    </p>
+                  )}
                 </div>
 
                 {/* ── Requirements checklist ── */}
-                {formData.newPassword && (
+                {newPassword && (
                   <div className="bg-[#f3f4f6] rounded-xl p-4 space-y-2">
                     <p className="text-[9px] font-bold text-gray-400 tracking-[0.2em] uppercase mb-2">
                       Requirements
