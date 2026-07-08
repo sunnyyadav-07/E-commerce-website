@@ -10,6 +10,7 @@ const emailField = z
 
 const passwordField = z
   .string()
+  .min(1, "Password is required")
   .min(8, "Password must be at least 8 characters")
   .regex(/[A-Z]/, "Must contain at least one uppercase letter")
   .regex(/[0-9]/, "Must contain at least one number")
@@ -20,7 +21,10 @@ const passwordField = z
 ───────────────────────────────────────────── */
 export const loginSchema = z.object({
   email: emailField,
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: z
+    .string()
+    .min(1, "Password is required")
+    .min(8, "Password must be at least 8 characters"),
 });
 
 /* ─────────────────────────────────────────────
@@ -29,6 +33,7 @@ export const loginSchema = z.object({
 export const registerSchema = z.object({
   fullName: z
     .string()
+    .min(1, "Name is required")
     .min(2, "Full name must be at least 2 characters"),
   email: emailField,
   contact: z

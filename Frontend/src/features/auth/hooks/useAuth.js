@@ -9,6 +9,7 @@ import {
   resetPassword,
 } from "../service/auth.api";
 import { clearUser, setError, setLoading, setUser } from "../state/auth.slice";
+import toast from "react-hot-toast";
 
 const useAuth = () => {
   const dispatch = useDispatch();
@@ -29,10 +30,12 @@ const useAuth = () => {
         isSeller,
       });
       dispatch(setUser(data.user));
+      toast.success("Registered successfully.")
       return data;
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setError(errMsg));
+      toast.error(errMsg)
     } finally {
       dispatch(setLoading(false));
     }
@@ -42,10 +45,12 @@ const useAuth = () => {
       dispatch(setLoading(true));
       const data = await loginUser({ email, password });
       dispatch(setUser(data.user));
+      toast.success("Logged in successfully")
       return data;
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setError(errMsg));
+      toast.error(errMsg)
     } finally {
       dispatch(setLoading(false));
     }
@@ -54,10 +59,12 @@ const useAuth = () => {
     try {
       dispatch(setLoading(true));
       const data = await setUserRole({ role });
+      toast.success("Role has been set successfully.")
       return data;
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setError(errMsg));
+      toast.error(errMsg)
     } finally {
       dispatch(setLoading(false));
     }
@@ -80,10 +87,12 @@ const useAuth = () => {
       dispatch(setLoading(true));
       const data = await logoutUser();
       dispatch(clearUser());
+      toast.success("Logout successfully.");
       return data;
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setError(errMsg));
+      toast.error(errMsg);
     } finally {
       dispatch(setLoading(false));
     }
@@ -92,10 +101,12 @@ const useAuth = () => {
     try {
       dispatch(setLoading(true));
       const data = await sendEmailForgotPassword(email);
+      toast.success("Email has been sent,");
       return data;
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setError(errMsg));
+      toast.error(errMsg);
     } finally {
       dispatch(setLoading(false));
     }
@@ -104,10 +115,12 @@ const useAuth = () => {
     try {
       dispatch(setLoading(true));
       const res = await resetPassword(data);
+      toast.success("Password reset successfully.");
       return res;
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setError(errMsg));
+      toast.error(errMsg);
     } finally {
       dispatch(setLoading(false));
     }

@@ -7,12 +7,12 @@ import {
   ArrowUpRight,
   Package,
   Trash2,
-  Search,
   FilePen,
   Layers,
   ChevronRight,
 } from "lucide-react";
 import SellerNavigation from "../../../shared/components/SellerNavigation";
+import SearchBar from "../../../shared/components/SearchBar";
 
 const SellerDashboard = () => {
   const navigate = useNavigate();
@@ -38,9 +38,7 @@ const SellerDashboard = () => {
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md pl-16 pr-6 py-4 md:px-6 flex items-center justify-end border-b border-slate-100">
         <div className="flex items-center gap-4">
-          <button className="p-2 text-slate-400 hover:text-[#3b557e] transition-colors cursor-pointer">
-            <Search size={20} />
-          </button>
+          <SearchBar />
 
           <div className="h-6 w-[1px] bg-slate-200 hidden sm:block"></div>
 

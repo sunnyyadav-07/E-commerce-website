@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import SellerNavigation from "../../../shared/components/SellerNavigation";
 import useProduct from "../../hooks/useProduct";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 const CATEGORIES = ["Men's Clothing", "Women's Clothing", "Kids' Clothing"];
 
 
@@ -59,28 +59,11 @@ const CreateParentProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    try {
-      const res = await handleCreateParentProduct(formData);
-      if (res) {
-        toast.success("Parent product created successfully!");
-        navigate(`/seller/create-product/${res._id}/variant`);
-      }
-    } catch (error) {
-      const errorMsg = error.response?.data?.message || error.message || "";
-      if (
-        errorMsg.toLowerCase().includes("already exist") ||
-        errorMsg.toLowerCase().includes("already exists") ||
-        error.response?.status === 409 ||
-        error.response?.status === 400
-      ) {
-        toast.warning("This product already exists! Try to add a variant.");
-        setTimeout(() => {
-          navigate("/seller/dashboard");
-        }, 2500);
-      }
-    } finally {
-      setIsSubmitting(false);
+    const res = await handleCreateParentProduct(formData);
+    if (res) {
+      navigate(`/seller/create-product/${res._id}/variant`);
     }
+    setIsSubmitting(false);
   };
 
   const filledFields = Object.values(formData).filter(Boolean).length;

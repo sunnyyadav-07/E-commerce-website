@@ -13,6 +13,7 @@ import {
   setLoading,
   setSellerProduct,
 } from "../state/product.slice";
+import toast from "react-hot-toast";
 
 const useProduct = () => {
   const dispatch = useDispatch();
@@ -21,11 +22,13 @@ const useProduct = () => {
     try {
       dispatch(setLoading(true));
       const data = await createParentProduct(formData);
+      toast.success("Parent product created successfully!");
+
       return data.product;
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setError(errMsg));
-      throw error;
+      toast.error(errMsg);
     } finally {
       dispatch(setLoading(false));
     }
@@ -34,11 +37,12 @@ const useProduct = () => {
     try {
       dispatch(setLoading(true));
       const data = await createProductVariant(productId, formData);
+      toast.success("Product vatiant created successfully!");
       return data.product;
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setError(errMsg));
-       throw error;
+      toast.error(errMsg);
     } finally {
       dispatch(setLoading(false));
     }
@@ -52,6 +56,7 @@ const useProduct = () => {
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setError(errMsg));
+      toast.error(errMsg);
     } finally {
       dispatch(setLoading(false));
     }
@@ -65,6 +70,7 @@ const useProduct = () => {
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setError(errMsg));
+      toast.error(errMsg);
     } finally {
       dispatch(setLoading(false));
     }
@@ -77,6 +83,7 @@ const useProduct = () => {
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setError(errMsg));
+      toast.error(errMsg);
     } finally {
       dispatch(setLoading(false));
     }
@@ -85,10 +92,12 @@ const useProduct = () => {
     try {
       dispatch(setLoading(true));
       const data = await updateProduct(productId, variantId, updatedData);
+      toast.success("Product updated successfully!");
       return data.updatedData;
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setError(errMsg));
+      toast.error(errMsg);
     } finally {
       dispatch(setLoading(false));
     }

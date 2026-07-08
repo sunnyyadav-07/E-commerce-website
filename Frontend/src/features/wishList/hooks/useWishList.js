@@ -10,6 +10,7 @@ import {
   getAllWishListItems,
   removeFromWishList,
 } from "../service/wishlist.api";
+import toast from "react-hot-toast";
 export const useWishList = () => {
   const dispatch = useDispatch();
   async function handleAddToWishList(data) {
@@ -18,10 +19,12 @@ export const useWishList = () => {
       const res = await addToWishList(data);
       const item = await getAllWishListItems();
       dispatch(setWishlistItems(item.wishlist));
+      toast.success("Item added in wishlist.");
       return res;
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setWishListError(errMsg));
+      toast.error(errMsg);
     } finally {
       dispatch(setWishListLoading(false));
     }
@@ -45,10 +48,12 @@ export const useWishList = () => {
       dispatch(setWishListLoading(true));
       const res = await removeFromWishList(productId, variantId);
       dispatch(removeItemFromWishList({ productId, variantId }));
+      toast.success("Product removed successfullty from wishlist");
       return res;
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setWishListError(errMsg));
+      toast.error(errMsg);
     } finally {
       dispatch(setWishListLoading(false));
     }

@@ -12,6 +12,7 @@ import {
   setLoadingInCart,
   updateQuantityOfProduct,
 } from "../state/cart.slice";
+import toast from "react-hot-toast";
 
 export const useCart = () => {
   const dispatch = useDispatch();
@@ -20,10 +21,12 @@ export const useCart = () => {
       const res = await addToCart(data);
       const cart = await getAllCartProducts();
       dispatch(setCartProducts(cart.products));
+      toast.success("Added to cart.");
       return res;
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setErrorInCart(errMsg));
+      toast.error(errMsg);
     }
   }
   async function handleGetAllCartProducts() {
@@ -50,9 +53,11 @@ export const useCart = () => {
           quantity: res.quantity,
         }),
       );
+      toast.success("Quantity +1.");
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setErrorInCart(errMsg));
+      toast.error(errMsg);
     } finally {
       dispatch(setLoadingInCart(false));
     }
@@ -67,9 +72,11 @@ export const useCart = () => {
           variantId,
         }),
       );
+      toast.success("Product removed successfully");
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setErrorInCart(errMsg));
+      toast.error(errMsg);
     } finally {
       dispatch(setLoadingInCart(false));
     }
