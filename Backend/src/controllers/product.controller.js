@@ -264,3 +264,4 @@ export async function updateSellerProductController(req, res, next) {
     next(error);
   }
 }
+export async function deleteProductController(req, res) {}
