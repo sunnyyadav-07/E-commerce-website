@@ -11,6 +11,7 @@ import cartRouter from "./routes/cart.route.js";
 import wishListRouter from "./routes/wishlist.route.js";
 import catalogRouter from "./routes/catalog.route.js";
 import { globalErrorHandler } from "./utils/globalErrorHandler.js";
+import orderRouter from "./routes/order.route.js";
 const app = express();
 app.use(morgan("dev"));
 // app.use(cors({
@@ -41,5 +42,6 @@ app.use("/api/products", productRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/wishlist", wishListRouter);
 app.use("/api/catalog", catalogRouter);
+app.use("/api/order", orderRouter);
 app.use(globalErrorHandler);
 export default app;
