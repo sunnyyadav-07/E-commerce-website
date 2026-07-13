@@ -1,6 +1,6 @@
 import { body } from "express-validator";
 import { validateRequest } from "./validateRequest";
-const orderValidator = [
+export const orderValidator = [
   body("items")
     .isArray({ min: 1 })
     .withMessage("Items must be a non-empty array"),
