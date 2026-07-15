@@ -1,15 +1,15 @@
 import { body } from "express-validator";
-import { validateRequest } from "./validateRequest";
+import { validateRequest } from "./validateRequest.js";
 export const orderValidator = [
   body("items")
     .isArray({ min: 1 })
     .withMessage("Items must be a non-empty array"),
-  body("items.*.product")
+  body("items.*.productId")
     .notEmpty()
     .withMessage("Product ID is required")
     .isMongoId()
     .withMessage("Invalid product ID"),
-  body("items.*.variant")
+  body("items.*.variantId")
     .notEmpty()
     .withMessage("Variant ID is required")
     .isMongoId()
@@ -22,7 +22,7 @@ export const orderValidator = [
   body("items").custom((items) => {
     const seen = new Set();
     for (const item of items) {
-      const key = `${item.product}-${item.variant}`;
+      const key = `${item.productId}-${item.variantId}`;
       if (seen.has(key)) {
         throw new Error("Duplicate product/variant combination in items");
       }

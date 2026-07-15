@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { orderValidator } from "../validators/order.validator";
-import { createOrderController } from "../controllers/order.controller";
-import { authorizeRole, authUser } from "../middlewares/auth.middleware";
+import { orderValidator } from "../validators/order.validator.js";
+import { createOrderController } from "../controllers/order.controller.js";
+import { authorizeRole, authUser } from "../middlewares/auth.middleware.js";
 
 const orderRouter = Router();
 orderRouter.post(
