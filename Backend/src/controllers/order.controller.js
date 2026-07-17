@@ -1,8 +1,11 @@
+import mongoose from "mongoose";
 import orderModel from "../models/order.model.js";
 import productModel from "../models/product.model.js";
 import { AppError } from "../utils/appError.js";
 
 export async function createOrderController(req, res, next) {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     const userId = req.user._id;
     const { items } = req.body;
@@ -21,7 +24,6 @@ export async function createOrderController(req, res, next) {
     const bulkOps = [];
     for (const item of items) {
       const product = productMap.get(item.productId);
-      console.log("mila", product);
       if (!product) {
         throw new AppError("Product not found", 404);
       }
@@ -59,20 +61,74 @@ export async function createOrderController(req, res, next) {
         },
       });
     }
-    const bulkResult = await productModel.bulkWrite(bulkOps);
+    const bulkResult = await productModel.bulkWrite(bulkOps, { session });
     if (bulkResult.modifiedCount !== items.length) {
       // Race condition case — kisi ne beech mein order place kar diya, stock change ho gaya
       throw new AppError("Stock changed, please try again", 409);
     }
-    const order = await orderModel.create({
-      user: req.user._id,
-      items: orderedItems,
-      totalAmount,
-      orderStatus: "placed",
-    });
+    const order = await orderModel.create(
+      [
+        {
+          user: req.user._id,
+          items: orderedItems,
+          totalAmount,
+          orderStatus: "placed",
+        },
+      ],
+      { session },
+    );
+    await session.commitTransaction();
     res.status(201).json({
       success: true,
       message: "Order placed successfully",
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    next(error);
+  } finally {
+    session.endSession();
+  }
+}
+
+async function getSellerOrdersByStatus(sellerId, status, isSeen = false) {
+  const orders = await orderModel
+    .find({
+      items: {
+        $elemMatch: {
+          "items.seller": sellerId,
+          "tems.isSeenBySieller": isSeen,
+          "items.itemStatus": status,
+        },
+      },
+    })
+    .lean();
+
+  return orders;
+}
+
+export async function getSellerOrdersController(req, res, next) {
+  try {
+    const sellerId = req.user._id;
+    const { status, isSeen } = req.query;
+    if (!sellerId) {
+      throw new AppError("Need seller id to process request", 400);
+    }
+    const validStatuses = [
+      "pending",
+      "processing",
+      "shipped",
+      "delivered",
+      "cancelled",
+    ];
+    if (!status || !validStatuses.includes(status)) {
+      throw new AppError("Invalid or missing status", 400);
+    }
+    const seenFlag = isSeen === "true";
+    const orders = await getSellerOrdersByStatus(sellerId, status, seenFlag);
+    res.status(200).json({
+      success: true,
+      message: "Orders fetched successfully",
+      orders,
     });
   } catch (error) {
     next(error);

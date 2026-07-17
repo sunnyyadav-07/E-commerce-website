@@ -37,6 +37,10 @@ const orderSchema = new mongoose.Schema(
           enum: ["pending", "processing", "shipped", "delivered", "cancelled"],
           default: "pending",
         },
+        isSeenBySeller: {
+          type: Boolean,
+          default: false,
+        },
       },
     ],
     orderStatus: {

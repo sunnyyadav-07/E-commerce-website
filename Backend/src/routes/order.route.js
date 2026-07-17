@@ -1,6 +1,9 @@
 import { Router } from "express";
 import { orderValidator } from "../validators/order.validator.js";
-import { createOrderController } from "../controllers/order.controller.js";
+import {
+  createOrderController,
+  getSellerOrdersController,
+} from "../controllers/order.controller.js";
 import { authorizeRole, authUser } from "../middlewares/auth.middleware.js";
 
 const orderRouter = Router();
@@ -10,5 +13,11 @@ orderRouter.post(
   authorizeRole("buyer"),
   orderValidator,
   createOrderController,
+);
+orderRouter.get(
+  "/seller",
+  authUser,
+  authorizeRole("seller"),
+  getSellerOrdersController,
 );
 export default orderRouter;
