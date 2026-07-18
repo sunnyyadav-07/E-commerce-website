@@ -91,17 +91,48 @@ export async function createOrderController(req, res, next) {
 }
 
 async function getSellerOrdersByStatus(sellerId, status, isSeen = false) {
-  const orders = await orderModel
-    .find({
-      items: {
-        $elemMatch: {
-          "items.seller": sellerId,
-          "tems.isSeenBySieller": isSeen,
-          "items.itemStatus": status,
+  const orders = await orderModel.aggregate([
+    {
+      $match: {
+        "items.seller": sellerId,
+        "items.itemStatus": status,
+        "items.isSeenBySeller": isSeen,
+      },
+    },
+    {
+      $project: {
+        user: 1,
+        createdAt: 1,
+        items: {
+          $map: {
+            input: {
+              $filter: {
+                input: "$items",
+                as: "item",
+                cond: {
+                  $and: [
+                    { $eq: ["$$item.seller", sellerId] },
+                    { $eq: ["$$item.itemStatus", status] },
+                    { $eq: ["$$item.isSeenBySeller", isSeen] },
+                  ],
+                },
+              },
+            },
+            as: "filteredItem",
+            in: {
+              _id: "$$filteredItem._id",
+              product: "$$filteredItem.product",
+              variant: "$$filteredItem.variant",
+              price: "$$filteredItem.price",
+              quantity: "$$filteredItem.quantity",
+              itemStatus: "$$filteredItem.itemStatus",
+              isSeenBySeller: "$$filteredItem.isSeenBySeller",
+            },
+          },
         },
       },
-    })
-    .lean();
+    },
+  ]);
 
   return orders;
 }
