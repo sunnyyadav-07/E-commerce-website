@@ -1,4 +1,10 @@
-import { Heart, LogIn, LogOut, ShoppingBag } from "lucide-react";
+import {
+  Heart,
+  LayoutDashboard,
+  LogIn,
+  LogOut,
+  ShoppingBag,
+} from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import useAuth from "../../auth/hooks/useAuth";
@@ -23,8 +29,6 @@ const Navbar = () => {
     handleLogoutUser();
     navigate("/login");
   };
-
-
 
   return (
     <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-sm">
@@ -67,6 +71,18 @@ const Navbar = () => {
             <>
               {/* Search */}
               <SearchBar />
+
+              {/* Dashboard — only for sellers */}
+              {isSeller && (
+                <button
+                  onClick={() => navigate("/seller/dashboard")}
+                  title="Your Dashboard"
+                  className="cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl text-stone-500 hover:text-[#3b557e] hover:bg-[#3b557e]/10 transition-colors duration-200 text-[11px] uppercase tracking-widest font-bold group"
+                >
+                  <LayoutDashboard className="w-4.5 h-4.5 group-hover:scale-110 transition-transform duration-200" />
+                  <span className="hidden md:inline">Dashboard</span>
+                </button>
+              )}
 
               {/* Wishlist — only for buyers */}
               {!isSeller && (

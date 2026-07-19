@@ -1,5 +1,5 @@
 import { RouterProvider } from "react-router";
-import { router } from "./app.route";
+import { router } from "../routes/app.route";
 import { useEffect } from "react";
 import useAuth from "../features/auth/hooks/useAuth";
 import { Toaster } from "react-hot-toast";

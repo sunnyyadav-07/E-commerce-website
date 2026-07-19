@@ -3,8 +3,7 @@ import { Outlet } from "react-router";
 import { useSelector } from "react-redux";
 import { useWishList } from "../features/wishList/hooks/useWishList";
 import { useCart } from "../features/addToCart/hooks/useCart";
-
-const AppLayout = () => {
+const MainLayout = () => {
   const user = useSelector((state) => state.auth.user);
   const { handleGetAllWisgListItems } = useWishList();
   const { handleGetAllCartProducts } = useCart();
@@ -15,7 +14,6 @@ const AppLayout = () => {
       handleGetAllCartProducts();
     }
   }, [user]);
-
   return (
     <>
       <Outlet />
@@ -23,4 +21,4 @@ const AppLayout = () => {
   );
 };
 
-export default AppLayout;
+export default MainLayout;
