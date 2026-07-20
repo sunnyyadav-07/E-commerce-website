@@ -84,6 +84,7 @@ export async function createOrderController(req, res, next) {
     });
   } catch (error) {
     await session.abortTransaction();
+    console.log("error in creating orders");
     next(error);
   } finally {
     session.endSession();
@@ -104,31 +105,91 @@ async function getSellerOrdersByStatus(sellerId, status, isSeen = false) {
         user: 1,
         createdAt: 1,
         items: {
-          $map: {
-            input: {
-              $filter: {
-                input: "$items",
-                as: "item",
-                cond: {
-                  $and: [
-                    { $eq: ["$$item.seller", sellerId] },
-                    { $eq: ["$$item.itemStatus", status] },
-                    { $eq: ["$$item.isSeenBySeller", isSeen] },
-                  ],
+          $filter: {
+            input: "$items",
+            as: "item",
+            cond: {
+              $and: [
+                {
+                  $eq: ["$$item.seller", sellerId],
                 },
-              },
-            },
-            as: "filteredItem",
-            in: {
-              _id: "$$filteredItem._id",
-              product: "$$filteredItem.product",
-              variant: "$$filteredItem.variant",
-              price: "$$filteredItem.price",
-              quantity: "$$filteredItem.quantity",
-              itemStatus: "$$filteredItem.itemStatus",
-              isSeenBySeller: "$$filteredItem.isSeenBySeller",
+                {
+                  $eq: ["$$item.itemStatus", status],
+                },
+                {
+                  $eq: ["$$item.isSeenBySeller", isSeen],
+                },
+              ],
             },
           },
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "user",
+        foreignField: "_id",
+        as: "buyerDetails",
+      },
+    },
+    {
+      $unwind: "$buyerDetails",
+    },
+    {
+      $unwind: "$items",
+    },
+    {
+      $lookup: {
+        from: "products",
+        localField: "items.product",
+        foreignField: "_id",
+        as: "productDetails",
+      },
+    },
+    {
+      $unwind: "$productDetails",
+    },
+    {
+      $addFields: {
+        matchedVariant: {
+          $filter: {
+            input: "$productDetails.variants",
+            as: "v",
+            cond: {
+              $eq: ["$$v._id", "$items.variant"],
+            },
+          },
+        },
+      },
+    },
+    {
+      $unwind: "$matchedVariant",
+    },
+    {
+      $project: {
+        orderId: "$_id",
+        createdAt: 1,
+        _id: 0,
+        quantity: "$items.quantity",
+        price: "$items.price",
+        itemId: "$items._id",
+        itemStatus: "$items.itemStatus",
+        isSeenBySeller: "$items.isSeenBySeller",
+        buyerDetails: {
+          name: "$buyerDetails.fullname",
+          email: "$buyerDetails.email",
+        },
+        productDetails: {
+          productId: "$productDetails._id",
+          title: "$productDetails.title",
+          brand: "$productDetails.brand",
+        },
+        variantDetails: {
+          variantId: "$matchedVariant._id",
+          sku: "$matchedVariant.sku",
+          images: "$matchedVariant.images",
+          attributes: "$matchedVariant.attributes",
         },
       },
     },
@@ -162,6 +223,40 @@ export async function getSellerOrdersController(req, res, next) {
       orders,
     });
   } catch (error) {
+    console.log("error in fetching sellers orders");
+    next(error);
+  }
+}
+
+export async function markOrderAsSeenController(req, res, next) {
+  try {
+    const sellerId = req.user._id;
+    const { orderId, productId } = req.query;
+    if (!orderId || !productId) {
+      throw new AppError("Order id and product id are missing", 400);
+    }
+    await orderModel.updateMany(
+      {
+        items: {
+          $elemMatch: {
+            seller: sellerId,
+            isSeenBySeller: false,
+          },
+        },
+      },
+      { $set: { "items.$[elem].isSeenBySeller": true } },
+      {
+        arrayFilters: [
+          { "elem.seller": sellerId, "elem.isSeenBySeller": false },
+        ],
+      },
+    );
+    res.status(200).json({
+      success: true,
+      message: "Marked as seen",
+    });
+  } catch (error) {
+    console.log("Error in marked seen");
     next(error);
   }
 }
