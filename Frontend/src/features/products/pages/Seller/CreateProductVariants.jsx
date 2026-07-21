@@ -16,7 +16,7 @@ import {
   ImagePlus,
   X,
 } from "lucide-react";
-import SellerNavigation from "../../../shared/components/SellerNavigation";
+import SellerNavigation from "../../components/SellerNavigation";
 import useProduct from "../../hooks/useProduct";
 
 // ── Design tokens (mirrors CreateParentProduct) ───────────────────────────────

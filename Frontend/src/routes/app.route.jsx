@@ -1,9 +1,8 @@
-import { createBrowserRouter, Outlet } from "react-router";
+import { createBrowserRouter, Navigate } from "react-router";
 import Register from "../features/auth/pages/Register.jsx";
 import Login from "../features/auth/pages/Login.jsx";
 import SelectRole from "../features/auth/pages/SelectRole.jsx";
 import SellerDashboard from "../features/products/pages/Seller/SellerDashboard.jsx";
-import PublicOnlyRoute from "../features/auth/components/PublicOnlyRoute.jsx";
 import Home from "../features/products/pages/Home.jsx";
 import ProductDetail from "../features/products/pages/ProductDetail.jsx";
 import CreateParentProduct from "../features/products/pages/Seller/CreateParentProduct.jsx";
@@ -21,6 +20,10 @@ import AuthLayout from "../Layouts/AuthLayout.jsx";
 import MainLayout from "../Layouts/MainLayout.jsx";
 import SellerLayout from "../Layouts/SellerLayout.jsx";
 import SellerProtected from "./protected/SellerProtected.jsx";
+import Order from "../features/orders/pages/Order.jsx";
+import PendingOrder from "../features/orders/pages/PendingOrder.jsx";
+import CancelledOrder from "../features/orders/pages/CancelledOrder.jsx";
+import DeliveredOrder from "../features/orders/pages/DeliveredOrder.jsx";
 
 export const router = createBrowserRouter([
   {
@@ -35,6 +38,7 @@ export const router = createBrowserRouter([
           { path: "register", element: <Register /> },
           { path: "reset-password", element: <ResetPassword /> },
           { path: "forgot-password", element: <ForgotPassword /> },
+          { path: "select-role", element: <SelectRole /> },
         ],
       },
     ],
@@ -71,6 +75,16 @@ export const router = createBrowserRouter([
             element: <CreateProductVariants />,
           },
           { path: "products/:productId/edit", element: <EditProduct /> },
+          {
+            path: "order",
+            element: <Order />,
+            children: [
+              { index: true, element: <Navigate to="pending" replace /> },
+              { path: "pending", element: <PendingOrder /> },
+              { path: "cancelled", element: <CancelledOrder /> },
+              { path: "delivered", element: <DeliveredOrder /> },
+            ],
+          },
         ],
       },
     ],

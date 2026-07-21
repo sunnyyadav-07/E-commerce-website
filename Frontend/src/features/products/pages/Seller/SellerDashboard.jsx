@@ -11,7 +11,7 @@ import {
   Layers,
   ChevronRight,
 } from "lucide-react";
-import SellerNavigation from "../../../shared/components/SellerNavigation";
+import SellerNavigation from "../../components/SellerNavigation";
 import SearchBar from "../../../shared/components/SearchBar";
 
 const SellerDashboard = () => {

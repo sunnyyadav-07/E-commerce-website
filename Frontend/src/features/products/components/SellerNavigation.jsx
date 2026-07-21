@@ -16,7 +16,7 @@ const SellerNavigation = () => {
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", to: "/seller/dashboard" },
     { icon: Inbox, label: "Inventory", to: "/seller/create-product" },
-    { icon: ClipboardList, label: "Orders", to: "/seller/orders" },
+    { icon: ClipboardList, label: "Orders", to: "/seller/order" },
     { icon: Settings, label: "Settings", to: "/seller/settings" },
   ];
 
@@ -25,7 +25,7 @@ const SellerNavigation = () => {
       {/* Mobile Toggle Button */}
       <button 
         onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="md:hidden fixed top-3 left-4 z-[60] p-2 bg-white rounded-xl shadow-sm border border-slate-100 text-slate-600 hover:text-[#3b557e] transition-colors"
+        className="md:hidden fixed top-3 left-4 z-60 p-2 bg-white rounded-xl shadow-sm border border-slate-100 text-slate-600 hover:text-[#3b557e] transition-colors"
       >
         {isMobileOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
@@ -45,7 +45,7 @@ const SellerNavigation = () => {
         {/* Brand / Logo */}
         <div className="h-20 flex items-center px-6 border-b border-slate-100">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-[#3b557e] to-[#2a3d5e] rounded-xl flex items-center justify-center text-white shadow-md shadow-[#3b557e]/20">
+            <div className="w-9 h-9 bg-linear-to-br from-[#3b557e] to-[#2a3d5e] rounded-xl flex items-center justify-center text-white shadow-md shadow-[#3b557e]/20">
               <Package size={18} strokeWidth={2} />
             </div>
             <div>

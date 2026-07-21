@@ -12,7 +12,7 @@ import {
   Pencil,
   Layers,
 } from "lucide-react";
-import SellerNavigation from "../../../shared/components/SellerNavigation";
+import SellerNavigation from "../../components/SellerNavigation";
 import {
   inputClass,
   FormField,

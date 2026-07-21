@@ -12,7 +12,7 @@ import {
   ChevronDown,
   Shirt,
 } from "lucide-react";
-import SellerNavigation from "../../../shared/components/SellerNavigation";
+import SellerNavigation from "../../components/SellerNavigation";
 import useProduct from "../../hooks/useProduct";
 import toast from "react-hot-toast";
 const CATEGORIES = ["Men's Clothing", "Women's Clothing", "Kids' Clothing"];
