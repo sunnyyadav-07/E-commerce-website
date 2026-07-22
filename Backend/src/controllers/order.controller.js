@@ -260,3 +260,9 @@ export async function markOrderAsSeenController(req, res, next) {
     next(error);
   }
 }
+
+export async function orderAcceptedContoller(req, res) {
+  try {
+    const { productId, orderId } = req.body;
+  } catch (error) {}
+}
