@@ -4,6 +4,7 @@ import {
   createOrderController,
   getSellerOrdersController,
   markOrderAsSeenController,
+  updateProductStatusContoller,
 } from "../controllers/order.controller.js";
 import { authorizeRole, authUser } from "../middlewares/auth.middleware.js";
 
@@ -26,5 +27,11 @@ orderRouter.put(
   authUser,
   authorizeRole("seller"),
   markOrderAsSeenController,
+);
+orderRouter.patch(
+  "/",
+  authUser,
+  authorizeRole("seller"),
+  updateProductStatusContoller,
 );
 export default orderRouter;

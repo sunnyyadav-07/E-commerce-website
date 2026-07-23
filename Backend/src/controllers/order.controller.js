@@ -261,8 +261,42 @@ export async function markOrderAsSeenController(req, res, next) {
   }
 }
 
-export async function orderAcceptedContoller(req, res) {
+export async function updateProductStatusContoller(req, res, next) {
   try {
-    const { productId, orderId } = req.body;
-  } catch (error) {}
+    const sellerId = req.user._id;
+    const { itemId, orderId, status } = req.body;
+    if (!itemId || !orderId || !status) {
+      throw new AppError(
+        "To update the order status, product details are needed",
+        400,
+      );
+    }
+    const updatedOrder = await orderModel.findOneAndUpdate(
+      {
+        _id: orderId,
+        items: {
+          $elemMatch: {
+            seller: sellerId,
+            _id: itemId,
+          },
+        },
+      },
+      {
+        $set: { "items.$.itemStatus": status },
+      },
+      { new: true },
+    );
+    if (!updatedOrder) {
+      throw new AppError("Order or item not found", 404);
+    }
+    res.status(200).json({
+      success: true,
+      message: "Product status updated successfully",
+      updatedOrder,
+    });
+    
+  } catch (error) {
+    console.log("error in accept order api");
+    next(error);
+  }
 }
