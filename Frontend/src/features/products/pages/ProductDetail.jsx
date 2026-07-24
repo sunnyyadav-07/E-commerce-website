@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useCart } from "../../addToCart/hooks/useCart";
 import { useWishList } from "../../wishList/hooks/useWishList";
+import QuantitySelector from "../../shared/components/QuantitySelector";
 
 /* ─── Component ──────────────────────────────────────────── */
 const ProductDetail = () => {
@@ -25,6 +26,7 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [selectedVariantId, setSelectedVariantId] = useState(null);
+  const [quantity, setQuantity] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
   const { handleAddToCart } = useCart();
   const loading = useSelector((state) => state.product.loading);
@@ -32,10 +34,7 @@ const ProductDetail = () => {
   const isSeller = user?.role === "seller";
   const { handleGetProductDetails } = useProduct();
   const cartItems = useSelector((state) => state.cart.allCartProducts);
-  const {
-    handleAddToWishList,
-    handleRemoveItemFromWishList,
-  } = useWishList();
+  const { handleAddToWishList, handleRemoveItemFromWishList } = useWishList();
   const wishListItems = useSelector((state) => state.wishlist.allWishListItem);
 
   const wishListedItem = wishListItems.some(
@@ -60,13 +59,20 @@ const ProductDetail = () => {
           data.variants?.find((v) => v.isDefault) ?? data.variants?.[0];
         setSelectedVariantId(def?._id ?? null);
         setActiveImg(0);
+        setQuantity(1);
       }
     })();
   }, [productId]);
+
+  // Reset quantity when variant changes
+  useEffect(() => {
+    setQuantity(1);
+  }, [selectedVariantId]);
   function addToCartHandle(variantId) {
     const data = {
       productId,
       variantId,
+      quantity,
     };
     handleAddToCart(data);
   }
@@ -404,6 +410,15 @@ const ProductDetail = () => {
             })()}
 
             <div className="border-t border-stone-200" />
+
+            {/* ── Quantity Selector ── */}
+            {!isSeller && stock > 0 && (
+              <QuantitySelector
+                value={quantity}
+                onChange={setQuantity}
+                max={stock}
+              />
+            )}
 
             {/* CTA Buttons */}
             {isSeller ? (

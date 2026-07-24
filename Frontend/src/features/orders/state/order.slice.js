@@ -7,6 +7,8 @@ const orderSlice = createSlice({
       pending: [],
       cancelled: [],
       delivered: [],
+      processing: [],
+      shipped: [],
     },
     error: null,
     loading: false,
