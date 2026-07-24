@@ -24,6 +24,7 @@ import Order from "../features/orders/pages/Order.jsx";
 import PendingOrder from "../features/orders/pages/PendingOrder.jsx";
 import CancelledOrder from "../features/orders/pages/CancelledOrder.jsx";
 import DeliveredOrder from "../features/orders/pages/DeliveredOrder.jsx";
+import FillAddressForm from "../features/orders/pages/FillAddressForm.jsx";
 
 export const router = createBrowserRouter([
   {
@@ -56,6 +57,7 @@ export const router = createBrowserRouter([
           { path: "wishlist", element: <WishList /> },
           { path: "products/catalog/:category", element: <Catalog /> },
           { path: "products", element: <SearchedProducts /> },
+          { path: "checkout/address", element: <FillAddressForm /> },
         ],
       },
     ],

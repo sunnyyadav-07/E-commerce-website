@@ -7,6 +7,7 @@ import HeroBanner  from "../components/HeroBanner";
 import FilterStrip from "../components/FilterStrip";
 import ProductCard from "../components/ProductCard";
 import HomeFooter  from "../components/HomeFooter";
+import Loading     from "../../shared/components/Loading";
 
 const Home = () => {
   const products = useSelector((state) => state.product.allProducts);
@@ -32,11 +33,8 @@ const Home = () => {
       {/* ── Product Grid ── */}
       <main className="max-w-7xl mx-auto px-6 md:px-10 pb-32">
         {loading ? (
-          <div className="py-40 flex flex-col items-center justify-center gap-4">
-            <div className="w-10 h-10 rounded-full border-4 border-stone-200 border-t-stone-700 animate-spin" />
-            <p className="text-xs uppercase tracking-widest text-stone-400">
-              Loading collection…
-            </p>
+          <div className="py-40 flex items-center justify-center">
+            <Loading message="Loading collection…" />
           </div>
         ) : products.length === 0 ? (
           <div className="py-40 flex flex-col items-center justify-center gap-4">

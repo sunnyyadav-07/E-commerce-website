@@ -19,6 +19,8 @@ import {
 import { useCart } from "../../addToCart/hooks/useCart";
 import { useWishList } from "../../wishList/hooks/useWishList";
 import QuantitySelector from "../../shared/components/QuantitySelector";
+import AppFooter from "../../shared/components/AppFooter";
+import Loading from "../../shared/components/Loading";
 
 /* ─── Component ──────────────────────────────────────────── */
 const ProductDetail = () => {
@@ -96,18 +98,7 @@ const ProductDetail = () => {
   /* ── unique colours list  ── */
   const colorVariants = product?.variants;
   /* ─── Loading ─────────────────────────────────────────── */
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#F9F7F4] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 rounded-full border-4 border-stone-200 border-t-stone-700 animate-spin" />
-          <p className="text-xs uppercase tracking-widest text-stone-400">
-            Loading product…
-          </p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <Loading message="Loading product…" />;
 
   /* ─── Not Found ───────────────────────────────────────── */
   if (!product) {
@@ -466,6 +457,7 @@ const ProductDetail = () => {
                 </button>
                 <button
                   disabled={stock === 0}
+                  onClick={()=>{navigate("/checkout/address")}}
                   className="cursor-pointer w-full flex items-center justify-center gap-2 py-4 bg-stone-900 text-white text-sm font-bold uppercase tracking-widest rounded-2xl hover:bg-stone-700 active:scale-[0.98] transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <Zap className="w-5 h-5" />
@@ -539,12 +531,7 @@ const ProductDetail = () => {
       </main>
 
       {/* ── Footer ── */}
-      <footer className="mt-24 border-t border-stone-200 bg-stone-900 text-stone-300">
-        <div className="max-w-7xl mx-auto px-6 md:px-10 py-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] uppercase tracking-widest text-stone-600">
-          <span>© 2026 Atelier. All rights reserved.</span>
-          <span>Instagram · Twitter</span>
-        </div>
-      </footer>
+      <AppFooter className="mt-24" />
     </div>
   );
 };
