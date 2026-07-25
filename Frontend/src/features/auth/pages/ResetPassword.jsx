@@ -9,7 +9,7 @@ import Footer from "../components/Footer";
 import FormField from "../components/FormField";
 import PasswordToggleIcon from "../components/PasswordToggleIcon";
 import useAuth from "../hooks/useAuth";
-import { resetPasswordSchema } from "../schemas/authSchemas";
+import { resetPasswordSchema } from "../schemas/validationSchemas";
 
 /* ---------- password strength helper ---------- */
 const getStrength = (pw) => {

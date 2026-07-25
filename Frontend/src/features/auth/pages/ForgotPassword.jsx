@@ -6,7 +6,7 @@ import Heading from "../components/Heading";
 import Footer from "../components/Footer";
 import FormField from "../components/FormField";
 import useAuth from "../hooks/useAuth";
-import { forgotPasswordSchema } from "../schemas/authSchemas";
+import { forgotPasswordSchema } from "../schemas/validationSchemas";
 
 const ForgotPassword = () => {
   const { handleSendEmailForgotPassword } = useAuth();

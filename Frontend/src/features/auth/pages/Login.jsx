@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useAuth from "../hooks/useAuth";
-import { loginSchema } from "../schemas/authSchemas";
+import { loginSchema } from "../schemas/validationSchemas";
 import ContinueWithGoogle from "../components/ContinueWithGoogle";
 import Footer from "../components/Footer";
 import Heading from "../components/Heading";

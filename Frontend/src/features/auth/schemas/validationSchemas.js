@@ -63,3 +63,33 @@ export const resetPasswordSchema = z
     message: "Passwords do not match",
     path: ["confirmPassword"],
   });
+
+/* ─────────────────────────────────────────────
+   Shipping / Delivery Address
+───────────────────────────────────────────── */
+export const addressSchema = z.object({
+  fullName: z
+    .string()
+    .min(1, "Full name is required")
+    .min(8, "Full name must be at least 8 characters"),
+  phone: z
+    .string()
+    .min(1, "Phone number is required")
+    .regex(/^\+?[\d\s\-().]{7,15}$/, "Please enter a valid phone number"),
+  address: z
+    .string()
+    .min(1, "Address is required")
+    .min(10, "Please enter a more complete address"),
+  city: z
+    .string()
+    .min(1, "City is required")
+    .min(3, "City name must be at least 3 characters"),
+  state: z
+    .string()
+    .min(1, "State is required")
+    .min(3, "State name must be at least 3 characters"),
+  pincode: z
+    .string()
+    .min(1, "PIN code is required")
+    .regex(/^\d{6}$/, "PIN code must be exactly 6 digits"),
+});

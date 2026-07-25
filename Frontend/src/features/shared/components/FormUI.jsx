@@ -21,14 +21,17 @@ export const SectionLabel = ({ children }) => (
 );
 
 /* ── Field wrapper with icon label and optional hint ───────────────────────── */
-export const FormField = ({ label, icon: Icon, hint, children }) => (
+export const FormField = ({ label, icon: Icon, hint, error, children }) => (
   <div className="group space-y-2.5">
     <label className="flex items-center gap-2 text-[9px] font-bold text-gray-500 tracking-[0.25em] uppercase group-focus-within:text-[#3b557e] transition-colors">
       <Icon size={12} strokeWidth={2.5} />
       {label}
     </label>
     {children}
-    {hint && (
+    {error && (
+      <p className="text-[10px] font-semibold text-red-400 tracking-wide pl-1">{error}</p>
+    )}
+    {hint && !error && (
       <p className="text-[9px] text-gray-400 font-medium pl-1">{hint}</p>
     )}
   </div>
