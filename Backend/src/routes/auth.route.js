@@ -8,6 +8,7 @@ import {
   logoutController,
   registerController,
   resetPasswordController,
+  saveUserAddressController,
   setUserRoleController,
 } from "../controllers/auth.controller.js";
 import {
@@ -15,6 +16,7 @@ import {
   validateRegisterUser,
 } from "../validators/auth.validator.js";
 import { authUser } from "../middlewares/auth.middleware.js";
+import { validateAddress } from "../validators/address.validator.js";
 
 const authRouter = Router();
 authRouter.post("/register", validateRegisterUser, registerController);
@@ -36,5 +38,6 @@ authRouter.get("/me", authUser, getMeController);
 authRouter.post("/logout", logoutController);
 authRouter.post("/forgot-password", forgotPasswordController);
 authRouter.post("/reset-password", resetPasswordController);
+authRouter.post("/save-address",validateAddress,saveUserAddressController)
 
 export default authRouter;

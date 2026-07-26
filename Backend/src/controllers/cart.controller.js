@@ -20,7 +20,7 @@ async function hasCart(userId, populate = false) {
 export async function addToCartController(req, res, next) {
   try {
     const userId = req.user._id;
-    const { productId, variantId } = req.body;
+    const { productId, variantId, quantity } = req.body;
     const cart = await cartModel.findOne({
       userId,
     });
@@ -32,7 +32,7 @@ export async function addToCartController(req, res, next) {
       }
       const newCart = await cartModel.create({
         userId,
-        items: [{ productId, variantId, variant: 1 }],
+        items: [{ productId, variantId, quantity }],
       });
       return res.status(201).json({
         success: true,
@@ -64,7 +64,7 @@ export async function addToCartController(req, res, next) {
       cart.items.push({
         productId,
         variantId,
-        quantity: 1,
+        quantity,
       });
       await cart.save();
       return res.status(200).json({

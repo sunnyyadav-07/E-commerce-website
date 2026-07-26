@@ -284,3 +284,12 @@ export async function resetPasswordController(req, res, next) {
     next(error);
   }
 }
+
+export async function saveUserAddressController(req,res,next) {
+  try {
+    
+  } catch (error) {
+    console.log("error in save user address logic"),
+    next(error)
+  }
+}
