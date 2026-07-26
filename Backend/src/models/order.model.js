@@ -53,6 +53,33 @@ const orderSchema = new mongoose.Schema(
       required: true,
       min: [0, "Total amount can not be negative"],
     },
+    shippingAddress: {
+      fullname: {
+        type: String,
+        trim: true,
+      },
+      phone: {
+        type: String,
+        trim: true,
+      },
+      addressLine: {
+        type: String,
+        trim: true,
+      },
+      city: {
+        type: String,
+        trim: true,
+      },
+      state: {
+        type: String,
+        trim: true,
+      },
+      pincode: {
+        type: String,
+        trim: true,
+        match: [/^\d{6}$/, "Pincode must be 6 digits"],
+      },
+    },
   },
   { timestamps: true },
 );

@@ -46,6 +46,14 @@ if (!process.env.GOOGLE_MAILER_CLIENT_ID) {
     "GOOGLE_MAILER_CLIENT_ID is undefined in the environment variable",
   );
 }
+if (!process.env.RAZORPAY_KEY_ID) {
+  throw new Error("RAZORPAY_KEY_ID is undefined in the environment variable");
+}
+if (!process.env.RAZORPAY_KEY_SECRET) {
+  throw new Error(
+    "RAZORPAY_KEY_SECRET is undefined in the environment variable",
+  );
+}
 export const config = {
   MONGO_URI: process.env.MONGO_URI,
   JWT_SECRET: process.env.JWT_SECRET,
@@ -60,4 +68,6 @@ export const config = {
   GOOGLE_MAILER_CLIENT_SECRET: process.env.GOOGLE_MAILER_CLIENT_SECRET,
   GOOGLE_USER: process.env.GOOGLE_USER,
   GOOGLE_REFRESH_TOKEN: process.env.GOOGLE_REFRESH_TOKEN,
+  RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
+  RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
 };
