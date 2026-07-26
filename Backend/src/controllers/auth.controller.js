@@ -49,7 +49,7 @@ export async function registerController(req, res, next) {
         });
       }
 
-      throw new AppError("User with this email or contact already exists",409);
+      throw new AppError("User with this email or contact already exists", 409);
     }
 
     const user = await userModel.create({
@@ -87,7 +87,7 @@ export async function loginController(req, res, next) {
     }
     const isPasswordMatched = await user.comparePassword(password);
     if (!isPasswordMatched) {
-      throw new AppError("Invalid credentials",400)
+      throw new AppError("Invalid credentials", 400);
     }
     sendTokenRequest(user, res, "Login successfully");
   } catch (error) {
@@ -147,11 +147,10 @@ export async function setUserRoleController(req, res, next) {
     const { role } = req.body;
     const user = req.user;
     if (!["buyer", "seller"].includes(role)) {
-
-      throw new AppError("Invalid role",400)
+      throw new AppError("Invalid role", 400);
     }
     if (user.role) {
-      throw new AppError("Role already selected",400)
+      throw new AppError("Role already selected", 400);
     }
     user.role = role;
     await user.save();
@@ -243,11 +242,11 @@ export async function resetPasswordController(req, res, next) {
   try {
     const { token, newPassword } = req.body;
     if (!token || !newPassword) {
-      throw new AppError("Token and new passwors are required",400)
+      throw new AppError("Token and new passwors are required", 400);
     }
 
     if (newPassword.length < 8) {
-      throw new AppError("Password must be at least 8 characters long.",400)
+      throw new AppError("Password must be at least 8 characters long.", 400);
     }
     const userSideHashedToken = crypto
       .createHash("sha256")
@@ -267,10 +266,10 @@ export async function resetPasswordController(req, res, next) {
       { returnDocument: "after" },
     );
     if (!user) {
-       throw new AppError(
-         "Token is invalid or has expired. Please request a new password reset.",
-         400,
-       );
+      throw new AppError(
+        "Token is invalid or has expired. Please request a new password reset.",
+        400,
+      );
     }
     sendPasswordChangedNotification("yadavsunny1916@gmail.com").catch((err) =>
       console.error("Failed to send password change notification:", err),
@@ -285,11 +284,26 @@ export async function resetPasswordController(req, res, next) {
   }
 }
 
-export async function saveUserAddressController(req,res,next) {
+export async function saveUserAddressController(req, res, next) {
   try {
-    
+    const { fullname, phone, city, state, pincode, addressLine } = req.body;
+    const userId = req.user._id;
+    const user = await userModel.findByIdAndUpdate(
+      userId,
+      {
+        $set: {
+          address: { fullname, phone, addressLine, state, city, pincode },
+        },
+      },
+      { returnDocument: "after" },
+    );
+    res.status(200).json({
+      success: true,
+      message: "Address saved successfully",
+      address: user.address,
+    });
   } catch (error) {
-    console.log("error in save user address logic"),
-    next(error)
+    console.log("error in save user address logic");
+    next(error);
   }
 }
