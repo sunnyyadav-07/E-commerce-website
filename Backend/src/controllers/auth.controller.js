@@ -184,6 +184,7 @@ export function getMeController(req, res) {
       email: user.email,
       fullname: user.fullname,
       role: user.role,
+      address: user.address,
     },
   });
 }
