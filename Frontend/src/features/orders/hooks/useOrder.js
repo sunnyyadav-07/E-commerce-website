@@ -4,6 +4,7 @@ import {
   createOrder,
   getSellersOrders,
   markedOrdersSeen,
+  verifyPayment,
 } from "../service/order.api";
 
 export const useOrder = () => {
@@ -12,6 +13,7 @@ export const useOrder = () => {
     try {
       dispatch(setLoading(true));
       const res = await createOrder(order);
+      return res.order;
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setError(errMsg));
@@ -42,5 +44,14 @@ export const useOrder = () => {
       dispatch(setLoading(false));
     }
   }
-  return { handleCreateOrder, handleGetSellerOrders, handleMarkeOrdersSeen };
+  async function handleVerifypayment(data) {
+    try {
+      const res = await verifyPayment(data);
+      return res.payment;
+    } catch (error) {
+      const errMsg = error.response?.data?.message || error.message;
+      dispatch(setError(errMsg));
+    }
+  }
+  return { handleCreateOrder, handleGetSellerOrders, handleMarkeOrdersSeen,handleVerifypayment };
 };

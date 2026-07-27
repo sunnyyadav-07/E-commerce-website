@@ -21,6 +21,8 @@ import { useWishList } from "../../wishList/hooks/useWishList";
 import QuantitySelector from "../../shared/components/QuantitySelector";
 import AppFooter from "../../shared/components/AppFooter";
 import Loading from "../../shared/components/Loading";
+import { useOrder } from "../../orders/hooks/useOrder";
+import { usePayment } from "../../orders/hooks/usePayment";
 
 /* ─── Component ──────────────────────────────────────────── */
 const ProductDetail = () => {
@@ -38,10 +40,21 @@ const ProductDetail = () => {
   const cartItems = useSelector((state) => state.cart.allCartProducts);
   const { handleAddToWishList, handleRemoveItemFromWishList } = useWishList();
   const wishListItems = useSelector((state) => state.wishlist.allWishListItem);
-
+  const { handleCreateOrder } = useOrder();
+  const { initiatePayment } = usePayment();
   const wishListedItem = wishListItems.some(
     (item) => item.variantId === selectedVariantId,
   );
+  async function handleCheckOut() {
+    const items = [
+      {
+        productId,
+        variantId: selectedVariantId,
+        quantity,
+      },
+    ];
+    initiatePayment(user, items);
+  }
   function handleAddItemToWishList(productId, variantId) {
     if (wishListedItem) {
       handleRemoveItemFromWishList(productId, variantId);
@@ -457,7 +470,13 @@ const ProductDetail = () => {
                 </button>
                 <button
                   disabled={stock === 0}
-                  onClick={()=>{navigate("/checkout/address")}}
+                  onClick={() => {
+                    if (user.address) {
+                      handleCheckOut();
+                    } else {
+                      navigate("/checkout/address");
+                    }
+                  }}
                   className="cursor-pointer w-full flex items-center justify-center gap-2 py-4 bg-stone-900 text-white text-sm font-bold uppercase tracking-widest rounded-2xl hover:bg-stone-700 active:scale-[0.98] transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <Zap className="w-5 h-5" />

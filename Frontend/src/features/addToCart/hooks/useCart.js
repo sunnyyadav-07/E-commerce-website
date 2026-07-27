@@ -16,7 +16,9 @@ import toast from "react-hot-toast";
 
 export const useCart = () => {
   const dispatch = useDispatch();
+
   async function handleAddToCart(data) {
+    dispatch(setLoadingInCart(true));
     try {
       const res = await addToCart(data);
       const cart = await getAllCartProducts();
@@ -27,8 +29,11 @@ export const useCart = () => {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setErrorInCart(errMsg));
       toast.error(errMsg);
+    } finally {
+      dispatch(setLoadingInCart(false));
     }
   }
+
   async function handleGetAllCartProducts() {
     dispatch(setLoadingInCart(true));
     try {
@@ -53,7 +58,7 @@ export const useCart = () => {
           quantity: res.quantity,
         }),
       );
-      toast.success("Quantity +1.");
+      toast.success(delta > 0 ? "Quantity increased." : "Quantity decreased.");
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setErrorInCart(errMsg));
@@ -62,10 +67,11 @@ export const useCart = () => {
       dispatch(setLoadingInCart(false));
     }
   }
+
   async function handleRemoveProduct(productId, variantId) {
     try {
       dispatch(setLoadingInCart(true));
-      const res = await removeProductFromCart(productId, variantId);
+      await removeProductFromCart(productId, variantId);
       dispatch(
         removeProduct({
           productId,
