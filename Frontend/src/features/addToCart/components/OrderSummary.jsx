@@ -6,9 +6,25 @@ import {
   ArrowRight,
   ChevronLeft,
 } from "lucide-react";
+import { usePayment } from "../../orders/hooks/usePayment";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router";
 
 /* ── Order Summary Panel ─────────────────────────────────── */
 const OrderSummary = ({ items, onContinueShopping }) => {
+  const navigate = useNavigate();
+  const user = useSelector((state) => state.auth.user);
+  const { initiatePayment } = usePayment();
+  function handleCheckout() {
+    const itemsDetails = items.map((item) => {
+      return {
+        productId: item.productId,
+        variantId: item.variantId,
+        quantity: item.quantity,
+      };
+    });
+    initiatePayment(user, itemsDetails);
+  }
   const subtotal = items?.reduce((acc, item) => {
     const price = item?.price;
     return acc + price * (item?.quantity || 1);
@@ -18,10 +34,7 @@ const OrderSummary = ({ items, onContinueShopping }) => {
   const currencySymbol =
     currency === "INR" ? "₹" : currency === "USD" ? "$" : "₹";
 
-  const shippingThreshold = currency === "INR" ? 2000 : 30;
-  const shippingFee =
-    subtotal >= shippingThreshold ? 0 : currency === "INR" ? 99 : 5;
-  const total = subtotal + shippingFee;
+  const total = subtotal;
   const savings = 0; // placeholder for discount logic
 
   return (
@@ -43,17 +56,6 @@ const OrderSummary = ({ items, onContinueShopping }) => {
               {subtotal.toLocaleString("en-IN")}
             </span>
           </div>
-          <div className="flex justify-between text-stone-600">
-            <span>Shipping</span>
-            {shippingFee === 0 ? (
-              <span className="text-emerald-500 font-semibold">Free</span>
-            ) : (
-              <span className="font-semibold text-stone-900">
-                {currencySymbol}
-                {shippingFee}
-              </span>
-            )}
-          </div>
           {savings > 0 && (
             <div className="flex justify-between text-emerald-600">
               <span>Discount</span>
@@ -64,34 +66,6 @@ const OrderSummary = ({ items, onContinueShopping }) => {
             </div>
           )}
         </div>
-
-        {/* Free shipping progress */}
-        {shippingFee > 0 && (
-          <div className="p-3 bg-amber-50 border border-amber-100 rounded-2xl">
-            <p className="text-[11px] text-amber-700 font-semibold mb-2">
-              Add {currencySymbol}
-              {(shippingThreshold - subtotal).toLocaleString("en-IN")} more for
-              free shipping
-            </p>
-            <div className="w-full h-1.5 bg-amber-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-amber-400 rounded-full transition-all duration-500"
-                style={{
-                  width: `${Math.min(100, (subtotal / shippingThreshold) * 100)}%`,
-                }}
-              />
-            </div>
-          </div>
-        )}
-
-        {shippingFee === 0 && (
-          <div className="flex items-center gap-2 p-3 bg-emerald-50 border border-emerald-100 rounded-2xl">
-            <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-            <p className="text-[11px] text-emerald-700 font-semibold">
-              You've unlocked free shipping! 🎉
-            </p>
-          </div>
-        )}
 
         <div className="border-t border-stone-100" />
 
@@ -108,7 +82,16 @@ const OrderSummary = ({ items, onContinueShopping }) => {
         </div>
 
         {/* CTA */}
-        <button className="cursor-pointer w-full flex items-center justify-center gap-2 py-4 bg-[#3b557e] text-white text-sm font-bold uppercase tracking-widest rounded-2xl hover:bg-[#2d4363] active:scale-[0.98] transition-all duration-200 shadow-lg hover:shadow-xl">
+        <button
+          onClick={() => {
+            if (user.address) {
+              handleCheckout();
+            } else {
+              navigate("/checkout/address");
+            }
+          }}
+          className="cursor-pointer w-full flex items-center justify-center gap-2 py-4 bg-[#3b557e] text-white text-sm font-bold uppercase tracking-widest rounded-2xl hover:bg-[#2d4363] active:scale-[0.98] transition-all duration-200 shadow-lg hover:shadow-xl"
+        >
           <Zap className="w-4 h-4" />
           Proceed to Checkout
           <ArrowRight className="w-4 h-4" />

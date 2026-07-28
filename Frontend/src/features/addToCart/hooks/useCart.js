@@ -58,7 +58,10 @@ export const useCart = () => {
           quantity: res.quantity,
         }),
       );
-      toast.success(delta > 0 ? "Quantity increased." : "Quantity decreased.");
+
+      toast.success(
+        quantity?.quantity > 0 ? "Quantity increased." : "Quantity decreased.",
+      );
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setErrorInCart(errMsg));

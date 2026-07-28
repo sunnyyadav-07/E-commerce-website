@@ -5,13 +5,13 @@ export const usePayment = () => {
   const { Razorpay, error, isLoading } = useRazorpay();
   const { handleCreateOrder, handleVerifypayment } = useOrder();
   async function initiatePayment(user, items) {
-    const order = await handleCreateOrder({ items: [] });
+    const order = await handleCreateOrder({ items });
     console.log("order", order);
     const options = {
       key: import.meta.env.VITE_RAZORPAY_KEY_ID,
       amount: order?.amount,
       currency: order?.currency,
-      name: "My Company",
+      name: "Atelier",
       description: "Test Transaction",
       order_id: order?.id,
       handler: async function (response) {
