@@ -65,7 +65,11 @@ export async function getAllWishListItemsController(req, res, next) {
     const userId = req.user._id;
     const userWishList = await getUserWishList(userId, true);
     if (userWishList.products.length === 0) {
-      throw new AppError("Do not have any item in wishlist", 404);
+      return res.status(200).json({
+        success: true,
+        message: "No items in wishlist",
+        wishlist: [],
+      });
     }
     const formattedWishListItems = userWishList.products.map((item) => {
       const variant = item.productId.variants.id(item.variantId);

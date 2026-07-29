@@ -84,7 +84,11 @@ export async function getAllCartProducts(req, res, next) {
     const userId = req.user._id;
     const userCartProducts = await hasCart(userId, true);
     if (userCartProducts.items.length === 0) {
-      throw new AppError("Do not have any product in cart", 404);
+      return res.status(200).json({
+        success: true,
+        message: "No items in cart",
+        products: [],
+      });
     }
     const formattedCartItems = userCartProducts.items.map((item) => {
       const variant = item.productId.variants.id(item.variantId);

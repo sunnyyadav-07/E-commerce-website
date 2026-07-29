@@ -14,8 +14,6 @@ export async function calculateOrderAmount(items) {
 
   let totalAmount = 0;
   const orderedItems = [];
-
-  const bulkOps = [];
   for (const item of items) {
     const product = productMap.get(item.productId);
     if (!product) {
@@ -44,17 +42,7 @@ export async function calculateOrderAmount(items) {
       quantity: item.quantity,
       seller: product.sellerId,
     });
-    bulkOps.push({
-      updateOne: {
-        filter: {
-          _id: product._id,
-          "variants._id": variant._id,
-          "variants.stock": { $gte: item.quantity },
-        },
-        update: { $inc: { "variants.$.stock": -item.quantity } },
-      },
-    });
   }
 
-  return { totalAmount, orderedItems, bulkOps };
+  return { totalAmount, orderedItems };
 }
