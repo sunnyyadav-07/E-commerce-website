@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authorizeRole, authUser } from "../middlewares/auth.middleware.js";
 import {
   createRazorpayOrderController,
+  razorpayWebhookController,
   verifyPaymentController,
 } from "../controllers/payment.controller.js";
 const paymentRouter = Router();
@@ -17,5 +18,5 @@ paymentRouter.post(
   authorizeRole("buyer"),
   verifyPaymentController,
 );
-
+paymentRouter.post("/webhook", razorpayWebhookController);
 export default paymentRouter;

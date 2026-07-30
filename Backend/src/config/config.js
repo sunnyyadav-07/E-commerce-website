@@ -54,6 +54,11 @@ if (!process.env.RAZORPAY_KEY_SECRET) {
     "RAZORPAY_KEY_SECRET is undefined in the environment variable",
   );
 }
+if (!process.env.RAZORPAY_WEBHOOK_SECRET) {
+  throw new Error(
+    "RAZORPAY_WEBHOOK_SECRET is undefined in the environment variable",
+  );
+}
 export const config = {
   MONGO_URI: process.env.MONGO_URI,
   JWT_SECRET: process.env.JWT_SECRET,
@@ -70,4 +75,5 @@ export const config = {
   GOOGLE_REFRESH_TOKEN: process.env.GOOGLE_REFRESH_TOKEN,
   RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
   RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
+  RAZORPAY_WEBHOOK_SECRET: process.env.RAZORPAY_WEBHOOK_SECRET,
 };

@@ -5,7 +5,10 @@ import paymentModel from "../models/payment.model.js";
 import { calculateOrderAmount } from "../services/order.service.js";
 import razorpayInstance from "../services/razorpay.service.js";
 import { AppError } from "../utils/appError.js";
-import { validatePaymentVerification } from "razorpay/dist/utils/razorpay-utils.js";
+import {
+  validatePaymentVerification,
+  validateWebhookSignature,
+} from "razorpay/dist/utils/razorpay-utils.js";
 import productModel from "../models/product.model.js";
 import cartModel from "../models/cart.model.js";
 
@@ -141,5 +144,28 @@ export async function verifyPaymentController(req, res, next) {
     next(error);
   } finally {
     session.endSession();
+  }
+}
+
+export async function razorpayWebhookController(req, res, next) {
+  try {
+    const webhookSignature = req.headers["x-razorpay-signature"];
+    const isWebhookValid = validateWebhookSignature(
+      req.rawBody.toString(),
+      webhookSignature,
+      config.RAZORPAY_WEBHOOK_SECRET,
+    );
+    if (!isWebhookValid) {
+      throw new AppError("webhook signature verification failed", 400);
+    }
+    const event = req.body.event;
+    if (event === "payment.captured") {
+    }
+    res.status(200).json({
+      success: true,
+    });
+  } catch (error) {
+    console.log("error in razorpay web hook logic");
+    next(error);
   }
 }

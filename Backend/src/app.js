@@ -37,7 +37,13 @@ passport.use(
 );
 
 app.use(cookieParser());
-app.use(express.json());
+app.use(
+  express.json({
+    verify: (re, res, buf) => {
+      req.rawBody = buf;
+    },
+  }),
+);
 app.use("/api/auth", authRouter);
 app.use("/api/products", productRouter);
 app.use("/api/cart", cartRouter);
