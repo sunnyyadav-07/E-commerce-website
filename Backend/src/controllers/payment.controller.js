@@ -160,12 +160,73 @@ export async function razorpayWebhookController(req, res, next) {
     }
     const event = req.body.event;
     if (event === "payment.captured") {
+      const paymentEntity = req.body.payload.payment.entity;
+      const razorpayOrderId = paymentEntity.order_id;
+      const razorpayPaymentId = paymentEntity.id;
+
+      const session = await mongoose.startSession();
+      session.startTransaction();
+
+      // Idempotent update, atomic check
+      const payment = await paymentModel.findOneAndUpdate(
+        { razorpayOrderId, status: { $ne: "paid" } },
+        { razorpayPaymentId, status: "paid" },
+        { returnDocument: "after", session },
+      );
+
+      if (!payment) {
+        // Ya to already "paid" ho chuka (verifyPaymentController ne pehle handle kar liya),
+        // ya koi record hi nahi mila — dono case mein safely skip karo
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(200).json({ success: true });
+      }
+
+      const order = await orderModel.findById(payment.order).session(session);
+      const bulkOps = order.items.map((item) => ({
+        updateOne: {
+          filter: {
+            _id: item.product,
+            "variants._id": item.variant,
+            "variants.stock": { $gte: item.quantity },
+          },
+          update: { $inc: { "variants.$.stock": -item.quantity } },
+        },
+      }));
+      const bulkResult = await productModel.bulkWrite(bulkOps, { session });
+      if (bulkResult.modifiedCount !== order.items.length) {
+        throw new AppError("Stock changed, please try again", 409);
+      }
+      order.orderStatus = "placed";
+      await order.save({ session });
+      const orderedProductIds = order.items.map((item) => item.product);
+      const orderedVariantIds = order.items.map((item) => item.variant);
+      await cartModel.updateOne(
+        {
+          userId: req.user._id,
+        },
+        {
+          $pull: {
+            items: {
+              productId: { $in: orderedProductIds },
+              variantId: { $in: orderedVariantIds },
+            },
+          },
+        },
+        { session },
+      );
+
+      await session.commitTransaction();
     }
     res.status(200).json({
       success: true,
+      message: "Payment verified successfully",
     });
   } catch (error) {
+    await session.abortTransaction();
     console.log("error in razorpay web hook logic");
     next(error);
+  } finally {
+    session.endSession();
   }
 }
