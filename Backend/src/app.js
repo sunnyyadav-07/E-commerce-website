@@ -39,7 +39,7 @@ passport.use(
 app.use(cookieParser());
 app.use(
   express.json({
-    verify: (re, res, buf) => {
+    verify: (req, res, buf) => {
       req.rawBody = buf;
     },
   }),

@@ -2,7 +2,10 @@ import mongoose from "mongoose";
 import { config } from "../config/config.js";
 import orderModel from "../models/order.model.js";
 import paymentModel from "../models/payment.model.js";
-import { calculateOrderAmount } from "../services/order.service.js";
+import {
+  calculateOrderAmount,
+  confirmOrderAfterPayment,
+} from "../services/order.service.js";
 import razorpayInstance from "../services/razorpay.service.js";
 import { AppError } from "../utils/appError.js";
 import {
@@ -81,11 +84,10 @@ export async function verifyPaymentController(req, res, next) {
     const paymentDetails =
       await razorpayInstance.payments.fetch(razorpay_payment_id);
 
-    const payment = await paymentModel.findOneAndUpdate(
+    const paymentBeforeUpdate = await paymentModel.findOneAndUpdate(
       {
         razorpayOrderId: razorpay_order_id,
         user: req.user._id,
-        status: { $ne: "paid" },
       },
       {
         razorpayPaymentId: razorpay_payment_id,
@@ -93,50 +95,29 @@ export async function verifyPaymentController(req, res, next) {
         status: "paid",
         method: paymentDetails.method,
       },
-      { returnDocument: "after", session },
+      { returnDocument: "before", session },
     );
 
-    if (!payment) {
+    if (!paymentBeforeUpdate) {
       throw new AppError("Payment record not found", 404);
     }
-    const order = await orderModel.findById(payment.order).session(session);
-    const bulkOps = order.items.map((item) => ({
-      updateOne: {
-        filter: {
-          _id: item.product,
-          "variants._id": item.variant,
-          "variants.stock": { $gte: item.quantity },
-        },
-        update: { $inc: { "variants.$.stock": -item.quantity } },
-      },
-    }));
-    const bulkResult = await productModel.bulkWrite(bulkOps, { session });
-    if (bulkResult.modifiedCount !== order.items.length) {
-      throw new AppError("Stock changed, please try again", 409);
+    if (paymentBeforeUpdate.status === "paid") {
+      // Webhook already process kar chuka tha — ye EXPECTED hai, error nahi
+      await session.abortTransaction();
+      session.endSession();
+
+      return res.status(200).json({
+        success: true,
+        message: "Payment verified successfully",
+        orderId: paymentBeforeUpdate.order,
+      });
     }
-    order.orderStatus = "placed";
-    await order.save({ session });
-    const orderedProductIds = order.items.map((item) => item.product);
-    const orderedVariantIds = order.items.map((item) => item.variant);
-    await cartModel.updateOne(
-      {
-        userId: req.user._id,
-      },
-      {
-        $pull: {
-          items: {
-            productId: { $in: orderedProductIds },
-            variantId: { $in: orderedVariantIds },
-          },
-        },
-      },
-      { session },
-    );
+    const order = await confirmOrderAfterPayment(paymentBeforeUpdate, session);
     await session.commitTransaction();
     res.status(200).json({
       success: true,
       message: "Payment verified successfully",
-      order,
+      orderId: order._id,
     });
   } catch (error) {
     await session.abortTransaction();
@@ -148,6 +129,7 @@ export async function verifyPaymentController(req, res, next) {
 }
 
 export async function razorpayWebhookController(req, res, next) {
+  const session = await mongoose.startSession();
   try {
     const webhookSignature = req.headers["x-razorpay-signature"];
     const isWebhookValid = validateWebhookSignature(
@@ -163,67 +145,50 @@ export async function razorpayWebhookController(req, res, next) {
       const paymentEntity = req.body.payload.payment.entity;
       const razorpayOrderId = paymentEntity.order_id;
       const razorpayPaymentId = paymentEntity.id;
-
-      const session = await mongoose.startSession();
       session.startTransaction();
-
-      // Idempotent update, atomic check
-      const payment = await paymentModel.findOneAndUpdate(
-        { razorpayOrderId, status: { $ne: "paid" } },
-        { razorpayPaymentId, status: "paid" },
-        { returnDocument: "after", session },
+      const paymentDetails =
+        await razorpayInstance.payments.fetch(razorpayPaymentId);
+      const paymentBeforeUpdate = await paymentModel.findOneAndUpdate(
+        { razorpayOrderId },
+        { razorpayPaymentId, status: "paid", method: paymentDetails.method },
+        { returnDocument: "before", session },
       );
 
-      if (!payment) {
-        // Ya to already "paid" ho chuka (verifyPaymentController ne pehle handle kar liya),
-        // ya koi record hi nahi mila — dono case mein safely skip karo
+      if (!paymentBeforeUpdate) {
+        await session.abortTransaction();
+        session.endSession();
+        console.error(
+          `Webhook: no Payment record found for razorpayOrderId ${razorpayOrderId}`,
+        );
+        return res.status(200).json({ success: true });
+      }
+      if (paymentBeforeUpdate.status === "paid") {
         await session.abortTransaction();
         session.endSession();
         return res.status(200).json({ success: true });
       }
-
-      const order = await orderModel.findById(payment.order).session(session);
-      const bulkOps = order.items.map((item) => ({
-        updateOne: {
-          filter: {
-            _id: item.product,
-            "variants._id": item.variant,
-            "variants.stock": { $gte: item.quantity },
-          },
-          update: { $inc: { "variants.$.stock": -item.quantity } },
-        },
-      }));
-      const bulkResult = await productModel.bulkWrite(bulkOps, { session });
-      if (bulkResult.modifiedCount !== order.items.length) {
-        throw new AppError("Stock changed, please try again", 409);
-      }
-      order.orderStatus = "placed";
-      await order.save({ session });
-      const orderedProductIds = order.items.map((item) => item.product);
-      const orderedVariantIds = order.items.map((item) => item.variant);
-      await cartModel.updateOne(
-        {
-          userId: req.user._id,
-        },
-        {
-          $pull: {
-            items: {
-              productId: { $in: orderedProductIds },
-              variantId: { $in: orderedVariantIds },
-            },
-          },
-        },
-        { session },
-      );
-
+      await confirmOrderAfterPayment(paymentBeforeUpdate, session);
       await session.commitTransaction();
+    } else if (event === "payment.failed") {
+      const paymentEntity = req.body.payload.payment.entity;
+      await paymentModel.findOneAndUpdate(
+        {
+          razorpayOrderId: paymentEntity.order_id,
+          state: { $ne: "paid" },
+        },
+        {
+          status: "failed",
+        },
+      );
     }
     res.status(200).json({
       success: true,
       message: "Payment verified successfully",
     });
   } catch (error) {
-    await session.abortTransaction();
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
     console.log("error in razorpay web hook logic");
     next(error);
   } finally {

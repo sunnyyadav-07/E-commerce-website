@@ -91,6 +91,7 @@ export async function loginController(req, res, next) {
     }
     sendTokenRequest(user, res, "Login successfully");
   } catch (error) {
+    console.log("error in login logic")
     next(error);
   }
 }
