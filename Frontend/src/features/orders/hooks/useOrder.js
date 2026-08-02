@@ -1,10 +1,16 @@
 import { useDispatch } from "react-redux";
-import { setError, setLoading, setSellerOrders } from "../state/order.slice";
+import {
+  setBuyerOrders,
+  setError,
+  setLoading,
+  setSellerOrders,
+} from "../state/order.slice";
 import {
   cancelPayment,
   createOrder,
   getSellersOrders,
   markedOrdersSeen,
+  myOrders,
   orderDetails,
   verifyPayment,
 } from "../service/order.api";
@@ -79,6 +85,19 @@ export const useOrder = () => {
       dispatch(setLoading(false));
     }
   }
+  async function handleMyOrders(status) {
+    try {
+      dispatch(setLoading(true));
+      const res = await myOrders(status);
+      dispatch(setBuyerOrders({ status, data: res.orders }));
+      return res.orders;
+    } catch (error) {
+      const errMsg = error.response?.data?.message || error.message;
+      dispatch(setError(errMsg));
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
   return {
     handleCreateOrder,
     handleGetSellerOrders,
@@ -86,5 +105,6 @@ export const useOrder = () => {
     handleVerifypayment,
     handlecancelPayment,
     handleOrderDetails,
+    handleMyOrders,
   };
 };

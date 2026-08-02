@@ -14,7 +14,7 @@ import {
   CalendarDays,
   CreditCard,
 } from "lucide-react";
-import { useOrder } from "../hooks/useOrder";
+import { useOrder } from "../../hooks/useOrder";
 
 /* ── Status config ───────────────────────────────────────────── */
 const STATUS = {
@@ -182,7 +182,6 @@ const OrderItemCard = ({ item }) => {
               Qty: {item.quantity}
             </span>
           </div>
-
         </div>
 
         {/* Price + Status */}
@@ -275,7 +274,9 @@ const OrderDetails = () => {
           <Card className="p-5">
             <SectionTitle icon={MapPin} title="Delivery Address" />
             <div className="space-y-2">
-              <p className="text-sm font-bold text-stone-900">{addr?.fullname}</p>
+              <p className="text-sm font-bold text-stone-900">
+                {addr?.fullname}
+              </p>
               <p className="text-xs text-stone-500 leading-relaxed">
                 {addr?.addressLine}
               </p>

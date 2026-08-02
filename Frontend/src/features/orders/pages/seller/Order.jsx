@@ -1,6 +1,6 @@
 import { Outlet } from "react-router";
-import StatusNav from "../components/StatusNav";
-import { useOrder } from "../hooks/useOrder";
+import StatusNav from "../../components/StatusNav";
+import { useOrder } from "../../hooks/useOrder";
 import { useEffect } from "react";
 
 const Order = () => {
@@ -14,10 +14,10 @@ const Order = () => {
     fetch();
   }, []);
   return (
-    <>
+    <div>
       <StatusNav />
       <Outlet />
-    </>
+    </div>
   );
 };
 

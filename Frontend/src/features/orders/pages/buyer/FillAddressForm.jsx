@@ -7,9 +7,9 @@ import {
   inputClass,
   SectionLabel,
   SubmitButton,
-} from "../../shared/components/FormUI";
-import AppFooter from "../../shared/components/AppFooter";
-import { addressSchema } from "../../auth/schemas/validationSchemas";
+} from "../../../shared/components/FormUI";
+import AppFooter from "../../../shared/components/AppFooter";
+import { addressSchema } from "../../../auth/schemas/validationSchemas";
 
 /* ═══════════════════════════════════════════════════════════════════════ */
 const FillAddressForm = () => {

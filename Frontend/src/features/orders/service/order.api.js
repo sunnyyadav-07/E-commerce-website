@@ -16,6 +16,10 @@ export async function orderDetails(orderId) {
   const res = await orderApi.get(`/${orderId}`);
   return res.data;
 }
+export async function myOrders(status) {
+  const res = await orderApi.get(status ? `?status=${status}` : "");
+  return res.data;
+}
 export async function verifyPayment(data) {
   const res = await paymentApi.post("/verify", data);
   return res.data;
@@ -24,3 +28,4 @@ export async function cancelPayment(orderId) {
   const res = await paymentApi.patch("/cancel", orderId);
   return res.data;
 }
+

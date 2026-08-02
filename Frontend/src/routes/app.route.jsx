@@ -20,13 +20,20 @@ import AuthLayout from "../Layouts/AuthLayout.jsx";
 import MainLayout from "../Layouts/MainLayout.jsx";
 import SellerLayout from "../Layouts/SellerLayout.jsx";
 import SellerProtected from "./protected/SellerProtected.jsx";
-import Order from "../features/orders/pages/Order.jsx";
-import PendingOrder from "../features/orders/pages/PendingOrder.jsx";
-import CancelledOrder from "../features/orders/pages/CancelledOrder.jsx";
-import DeliveredOrder from "../features/orders/pages/DeliveredOrder.jsx";
-import FillAddressForm from "../features/orders/pages/FillAddressForm.jsx";
-import OrderSuccess from "../features/orders/pages/OrderSuccess.jsx";
-import OrderDetails from "../features/orders/pages/OrderDetails.jsx";
+import Order from "../features/orders/pages/seller/Order.jsx";
+import PendingOrder from "../features/orders/pages/seller/PendingOrder.jsx";
+import CancelledOrder from "../features/orders/pages/seller/CancelledOrder.jsx";
+import DeliveredOrder from "../features/orders/pages/seller/DeliveredOrder.jsx";
+import FillAddressForm from "../features/orders/pages/buyer/FillAddressForm.jsx";
+import OrderSuccess from "../features/orders/pages/buyer/OrderSuccess.jsx";
+import OrderDetails from "../features/orders/pages/buyer/OrderDetails.jsx";
+import MyOrder from "../features/orders/pages/buyer/MyOrder.jsx";
+import AllOrder from "../features/orders/pages/buyer/AllOrder.jsx";
+import Pending from "../features/orders/pages/buyer/Pending.jsx";
+import Processing from "../features/orders/pages/buyer/Processing.jsx";
+import Shipped from "../features/orders/pages/buyer/Shipped.jsx";
+import Delivered from "../features/orders/pages/buyer/Delivered.jsx";
+import Cancelled from "../features/orders/pages/buyer/Cancelled.jsx";
 
 export const router = createBrowserRouter([
   {
@@ -62,6 +69,20 @@ export const router = createBrowserRouter([
           { path: "checkout/address", element: <FillAddressForm /> },
           { path: "order-success/:orderId", element: <OrderSuccess /> },
           { path: "order/:orderId", element: <OrderDetails /> },
+          {
+            path: "my-orders",
+            element: <MyOrder />,
+            children: [
+              { index: true, element: <Navigate to="all-order" replace /> },
+              { path: "all-order", element: <AllOrder /> },
+              { path: "pending", element: <Pending /> },
+              { path: "processing", element: <Processing /> },
+              { path: "shipped", element: <Shipped /> },
+              { path: "delivered", element: <Delivered /> },
+              { path: "cancelled", element: <Cancelled /> },
+            ],
+          },
+
         ],
       },
     ],

@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   LogIn,
   LogOut,
+  Package,
   ShoppingBag,
 } from "lucide-react";
 import { useSelector } from "react-redux";
@@ -91,6 +92,18 @@ const Navbar = () => {
                   className="cursor-pointer flex items-center p-2 rounded-xl text-stone-500 hover:text-rose-500 hover:bg-rose-50 transition-colors group"
                 >
                   <Heart className="w-4.5 h-4.5 group-hover:fill-rose-500 group-hover:text-rose-500 transition-all duration-200" />
+                </button>
+              )}
+
+              {/* My Orders — only for buyers */}
+              {!isSeller && user && (
+                <button
+                  onClick={() => navigate("/my-orders")}
+                  title="My Orders"
+                  className="cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl text-stone-500 hover:text-[#3b557e] hover:bg-[#3b557e]/10 transition-colors duration-200 text-[11px] uppercase tracking-widest font-bold group"
+                >
+                  <Package className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
+                  <span className="hidden md:inline">Orders</span>
                 </button>
               )}
 

@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import { Clock } from "lucide-react";
-import OrderCard from "../components/OrderCard";
-import OrderSkeleton from "../components/OrderSkeleton";
+import OrderCard from "../../components/OrderCard";
+import OrderSkeleton from "../../components/OrderSkeleton";
 
 /* ── empty state ── */
 const EmptyState = () => (
@@ -19,7 +19,7 @@ const EmptyState = () => (
 /* ── page ── */
 const PendingOrder = () => {
   const loading = useSelector((state) => state.order.loading);
-  const pendingOrders = useSelector((state) => state.order.orders.pending);
+  const pendingOrders = useSelector((state) => state.order.sellerOrders.pending);
 
   return (
     <div className="max-w-5xl mx-auto px-6 md:px-10 py-8">
