@@ -1,11 +1,14 @@
 import { useDispatch } from "react-redux";
 import { setError, setLoading, setSellerOrders } from "../state/order.slice";
 import {
+  cancelPayment,
   createOrder,
   getSellersOrders,
   markedOrdersSeen,
+  orderDetails,
   verifyPayment,
 } from "../service/order.api";
+import toast from "react-hot-toast";
 
 export const useOrder = () => {
   const dispatch = useDispatch();
@@ -47,11 +50,41 @@ export const useOrder = () => {
   async function handleVerifypayment(data) {
     try {
       const res = await verifyPayment(data);
-      return res.payment;
+      toast.success("Payment successful");
+      return res;
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setError(errMsg));
     }
   }
-  return { handleCreateOrder, handleGetSellerOrders, handleMarkeOrdersSeen,handleVerifypayment };
+  async function handlecancelPayment(orderId) {
+    try {
+      toast.error("You cancelled the payment");
+      const res = await cancelPayment(orderId);
+      return res;
+    } catch (error) {
+      const errMsg = error.response?.data?.message || error.message;
+      dispatch(setError(errMsg));
+    }
+  }
+  async function handleOrderDetails(orderId) {
+    try {
+      dispatch(setLoading(true));
+      const res = await orderDetails(orderId);
+      return res.order;
+    } catch (error) {
+      const errMsg = error.response?.data?.message || error.message;
+      dispatch(setError(errMsg));
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+  return {
+    handleCreateOrder,
+    handleGetSellerOrders,
+    handleMarkeOrdersSeen,
+    handleVerifypayment,
+    handlecancelPayment,
+    handleOrderDetails,
+  };
 };

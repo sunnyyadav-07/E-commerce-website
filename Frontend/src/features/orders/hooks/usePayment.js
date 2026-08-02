@@ -1,12 +1,14 @@
 import { useRazorpay } from "react-razorpay";
 import { useOrder } from "./useOrder";
+import { useNavigate } from "react-router";
 
 export const usePayment = () => {
   const { Razorpay, error, isLoading } = useRazorpay();
-  const { handleCreateOrder, handleVerifypayment } = useOrder();
+  const navigate = useNavigate();
+  const { handleCreateOrder, handleVerifypayment, handlecancelPayment } =
+    useOrder();
   async function initiatePayment(user, items) {
     const order = await handleCreateOrder({ items });
-    console.log("order", order);
     const options = {
       key: import.meta.env.VITE_RAZORPAY_KEY_ID,
       amount: order?.amount,
@@ -17,11 +19,20 @@ export const usePayment = () => {
       handler: async function (response) {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
           response;
-        await handleVerifypayment({
+        const verifyRes = await handleVerifypayment({
           razorpay_order_id,
           razorpay_payment_id,
           razorpay_signature,
         });
+        if (verifyRes.success) {
+          navigate(`/order-success/${verifyRes.orderId}`);
+        }
+      },
+
+      modal: {
+        ondismiss: async function () {
+          await handlecancelPayment({ razorpayOrderId: order?.id });
+        },
       },
       prefill: {
         name: user?.fullname,

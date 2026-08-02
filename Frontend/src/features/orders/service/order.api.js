@@ -12,7 +12,15 @@ export async function markedOrdersSeen() {
   const res = await orderApi.put("/");
   return res.data;
 }
+export async function orderDetails(orderId) {
+  const res = await orderApi.get(`/${orderId}`);
+  return res.data;
+}
 export async function verifyPayment(data) {
   const res = await paymentApi.post("/verify", data);
+  return res.data;
+}
+export async function cancelPayment(orderId) {
+  const res = await paymentApi.patch("/cancel", orderId);
   return res.data;
 }
