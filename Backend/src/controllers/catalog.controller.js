@@ -1,5 +1,5 @@
 import productModel from "../models/product.model.js";
-
+import { AppError } from "../utils/appError.js";
 export async function getCategoryController(req, res, next) {
   try {
     let { category, search } = req.query;
@@ -16,9 +16,7 @@ export async function getCategoryController(req, res, next) {
       query.category = category;
     }
     let products = await productModel.find(query).select("-searchTerms");
-    if (products.length == 0) {
-      throw new AppError("Not found", 404);
-    }
+
     res.status(200).json({
       success: true,
       message: "Products fetched successfully",

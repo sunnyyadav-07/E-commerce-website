@@ -25,7 +25,7 @@ const paymentSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["created", "paid", "failed", "refund"],
+      enum: ["created", "paid", "failed", "refund", "cancelled"],
       default: "created",
     },
     razorpayOrderId: {

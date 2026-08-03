@@ -4,43 +4,6 @@ import productModel from "../models/product.model.js";
 import { AppError } from "../utils/appError.js";
 import { calculateOrderAmount } from "../services/order.service.js";
 
-export async function createOrderController(req, res, next) {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-  try {
-    const userId = req.user._id;
-    const { items } = req.body;
-    const { orderedItems, bulkOps, totalAmount } = calculateOrderAmount(items);
-    const bulkResult = await productModel.bulkWrite(bulkOps, { session });
-    if (bulkResult.modifiedCount !== items.length) {
-      // Race condition case — kisi ne beech mein order place kar diya, stock change ho gaya
-      throw new AppError("Stock changed, please try again", 409);
-    }
-    const order = await orderModel.create(
-      [
-        {
-          user: req.user._id,
-          items: orderedItems,
-          totalAmount,
-          orderStatus: "placed",
-        },
-      ],
-      { session },
-    );
-    await session.commitTransaction();
-    res.status(201).json({
-      success: true,
-      message: "Order placed successfully",
-    });
-  } catch (error) {
-    await session.abortTransaction();
-    console.log("error in creating orders");
-    next(error);
-  } finally {
-    session.endSession();
-  }
-}
-
 async function getSellerOrdersByStatus(sellerId, status, isSeen = false) {
   const orders = await orderModel.aggregate([
     {
@@ -246,6 +209,184 @@ export async function updateProductStatusContoller(req, res, next) {
     });
   } catch (error) {
     console.log("error in accept order api");
+    next(error);
+  }
+}
+
+export async function orderDetailsController(req, res, next) {
+  try {
+    const { orderId } = req.params;
+    const userId = req.user._id;
+    if (!orderId) {
+      throw new AppError("Need order id to fetch order details", 400);
+    }
+    const order = await orderModel.aggregate([
+      [
+        {
+          $match: {
+            _id: new mongoose.Types.ObjectId(orderId),
+            user: userId,
+            orderStatus: "placed",
+          },
+        },
+        {
+          $unwind: "$items",
+        },
+        {
+          $lookup: {
+            from: "products",
+            localField: "items.product",
+            foreignField: "_id",
+            as: "productDetails",
+          },
+        },
+        {
+          $unwind: "$productDetails",
+        },
+        {
+          $addFields: {
+            matchedVariant: {
+              $filter: {
+                input: "$productDetails.variants",
+                as: "v",
+                cond: {
+                  $eq: ["$$v._id", "$items.variant"],
+                },
+              },
+            },
+          },
+        },
+        {
+          $unwind: "$matchedVariant",
+        },
+        {
+          $group: {
+            _id: "$_id",
+            user: {
+              $first: "$user",
+            },
+            totalAmount: {
+              $first: "$totalAmount",
+            },
+            shippingAddress: {
+              $first: "$shippingAddress",
+            },
+            createdAt: {
+              $first: "$createdAt",
+            },
+            items: {
+              $push: {
+                itemId: "$items._id",
+                product: "$productDetails._id",
+                variant: "$matchedVariant._id",
+                quantity: "$items.quantity",
+                images: "$matchedVariant.images",
+                price: "$items.price",
+                itemStatus: "$items.itemStatus",
+                productTitle: "$productDetails.title",
+                productBrand: "$productDetails.brand",
+                variantSku: "$matchedVariant.sku",
+                variantAttributes: "$matchedVariant.attributes",
+              },
+            },
+          },
+        },
+      ],
+    ]);
+    if (!order || order.length === 0) {
+      throw new AppError("Order not found", 404);
+    }
+    res.status(200).json({
+      success: true,
+      message: "Order details fetched successfully",
+      order: order[0],
+    });
+  } catch (error) {
+    console.log("error in fetching order details logic");
+    next(error);
+  }
+}
+
+export async function getMyOrderController(req, res, next) {
+  try {
+    const userId = req.user._id;
+    const { status } = req.query;
+
+    const orders = await orderModel.aggregate([
+      {
+        $match: {
+          user: userId,
+          orderStatus: "placed",
+        },
+      },
+      {
+        $unwind: "$items",
+      },
+      ...(status ? [{ $match: { "items.itemStatus": status } }] : []),
+      {
+        $lookup: {
+          from: "products",
+          localField: "items.product",
+          foreignField: "_id",
+          as: "productDetails",
+        },
+      },
+      {
+        $unwind: "$productDetails",
+      },
+      {
+        $addFields: {
+          matchedVariant: {
+            $filter: {
+              input: "$productDetails.variants",
+              as: "v",
+              cond: {
+                $eq: ["$$v._id", "$items.variant"],
+              },
+            },
+          },
+        },
+      },
+      {
+        $unwind: "$matchedVariant",
+      },
+      {
+        $group: {
+          _id: "$_id",
+          totalAmount: {
+            $first: "$totalAmount",
+          },
+          createdAt: {
+            $first: "$createdAt",
+          },
+          items: {
+            $push: {
+              itemId: "$items._id",
+              quantity: "$items.quantity",
+              itemStatus: "$items.itemStatus",
+              product: "$productDetails._id",
+              variant: "$matchedVariant._id",
+              productTitle: "$productDetails.title",
+              thumbnail: {
+                $arrayElemAt: ["$matchedVariant.images", 0],
+              },
+            },
+          },
+        },
+      },
+      {
+        $sort: {
+          createdAt: -1,
+        },
+      },
+    ]);
+    res.status(200).json({
+      success: true,
+      message: "Orders fetched successfully",
+      orders,
+    });
+  } catch (error) {
+    console.log("error in fetching my orders logic");
     next(error);
   }
 }

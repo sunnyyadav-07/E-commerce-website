@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { authorizeRole, authUser } from "../middlewares/auth.middleware.js";
 import {
+  cancelPaymentController,
   createRazorpayOrderController,
   razorpayWebhookController,
   verifyPaymentController,
@@ -19,4 +20,10 @@ paymentRouter.post(
   verifyPaymentController,
 );
 paymentRouter.post("/webhook", razorpayWebhookController);
+paymentRouter.patch(
+  "/cancel",
+  authUser,
+  authorizeRole("buyer"),
+  cancelPaymentController,
+);
 export default paymentRouter;

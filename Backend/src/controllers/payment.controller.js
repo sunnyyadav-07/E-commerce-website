@@ -195,3 +195,45 @@ export async function razorpayWebhookController(req, res, next) {
     session.endSession();
   }
 }
+
+export async function cancelPaymentController(req, res, next) {
+  try {
+    const { razorpayOrderId } = req.body;
+    if (!razorpayOrderId) {
+      throw new AppError("Order id is missing", 400);
+    }
+    const payment = await paymentModel.findOneAndUpdate(
+      {
+        razorpayOrderId,
+        status: "created",
+      },
+      {
+        status: "cancelled",
+      },
+      { returnDocument: "after" },
+    );
+    if (!payment) {
+      throw new AppError("Payment record not found", 404);
+    }
+    const order = await orderModel.findOneAndUpdate(
+      {
+        _id: payment.order,
+        orderStatus: "pending_payment",
+      },
+      {
+        orderStatus: "cancelled",
+      },
+      { returnDocument: "after" },
+    );
+    if (!order) {
+      throw new AppError("Order record not found", 404);
+    }
+    res.status(200).json({
+      success: true,
+      message: "payment cancelled successfully",
+    });
+  } catch (error) {
+    console.log("error in buyer cancelled payment logic");
+    next(error);
+  }
+}
