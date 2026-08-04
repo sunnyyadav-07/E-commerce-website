@@ -34,6 +34,7 @@ import Processing from "../features/orders/pages/buyer/Processing.jsx";
 import Shipped from "../features/orders/pages/buyer/Shipped.jsx";
 import Delivered from "../features/orders/pages/buyer/Delivered.jsx";
 import Cancelled from "../features/orders/pages/buyer/Cancelled.jsx";
+import Protected from "./protected/Protected.jsx";
 
 export const router = createBrowserRouter([
   {
@@ -55,19 +56,23 @@ export const router = createBrowserRouter([
   },
   {
     path: "/",
+
+    path: "",
+    element: <MainLayout />,
     children: [
+      { index: true, element: <Home /> },
+      { path: "product/:productId", element: <ProductDetail /> },
+      { path: "products/catalog/:category", element: <Catalog /> },
+      { path: "products", element: <SearchedProducts /> },
       {
         path: "",
-        element: <MainLayout />,
+        element: <Protected />,
         children: [
-          { index: true, element: <Home /> },
-          { path: "product/:productId", element: <ProductDetail /> },
           { path: "my-cart", element: <Cart /> },
           { path: "wishlist", element: <WishList /> },
-          { path: "products/catalog/:category", element: <Catalog /> },
-          { path: "products", element: <SearchedProducts /> },
           { path: "checkout/address", element: <FillAddressForm /> },
           { path: "order-success/:orderId", element: <OrderSuccess /> },
+
           { path: "order/:orderId", element: <OrderDetails /> },
           {
             path: "my-orders",
@@ -82,11 +87,11 @@ export const router = createBrowserRouter([
               { path: "cancelled", element: <Cancelled /> },
             ],
           },
-
         ],
       },
     ],
   },
+
   {
     path: "/seller",
     element: <SellerProtected />,

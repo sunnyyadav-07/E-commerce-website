@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useAuth from "../hooks/useAuth";
@@ -14,7 +14,7 @@ const Register = () => {
   const navigate = useNavigate();
   const { handleRegisterUser } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-
+  const location = useLocation();
   const {
     register,
     handleSubmit,
@@ -35,7 +35,8 @@ const Register = () => {
     });
     if (!res) return; // API error — useAuth already dispatched the error
     if (res.user.role === "buyer") {
-      navigate("/");
+      const from = location.state?.from?.pathname || "/";
+      navigate(from, { replace: true });
     } else if (res.user.role === "seller") {
       navigate("/seller/dashboard");
     }
@@ -203,7 +204,7 @@ const Register = () => {
               <p className="mt-8 text-center text-[10px] text-gray-400 font-medium tracking-widest">
                 ALREADY HAVE AN ACCOUNT?{" "}
                 <button
-                  onClick={() => navigate("/login")}
+                  onClick={() => navigate("/login", { state: location.state })}
                   className="text-[#3b557e] font-extrabold hover:underline transition-all ml-1 uppercase cursor-pointer"
                 >
                   Log In

@@ -10,6 +10,8 @@ import {
 } from "../service/auth.api";
 import { clearUser, setError, setLoading, setUser } from "../state/auth.slice";
 import toast from "react-hot-toast";
+import { clearCart } from "../../addToCart/state/cart.slice";
+import { clearWishlist } from "../../wishList/state/wishlist.slice";
 
 const useAuth = () => {
   const dispatch = useDispatch();
@@ -30,12 +32,12 @@ const useAuth = () => {
         isSeller,
       });
       dispatch(setUser(data.user));
-      toast.success("Registered successfully.")
+      toast.success("Registered successfully.");
       return data;
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setError(errMsg));
-      toast.error(errMsg)
+      toast.error(errMsg);
     } finally {
       dispatch(setLoading(false));
     }
@@ -45,12 +47,12 @@ const useAuth = () => {
       dispatch(setLoading(true));
       const data = await loginUser({ email, password });
       dispatch(setUser(data.user));
-      toast.success("Logged in successfully")
+      toast.success("Logged in successfully");
       return data;
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setError(errMsg));
-      toast.error(errMsg)
+      toast.error(errMsg);
     } finally {
       dispatch(setLoading(false));
     }
@@ -59,12 +61,12 @@ const useAuth = () => {
     try {
       dispatch(setLoading(true));
       const data = await setUserRole({ role });
-      toast.success("Role has been set successfully.")
+      toast.success("Role has been set successfully.");
       return data;
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setError(errMsg));
-      toast.error(errMsg)
+      toast.error(errMsg);
     } finally {
       dispatch(setLoading(false));
     }
@@ -87,6 +89,8 @@ const useAuth = () => {
       dispatch(setLoading(true));
       const data = await logoutUser();
       dispatch(clearUser());
+      dispatch(clearCart());
+      dispatch(clearWishlist());
       toast.success("Logout successfully.");
       return data;
     } catch (error) {

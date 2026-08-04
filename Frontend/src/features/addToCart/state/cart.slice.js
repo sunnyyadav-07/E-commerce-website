@@ -14,6 +14,9 @@ const cartSlice = createSlice({
     setLoadingInCart: (state, action) => {
       state.loading = action.payload;
     },
+    clearCart: (state, action) => {
+      state.allCartProducts = [];
+    },
     updateQuantityOfProduct: (state, action) => {
       const { productId, variantId, quantity } = action.payload;
       const item = state.allCartProducts.find(
@@ -41,5 +44,6 @@ export const {
   setLoadingInCart,
   updateQuantityOfProduct,
   removeProduct,
+  clearCart,
 } = cartSlice.actions;
 export default cartSlice.reducer;
