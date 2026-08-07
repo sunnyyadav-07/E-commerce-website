@@ -128,8 +128,8 @@ export async function getSellerOrdersController(req, res, next) {
     if (!status || !validStatuses.includes(status)) {
       throw new AppError("Invalid or missing status", 400);
     }
-    const seenFlag = isSeen === "true";
-    const orders = await getSellerOrdersByStatus(sellerId, status, seenFlag);
+    // const seenFlag = isSeen === "true";
+    const orders = await getSellerOrdersByStatus(sellerId, status);
     res.status(200).json({
       success: true,
       message: "Orders fetched successfully",
@@ -184,6 +184,10 @@ export async function updateProductStatusContoller(req, res, next) {
         400,
       );
     }
+    const updateFields = {
+      "items.$.itemStatus": status,
+    };
+
     const updatedOrder = await orderModel.findOneAndUpdate(
       {
         _id: orderId,
@@ -195,9 +199,15 @@ export async function updateProductStatusContoller(req, res, next) {
         },
       },
       {
-        $set: { "items.$.itemStatus": status },
+        $set: updateFields,
+        $push: {
+          "items.$.statusHistory": {
+            status: status,
+            changedBy: req.user.role,
+          },
+        },
       },
-      { new: true },
+      { returnDocument: "after" },
     );
     if (!updatedOrder) {
       throw new AppError("Order or item not found", 404);

@@ -37,6 +37,13 @@ const orderSchema = new mongoose.Schema(
           enum: ["pending", "processing", "shipped", "delivered", "cancelled"],
           default: "pending",
         },
+        statusHistory: [
+          {
+            status: String,
+            changedAt: { type: Date, default: Date.now },
+            changedBy: String,
+          },
+        ],
         isSeenBySeller: {
           type: Boolean,
           default: false,
