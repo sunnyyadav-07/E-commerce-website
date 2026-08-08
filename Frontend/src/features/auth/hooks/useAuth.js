@@ -103,7 +103,6 @@ const useAuth = () => {
   }
   async function handleSendEmailForgotPassword(email) {
     try {
-      dispatch(setLoading(true));
       const data = await sendEmailForgotPassword(email);
       toast.success("Email has been sent,");
       return data;
@@ -111,8 +110,6 @@ const useAuth = () => {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setError(errMsg));
       toast.error(errMsg);
-    } finally {
-      dispatch(setLoading(false));
     }
   }
   async function handleResetPassword(data) {

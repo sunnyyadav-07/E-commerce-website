@@ -3,10 +3,12 @@ import {
   setBuyerOrders,
   setError,
   setLoading,
+  setOrdersAccordingToStatus,
   setSellerOrders,
 } from "../state/order.slice";
 import {
   cancelPayment,
+  changeStatusOfOrder,
   createOrder,
   getSellersOrders,
   markedOrdersSeen,
@@ -98,6 +100,48 @@ export const useOrder = () => {
       dispatch(setLoading(false));
     }
   }
+  async function handleAcceptOrder(orderId, itemId, status) {
+    try {
+      dispatch(setLoading(true));
+      const res = await changeStatusOfOrder(orderId, itemId, status);
+      dispatch(
+        setOrdersAccordingToStatus({
+          orderId,
+          itemId,
+          status,
+          updatedOrder: res.updatedOrder,
+        }),
+      );
+      toast.success("Order accepted successfully");
+      return res;
+    } catch (error) {
+      const errMsg = error.response?.data?.message || error.message;
+      dispatch(setError(errMsg));
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+  async function handleRejectOrder(orderId, itemId, status) {
+    try {
+      dispatch(setLoading(true));
+      const res = await changeStatusOfOrder(orderId, itemId, status);
+      dispatch(
+        setOrdersAccordingToStatus({
+          orderId,
+          itemId,
+          status,
+          updatedOrder: res.updatedOrder,
+        }),
+      );
+      toast.success("Order cancelled successfully");
+      return res;
+    } catch (error) {
+      const errMsg = error.response?.data?.message || error.message;
+      dispatch(setError(errMsg));
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
   return {
     handleCreateOrder,
     handleGetSellerOrders,
@@ -106,5 +150,7 @@ export const useOrder = () => {
     handlecancelPayment,
     handleOrderDetails,
     handleMyOrders,
+    handleAcceptOrder,
+    handleRejectOrder,
   };
 };

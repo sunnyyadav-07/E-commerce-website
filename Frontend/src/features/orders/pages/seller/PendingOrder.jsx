@@ -2,6 +2,7 @@ import { useSelector } from "react-redux";
 import { Clock } from "lucide-react";
 import OrderCard from "../../components/OrderCard";
 import OrderSkeleton from "../../components/OrderSkeleton";
+import { useOrder } from "../../hooks/useOrder";
 
 /* ── empty state ── */
 const EmptyState = () => (
@@ -19,8 +20,10 @@ const EmptyState = () => (
 /* ── page ── */
 const PendingOrder = () => {
   const loading = useSelector((state) => state.order.loading);
-  const pendingOrders = useSelector((state) => state.order.sellerOrders.pending);
-
+  const pendingOrders = useSelector(
+    (state) => state.order.sellerOrders.pending,
+  );
+  const { handleAcceptOrder, handleRejectOrder } = useOrder();
   return (
     <div className="max-w-5xl mx-auto px-6 md:px-10 py-8">
       {/* Section header */}
@@ -58,10 +61,28 @@ const PendingOrder = () => {
               order={order}
               actions={
                 <>
-                  <button className="px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-widest bg-red-50 text-red-500 ring-1 ring-red-100 hover:bg-red-100 hover:ring-red-200 transition-all duration-150">
+                  <button
+                    onClick={() => {
+                      handleRejectOrder(
+                        order.orderId,
+                        order.itemId,
+                        "cancelled",
+                      );
+                    }}
+                    className="px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-widest bg-red-50 text-red-500 ring-1 ring-red-100 hover:bg-red-100 hover:ring-red-200 transition-all duration-150"
+                  >
                     Reject
                   </button>
-                  <button className="px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-widest bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100 hover:bg-emerald-100 hover:ring-emerald-200 transition-all duration-150">
+                  <button
+                    onClick={() => {
+                      handleAcceptOrder(
+                        order.orderId,
+                        order.itemId,
+                        "processing",
+                      );
+                    }}
+                    className="px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-widest bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100 hover:bg-emerald-100 hover:ring-emerald-200 transition-all duration-150"
+                  >
                     Accept
                   </button>
                 </>

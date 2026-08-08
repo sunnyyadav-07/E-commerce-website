@@ -26,6 +26,18 @@ const orderSlice = createSlice({
       const { status, data } = action.payload;
       state.sellerOrders[status] = data;
     },
+    setOrdersAccordingToStatus: (state, action) => {
+      const { itemId, orderId, status, updatedOrder } = action.payload;
+      const items = state.sellerOrders.pending.filter(
+        (item) => item.itemId !== itemId && item.orderId !== orderId,
+      );
+      if (items) state.sellerOrders.pending = items;
+      if (status === "cancelled") {
+        if (updatedOrder) state.sellerOrders.cancelled.push(updatedOrder);
+      } else if (status === "processing") {
+        if (updatedOrder) state.sellerOrders.processing.push(updatedOrder);
+      }
+    },
     setBuyerOrders: (state, action) => {
       const { status, data } = action.payload;
       if (status) {
@@ -42,6 +54,11 @@ const orderSlice = createSlice({
     },
   },
 });
-export const { setError, setLoading, setSellerOrders, setBuyerOrders } =
-  orderSlice.actions;
+export const {
+  setError,
+  setLoading,
+  setSellerOrders,
+  setBuyerOrders,
+  setOrdersAccordingToStatus,
+} = orderSlice.actions;
 export default orderSlice.reducer;

@@ -11,7 +11,6 @@ import { forgotPasswordSchema } from "../schemas/validationSchemas";
 const ForgotPassword = () => {
   const { handleSendEmailForgotPassword } = useAuth();
   const [isSubmitted, setIsSubmitted] = useState(false);
-
   const {
     register,
     handleSubmit,
@@ -21,10 +20,9 @@ const ForgotPassword = () => {
     resolver: zodResolver(forgotPasswordSchema),
     mode: "onBlur",
   });
-
   const onSubmit = async (data) => {
-    await handleSendEmailForgotPassword(data.email);
-    setIsSubmitted(true);
+    const result = await handleSendEmailForgotPassword(data.email);
+    if (result) setIsSubmitted(true);
   };
 
   return (
@@ -116,7 +114,10 @@ const ForgotPassword = () => {
                     </p>
                     <p className="text-[11px] text-emerald-600/80 leading-relaxed">
                       We&apos;ve sent a reset link to{" "}
-                      <span className="font-semibold">{getValues("email")}</span>.
+                      <span className="font-semibold">
+                        {getValues("email")}
+                      </span>
+                      .
                     </p>
                   </div>
                   <div className="w-full border-t border-emerald-100 pt-3 text-[10px] text-gray-400 leading-relaxed">

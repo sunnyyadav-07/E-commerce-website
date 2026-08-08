@@ -29,3 +29,7 @@ export async function cancelPayment(orderId) {
   return res.data;
 }
 
+export async function changeStatusOfOrder(orderId, itemId, status) {
+  const res = await orderApi.patch("/", { orderId, itemId, status });
+  return res.data;
+}

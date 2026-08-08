@@ -9,6 +9,7 @@ import {
   Menu,
   X
 } from "lucide-react";
+import LogoutButton from "../../shared/components/LogoutButton";
 
 const SellerNavigation = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -87,6 +88,9 @@ const SellerNavigation = () => {
             </NavLink>
           ))}
         </div>
+
+        {/* Logout */}
+        <LogoutButton variant="sidebar" />
       </nav>
     </>
   );

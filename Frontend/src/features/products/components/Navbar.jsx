@@ -2,7 +2,6 @@ import {
   Heart,
   LayoutDashboard,
   LogIn,
-  LogOut,
   Package,
   ShoppingBag,
 } from "lucide-react";
@@ -10,6 +9,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import useAuth from "../../auth/hooks/useAuth";
 import SearchBar from "../../shared/components/SearchBar";
+import LogoutButton from "../../shared/components/LogoutButton";
 
 const NAV_CATEGORIES = [
   { label: "Men" },
@@ -119,13 +119,7 @@ const Navbar = () => {
 
               {/* Auth button — Logout or Login */}
               {user ? (
-                <button
-                  onClick={handleLogoutUser}
-                  className="cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl text-stone-500 hover:text-red-500 hover:bg-red-50 transition-colors duration-200 text-[11px] uppercase tracking-widest font-bold group"
-                >
-                  <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-200" />
-                  <span className="hidden md:inline">Logout</span>
-                </button>
+                <LogoutButton />
               ) : (
                 <button
                   onClick={() => navigate("/login")}

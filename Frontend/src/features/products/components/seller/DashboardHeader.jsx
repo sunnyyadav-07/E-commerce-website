@@ -1,9 +1,9 @@
-import React from "react";
 import { Link } from "react-router";
 import { ShoppingBag } from "lucide-react";
 import SearchBar from "../../../shared/components/SearchBar";
-
+import { useSelector } from "react-redux";
 const DashboardHeader = () => {
+  const user = useSelector((state) => state.auth.user);
   return (
     <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md pl-16 pr-6 py-4 md:px-6 flex items-center justify-end border-b border-slate-100">
       <div className="flex items-center gap-4">
@@ -11,7 +11,10 @@ const DashboardHeader = () => {
           to="/"
           className="flex items-center gap-2 px-4 py-2 rounded-xl text-[#3b557e] bg-[#3b557e]/8 hover:bg-[#3b557e]/15 border border-[#3b557e]/15 hover:border-[#3b557e]/30 font-semibold text-xs tracking-wide transition-all group"
         >
-          <ShoppingBag size={15} className="group-hover:scale-110 transition-transform" />
+          <ShoppingBag
+            size={15}
+            className="group-hover:scale-110 transition-transform"
+          />
           Browse Store
         </Link>
 
@@ -22,7 +25,7 @@ const DashboardHeader = () => {
         <div className="flex items-center gap-3 cursor-pointer group">
           <div className="text-right hidden sm:block">
             <p className="text-xs font-bold text-[#1a1a1a] group-hover:text-[#3b557e] transition-colors">
-              Alex Morgan
+              {user?.fullname}
             </p>
           </div>
           <div className="w-9 h-9 rounded-full bg-slate-100 border-2 border-white shadow-sm flex items-center justify-center overflow-hidden group-hover:shadow-md transition-all">

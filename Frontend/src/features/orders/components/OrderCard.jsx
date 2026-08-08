@@ -74,7 +74,7 @@ const OrderCard = ({ order, actions }) => {
               Order ID
             </p>
             <p className="text-[11px] font-black text-stone-700 tracking-wider font-mono mt-0.5">
-              #{orderId.slice(-8).toUpperCase()}
+              #{orderId?.slice(-8).toUpperCase()}
             </p>
           </div>
         </div>
@@ -139,14 +139,7 @@ const OrderCard = ({ order, actions }) => {
                 <span className="text-[10px] font-semibold text-stone-600">Size {size}</span>
               </div>
             )}
-            {variantDetails?.sku && (
-              <div className="flex items-center gap-1 bg-stone-50 rounded-lg px-2 py-1 ring-1 ring-stone-100">
-                <Barcode className="w-3 h-3 text-stone-400" />
-                <span className="text-[10px] font-semibold text-stone-500 font-mono truncate max-w-[180px]">
-                  {variantDetails.sku}
-                </span>
-              </div>
-            )}
+
           </div>
 
           {/* Qty + price row */}
