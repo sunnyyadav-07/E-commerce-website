@@ -10,6 +10,7 @@ import {
   ChevronRight,
   Package,
 } from "lucide-react";
+import { useOrder } from "../hooks/useOrder";
 
 /* ── Status config ─────────────────────────────────────── */
 const STATUS = {
@@ -86,6 +87,7 @@ const fmtDate = (iso) =>
  */
 const BuyerOrderCard = ({ order }) => {
   const navigate = useNavigate();
+  const { handleRejectOrder } = useOrder();
   const { _id, totalAmount, createdAt, items = [] } = order;
 
   // Determine an "overall" status: if all items share one status, show that; otherwise "mixed"
@@ -159,17 +161,41 @@ const BuyerOrderCard = ({ order }) => {
       </div>
 
       {/* ── Footer ── */}
-      <div className="px-5 py-3 bg-stone-50/60 border-t border-stone-50 flex items-center justify-between">
+      <div className="px-5 py-3 bg-stone-50/60 border-t border-stone-50 flex items-center justify-between gap-3 flex-wrap">
         <span className="text-sm font-black text-stone-900">
           ₹{totalAmount?.toLocaleString("en-IN")}
         </span>
-        <button
-          onClick={() => navigate(`/order/${_id}`)}
-          className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-widest bg-[#3b557e]/10 text-[#3b557e] ring-1 ring-[#3b557e]/20 hover:bg-[#3b557e] hover:text-white transition-all duration-200"
-        >
-          View Details
-          <ChevronRight className="w-3.5 h-3.5" />
-        </button>
+
+        <div className="flex items-center gap-2">
+          {/* Cancel button — pending / processing / shipped */}
+          {["pending", "processing", "shipped"].includes(overallStatus) && (
+            <button
+              onClick={() => {
+                handleRejectOrder(_id, items.itemId, "cancelled");
+              }}
+              className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-widest bg-red-50 text-red-500 ring-1 ring-red-200 hover:bg-red-500 hover:text-white transition-all duration-200"
+            >
+              <XCircle className="w-3.5 h-3.5" />
+              Cancel Order
+            </button>
+          )}
+
+          {/* Return button — delivered only */}
+          {overallStatus === "delivered" && (
+            <button className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-widest bg-orange-50 text-orange-500 ring-1 ring-orange-200 hover:bg-orange-500 hover:text-white transition-all duration-200">
+              <RotateCcw className="w-3.5 h-3.5" />
+              Return Order
+            </button>
+          )}
+
+          <button
+            onClick={() => navigate(`/order/${_id}`)}
+            className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-widest bg-[#3b557e]/10 text-[#3b557e] ring-1 ring-[#3b557e]/20 hover:bg-[#3b557e] hover:text-white transition-all duration-200"
+          >
+            View Details
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
     </div>
   );
