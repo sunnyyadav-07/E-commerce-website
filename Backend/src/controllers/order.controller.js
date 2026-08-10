@@ -106,6 +106,11 @@ async function getSellerOrdersByStatus(sellerId, status, isSeen = false) {
         },
       },
     },
+    {
+      $sort: {
+        createdAt: -1,
+      },
+    },
   ]);
 
   return orders;
@@ -212,10 +217,21 @@ export async function updateProductStatusContoller(req, res, next) {
     if (!updatedOrder) {
       throw new AppError("Order or item not found", 404);
     }
+    await productModel.updateOne(
+      { _id: item.product, "variants._id": item.variant },
+      { $inc: { "variants.$.stock": item.quantity } },
+    );
+    const orders = await getSellerOrdersByStatus(sellerId, status);
+    const finalUpdatedOrder = orders.filter(
+      (order) =>
+        order.orderId.toString() === orderId &&
+        order.itemId.toString() === itemId &&
+        order.itemStatus === status,
+    );
     res.status(200).json({
       success: true,
       message: "Product status updated successfully",
-      updatedOrder,
+      updatedOrder: finalUpdatedOrder[0],
     });
   } catch (error) {
     console.log("error in accept order api");
@@ -397,6 +413,54 @@ export async function getMyOrderController(req, res, next) {
     });
   } catch (error) {
     console.log("error in fetching my orders logic");
+    next(error);
+  }
+}
+
+export async function cancelOrderByBuyerController(req, res, next) {
+  try {
+    const { orderId, itemId } = req.body;
+    const order = await orderModel.findOne({
+      _id: orderId,
+      user: req.user._id,
+    });
+    if (!order) {
+      throw new AppError("Order not found", 404);
+    }
+    const item = order.items.id(itemId);
+    if (!item) {
+      throw new AppError("Item not found in this order", 404);
+    }
+    if (["delivered", "cancelled", "shipped"].includes(item.itemStatus)) {
+      throw new AppError(
+        `Cannot cancel item with status: ${item.itemStatus}`,
+        400,
+      );
+    }
+    await productModel.updateOne(
+      { _id: item.product, "variants._id": item.variant },
+      { $inc: { "variants.$.stock": item.quantity } },
+    );
+    item.itemStatus = "cancelled";
+    item.statusHistory.push({
+      status: "cancelled",
+      changedBy: req.user._id,
+    });
+    await order.save();
+    const orders = await getSellerOrdersByStatus(item.seller, "cancelled");
+    const updatedOrder = orders.filter(
+      (order) =>
+        order.orderId.toString() === orderId &&
+        order.itemId.toString() === itemId &&
+        order.itemStatus === "cancelled",
+    );
+    res.status(200).json({
+      success: true,
+      message: "Product order cancelled successfully",
+      updatedOrder: updatedOrder[0],
+    });
+  } catch (error) {
+    console.log("error in order cancelation by buyer logic");
     next(error);
   }
 }

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { orderValidator } from "../validators/order.validator.js";
 import {
+  cancelOrderByBuyerController,
   getMyOrderController,
   getSellerOrdersController,
   markOrderAsSeenController,
@@ -34,10 +35,11 @@ orderRouter.get(
   authorizeRole("buyer"),
   orderDetailsController,
 );
-orderRouter.get(
-  "/",
+orderRouter.get("/", authUser, authorizeRole("buyer"), getMyOrderController);
+orderRouter.patch(
+  "/buyer",
   authUser,
   authorizeRole("buyer"),
-  getMyOrderController,
+  cancelOrderByBuyerController,
 );
 export default orderRouter;
