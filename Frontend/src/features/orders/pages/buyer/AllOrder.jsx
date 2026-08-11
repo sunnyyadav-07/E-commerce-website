@@ -2,20 +2,10 @@ import { useSelector } from "react-redux";
 import OrderList from "../../components/OrderList";
 
 const AllOrder = () => {
-  const buyerOrders = useSelector((state) => state.order.buyerOrders);
-  const loading = useSelector((state) => state.order.loading);
+  const buyerOrders = useSelector((state) => state.order.buyerOrders.all);
+  const loading = useSelector((state) => state.order.buyerLoading.all);
 
-  // Use the dedicated "all" bucket if populated; otherwise merge all status slices
-  const orders =
-    buyerOrders.all?.length > 0
-      ? buyerOrders.all
-      : [
-          ...buyerOrders.pending,
-          ...buyerOrders.processing,
-          ...buyerOrders.shipped,
-          ...buyerOrders.delivered,
-          ...buyerOrders.cancelled,
-        ];
+  const orders = buyerOrders;
 
   return (
     <OrderList

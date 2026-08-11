@@ -153,7 +153,7 @@ const OrderCard = ({ order, actions }) => {
               <p className="text-[10px] text-stone-400 uppercase tracking-widest">Unit price</p>
               <p className="text-[13px] font-black text-stone-800 flex items-center gap-0.5">
                 <IndianRupee className="w-3 h-3" />
-                {price.toLocaleString("en-IN")}
+                {price?.toLocaleString("en-IN")}
               </p>
             </div>
           </div>
@@ -185,7 +185,7 @@ const OrderCard = ({ order, actions }) => {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1 text-stone-800">
             <IndianRupee className="w-3 h-3" />
-            <span className="text-xs font-black">{totalPrice.toLocaleString("en-IN")}</span>
+            <span className="text-xs font-black">{totalPrice?.toLocaleString("en-IN")}</span>
           </div>
           {actions && <div className="flex items-center gap-2">{actions}</div>}
         </div>

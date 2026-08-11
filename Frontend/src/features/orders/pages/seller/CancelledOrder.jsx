@@ -17,7 +17,7 @@ const EmptyState = () => (
 );
 
 const CancelledOrder = () => {
-  const loading = useSelector((state) => state.order.loading);
+  const loading = useSelector((state) => state.order.sellerLoading.cancelled);
   const cancelledOrders = useSelector((state) => state.order.sellerOrders.cancelled);
   return (
     <div className="max-w-5xl mx-auto px-6 md:px-10 py-8">

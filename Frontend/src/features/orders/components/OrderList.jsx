@@ -6,11 +6,15 @@ import OrderSkeleton from "./OrderSkeleton";
  * OrderList — renders a list of buyer orders with loading / empty states.
  *
  * Props:
- *  orders  — array of order objects from Redux
- *  loading — boolean
+ *  orders     — array of order objects from Redux
+ *  loading    — boolean (per-status flag, initialised to true in Redux)
  *  emptyLabel — string shown when list is empty
  */
-const OrderList = ({ orders = [], loading = false, emptyLabel = "No orders found" }) => {
+const OrderList = ({
+  orders = [],
+  loading = false,
+  emptyLabel = "No orders found",
+}) => {
   if (loading) {
     return (
       <div className="space-y-4">
@@ -37,7 +41,7 @@ const OrderList = ({ orders = [], loading = false, emptyLabel = "No orders found
   return (
     <div className="space-y-4">
       {orders.map((order) => (
-        <BuyerOrderCard key={order._id} order={order} />
+        <BuyerOrderCard key={order.itemId} order={order} />
       ))}
     </div>
   );

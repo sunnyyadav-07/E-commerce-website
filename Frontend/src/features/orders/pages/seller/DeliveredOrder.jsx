@@ -17,7 +17,7 @@ const EmptyState = () => (
 );
 
 const DeliveredOrder = () => {
-  const loading = useSelector((state) => state.order.loading);
+  const loading = useSelector((state) => state.order.sellerLoading.delivered);
   const deliveredOrders = useSelector((state) => state.order.sellerOrders.delivered);
   return (
     <div className="max-w-5xl mx-auto px-6 md:px-10 py-8">

@@ -3,7 +3,7 @@ import OrderList from "../../components/OrderList";
 
 const Pending = () => {
   const orders = useSelector((state) => state.order.buyerOrders.pending);
-  const loading = useSelector((state) => state.order.loading);
+  const loading = useSelector((state) => state.order.buyerLoading.pending);
 
   return (
     <OrderList

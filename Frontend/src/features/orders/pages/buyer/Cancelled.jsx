@@ -3,7 +3,7 @@ import OrderList from "../../components/OrderList";
 
 const Cancelled = () => {
   const orders = useSelector((state) => state.order.buyerOrders.cancelled);
-  const loading = useSelector((state) => state.order.loading);
+  const loading = useSelector((state) => state.order.buyerLoading.cancelled);
 
   return (
     <OrderList

@@ -1,12 +1,16 @@
 import { useDispatch } from "react-redux";
 import {
   setBuyerOrders,
+  setBuyerLoading,
   setError,
   setLoading,
+  setOrderOfBuyer,
   setOrdersAccordingToStatus,
   setSellerOrders,
+  setSellerLoading,
 } from "../state/order.slice";
 import {
+  cancelOrderBybuyer,
   cancelPayment,
   changeStatusOfOrder,
   createOrder,
@@ -34,14 +38,14 @@ export const useOrder = () => {
   }
   async function handleGetSellerOrders(status, isSeen) {
     try {
-      dispatch(setLoading(true));
+      dispatch(setSellerLoading({ status, value: true }));
       const res = await getSellersOrders(status, isSeen);
       dispatch(setSellerOrders({ status: status, data: res.orders }));
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setError(errMsg));
     } finally {
-      dispatch(setLoading(false));
+      dispatch(setSellerLoading({ status, value: false }));
     }
   }
   async function handleMarkeOrdersSeen() {
@@ -89,7 +93,7 @@ export const useOrder = () => {
   }
   async function handleMyOrders(status) {
     try {
-      dispatch(setLoading(true));
+      dispatch(setBuyerLoading({ status, value: true }));
       const res = await myOrders(status);
       dispatch(setBuyerOrders({ status, data: res.orders }));
       return res.orders;
@@ -97,7 +101,7 @@ export const useOrder = () => {
       const errMsg = error.response?.data?.message || error.message;
       dispatch(setError(errMsg));
     } finally {
-      dispatch(setLoading(false));
+      dispatch(setBuyerLoading({ status, value: false }));
     }
   }
   async function handleAcceptOrder(orderId, itemId, status) {
@@ -106,7 +110,6 @@ export const useOrder = () => {
       const res = await changeStatusOfOrder(orderId, itemId, status);
       dispatch(
         setOrdersAccordingToStatus({
-          orderId,
           itemId,
           status,
           updatedOrder: res.updatedOrder,
@@ -127,7 +130,6 @@ export const useOrder = () => {
       const res = await changeStatusOfOrder(orderId, itemId, status);
       dispatch(
         setOrdersAccordingToStatus({
-          orderId,
           itemId,
           status,
           updatedOrder: res.updatedOrder,
@@ -142,6 +144,27 @@ export const useOrder = () => {
       dispatch(setLoading(false));
     }
   }
+
+  async function handleCancelOrderByBuyer(orderId, itemId) {
+    try {
+      dispatch(setLoading(true));
+      const res = await cancelOrderBybuyer(orderId, itemId);
+      dispatch(
+        setOrderOfBuyer({
+          itemId,
+          updatedOrder: res.updatedOrder,
+        }),
+      );
+      toast.success("Order cancelled successfully");
+      return res;
+    } catch (error) {
+      const errMsg = error.response?.data?.message || error.message;
+      dispatch(setError(errMsg));
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+
   return {
     handleCreateOrder,
     handleGetSellerOrders,
@@ -152,5 +175,6 @@ export const useOrder = () => {
     handleMyOrders,
     handleAcceptOrder,
     handleRejectOrder,
+    handleCancelOrderByBuyer,
   };
 };

@@ -19,7 +19,7 @@ const EmptyState = () => (
 
 /* ── page ── */
 const PendingOrder = () => {
-  const loading = useSelector((state) => state.order.loading);
+  const loading = useSelector((state) => state.order.sellerLoading.pending);
   const pendingOrders = useSelector(
     (state) => state.order.sellerOrders.pending,
   );
@@ -57,7 +57,7 @@ const PendingOrder = () => {
         <div className="space-y-4">
           {pendingOrders.map((order) => (
             <OrderCard
-              key={order.itemId ?? order.orderId}
+              key={order.itemId}
               order={order}
               actions={
                 <>

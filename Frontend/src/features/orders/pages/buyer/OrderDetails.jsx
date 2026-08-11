@@ -15,6 +15,7 @@ import {
   CreditCard,
 } from "lucide-react";
 import { useOrder } from "../../hooks/useOrder";
+import { fmtDateLong, fmtTime } from "../../../shared/utils/dateTime";
 
 /* ── Status config ───────────────────────────────────────────── */
 const STATUS = {
@@ -212,13 +213,7 @@ const OrderDetails = () => {
   }, [orderId]);
 
   const addr = order?.shippingAddress;
-  const formattedDate = order?.createdAt
-    ? new Date(order.createdAt).toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      })
-    : "-";
+
 
   return (
     <div className="max-w-2xl mx-auto px-4 md:px-6 py-8">
@@ -254,7 +249,10 @@ const OrderDetails = () => {
             </div>
             <div className="flex items-center gap-1.5 text-[11px] text-stone-400 shrink-0">
               <CalendarDays className="w-3.5 h-3.5" />
-              {formattedDate}
+              {fmtDateLong(order?.createdAt)}
+              <span className="w-px h-3 bg-stone-200" />
+              <Clock className="w-3.5 h-3.5" />
+              {fmtTime(order?.createdAt)}
             </div>
           </div>
 

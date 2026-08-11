@@ -33,3 +33,7 @@ export async function changeStatusOfOrder(orderId, itemId, status) {
   const res = await orderApi.patch("/", { orderId, itemId, status });
   return res.data;
 }
+export async function cancelOrderBybuyer(orderId, itemId) {
+  const res = await orderApi.patch("/buyer", { orderId, itemId });
+  return res.data;
+}

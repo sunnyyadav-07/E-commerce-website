@@ -8,7 +8,6 @@ const Suggestions = ({ items = [], query = "", onSelect }) => {
 
   const handleClick = (item) => {
     navigate(`/product/${item._id}`);
-    if (onSelect) onSelect();
   };
 
   const formatPrice = (price) =>

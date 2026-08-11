@@ -11,6 +11,7 @@ import {
   Package,
 } from "lucide-react";
 import { useOrder } from "../hooks/useOrder";
+import { fmtDate, fmtTime } from "../../shared/utils/dateTime";
 
 /* ── Status config ─────────────────────────────────────── */
 const STATUS = {
@@ -72,27 +73,38 @@ const StatusBadge = ({ status }) => {
 };
 
 /* ── Format helpers ────────────────────────────────────── */
-const fmtDate = (iso) =>
-  new Date(iso).toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
 
 /**
  * BuyerOrderCard
  *
  * Props:
- *  order — { _id, totalAmount, createdAt, items: [{ itemId, quantity, itemStatus, productTitle, thumbnail: { url } }] }
+ *  order — flat item shape from API:
+ *  { orderId, itemId, itemStatus, price, quantity, createdAt,
+ *    productDetails: { productId, title },
+ *    variantDetails: { variantId, sku, thumbnail: { url } } }
  */
 const BuyerOrderCard = ({ order }) => {
   const navigate = useNavigate();
-  const { handleRejectOrder } = useOrder();
-  const { _id, totalAmount, createdAt, items = [] } = order;
+  const { handleCancelOrderByBuyer } = useOrder();
 
-  // Determine an "overall" status: if all items share one status, show that; otherwise "mixed"
-  const statuses = [...new Set(items.map((i) => i.itemStatus?.toLowerCase()))];
-  const overallStatus = statuses.length === 1 ? statuses[0] : "pending";
+  const {
+    orderId,
+    itemId,
+    itemStatus,
+    price,
+    quantity,
+    createdAt,
+    productDetails = {},
+    variantDetails = {},
+  } = order;
+
+  const thumbnailUrl = variantDetails.thumbnail?.url;
+  const productTitle = productDetails.title;
+  const productId = productDetails.productId;
+  const sku = variantDetails.sku;
+  const canCancel = ["pending", "processing"].includes(
+    itemStatus?.toLowerCase()
+  );
 
   return (
     <div className="bg-white rounded-2xl border border-stone-100 shadow-sm hover:shadow-md hover:border-stone-200 transition-all duration-200 overflow-hidden group">
@@ -102,94 +114,89 @@ const BuyerOrderCard = ({ order }) => {
           <div className="w-7 h-7 rounded-xl bg-stone-100 flex items-center justify-center group-hover:bg-[#3b557e]/10 transition-colors duration-200">
             <ShoppingBag className="w-3.5 h-3.5 text-stone-400 group-hover:text-[#3b557e] transition-colors duration-200" />
           </div>
-          <div className="flex items-center gap-1 text-[11px] text-stone-400">
+          <div className="flex items-center gap-1.5 text-[11px] text-stone-400">
             <CalendarDays className="w-3 h-3" />
             <span>{fmtDate(createdAt)}</span>
+            <span className="w-px h-3 bg-stone-200" />
+            <Clock className="w-3 h-3" />
+            <span>{fmtTime(createdAt)}</span>
           </div>
         </div>
 
-        <StatusBadge status={overallStatus} />
+        <StatusBadge status={itemStatus} />
       </div>
 
-      {/* ── Items Preview ── */}
-      <div className="px-5 py-4 space-y-3">
-        {items.slice(0, 3).map((item) => (
+      {/* ── Item Row ── */}
+      <div className="px-5 py-4">
+        <div className="flex items-center gap-3 rounded-xl p-1 -mx-1">
+          {/* Thumbnail */}
           <div
-            key={item.itemId}
-            onClick={() => item.product && navigate(`/product/${item.product}`)}
-            className={`flex items-center gap-3 rounded-xl p-1 -mx-1 transition-colors duration-150 ${
-              item.product ? "cursor-pointer hover:bg-stone-50" : ""
+            onClick={() => productId && navigate(`/product/${productId}`)}
+            className={`w-12 h-14 rounded-xl overflow-hidden shrink-0 bg-stone-100 border border-stone-100 ${
+              productId ? "cursor-pointer" : ""
             }`}
           >
-            {/* Thumbnail */}
-            <div className="w-12 h-14 rounded-xl overflow-hidden shrink-0 bg-stone-100 border border-stone-100">
-              {item.thumbnail?.url ? (
-                <img
-                  src={item.thumbnail.url}
-                  alt={item.productTitle}
-                  className="w-full h-full object-cover"
-                  onError={(e) => (e.currentTarget.style.display = "none")}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Package className="w-4 h-4 text-stone-300" />
-                </div>
-              )}
-            </div>
-
-            {/* Info */}
-            <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-bold text-stone-900 truncate leading-snug">
-                {item.productTitle}
-              </p>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider">
-                  Qty: {item.quantity}
-                </span>
-                <span className="w-px h-3 bg-stone-200" />
-                <StatusBadge status={item.itemStatus} />
+            {thumbnailUrl ? (
+              <img
+                src={thumbnailUrl}
+                alt={productTitle}
+                className="w-full h-full object-cover"
+                onError={(e) => (e.currentTarget.style.display = "none")}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <Package className="w-4 h-4 text-stone-300" />
               </div>
+            )}
+          </div>
+
+          {/* Info */}
+          <div
+            onClick={() => productId && navigate(`/product/${productId}`)}
+            className={`flex-1 min-w-0 ${
+              productId ? "cursor-pointer hover:opacity-80 transition-opacity" : ""
+            }`}
+          >
+            <p className="text-[13px] font-bold text-stone-900 truncate leading-snug">
+              {productTitle}
+            </p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider">
+                Qty: {quantity}
+              </span>
             </div>
           </div>
-        ))}
-
-        {items.length > 3 && (
-          <p className="text-[10px] text-stone-400 font-semibold uppercase tracking-widest pl-1">
-            +{items.length - 3} more item{items.length - 3 !== 1 ? "s" : ""}
-          </p>
-        )}
+        </div>
       </div>
 
       {/* ── Footer ── */}
       <div className="px-5 py-3 bg-stone-50/60 border-t border-stone-50 flex items-center justify-between gap-3 flex-wrap">
         <span className="text-sm font-black text-stone-900">
-          ₹{totalAmount?.toLocaleString("en-IN")}
+          ₹{price?.toLocaleString("en-IN")}
         </span>
 
         <div className="flex items-center gap-2">
-          {/* Cancel button — pending / processing / shipped */}
-          {["pending", "processing", "shipped"].includes(overallStatus) && (
+          {/* Cancel button */}
+          {canCancel && (
             <button
-              onClick={() => {
-                handleRejectOrder(_id, items.itemId, "cancelled");
-              }}
+              onClick={() => handleCancelOrderByBuyer(orderId, itemId)}
               className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-widest bg-red-50 text-red-500 ring-1 ring-red-200 hover:bg-red-500 hover:text-white transition-all duration-200"
             >
               <XCircle className="w-3.5 h-3.5" />
-              Cancel Order
+              Cancel
             </button>
           )}
 
           {/* Return button — delivered only */}
-          {overallStatus === "delivered" && (
+          {itemStatus?.toLowerCase() === "delivered" && (
             <button className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-widest bg-orange-50 text-orange-500 ring-1 ring-orange-200 hover:bg-orange-500 hover:text-white transition-all duration-200">
               <RotateCcw className="w-3.5 h-3.5" />
-              Return Order
+              Return
             </button>
           )}
 
           <button
-            onClick={() => navigate(`/order/${_id}`)}
+            onClick={() => navigate(`/order/${orderId}`)}
             className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-widest bg-[#3b557e]/10 text-[#3b557e] ring-1 ring-[#3b557e]/20 hover:bg-[#3b557e] hover:text-white transition-all duration-200"
           >
             View Details

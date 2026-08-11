@@ -3,7 +3,7 @@ import OrderList from "../../components/OrderList";
 
 const Processing = () => {
   const orders = useSelector((state) => state.order.buyerOrders.processing);
-  const loading = useSelector((state) => state.order.loading);
+  const loading = useSelector((state) => state.order.buyerLoading.processing);
 
   return (
     <OrderList
