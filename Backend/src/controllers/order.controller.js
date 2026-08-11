@@ -217,10 +217,18 @@ export async function updateProductStatusContoller(req, res, next) {
     if (!updatedOrder) {
       throw new AppError("Order or item not found", 404);
     }
-    await productModel.updateOne(
-      { _id: item.product, "variants._id": item.variant },
-      { $inc: { "variants.$.stock": item.quantity } },
-    );
+    const item = updatedOrder.items.id(itemId);
+    if (status === "cancelled") {
+      const stockResult = await productModel.updateOne(
+        { _id: item.product, "variants._id": item.variant },
+        { $inc: { "variants.$.stock": item.quantity } },
+      );
+      if (stockResult.modifiedCount === 0) {
+        console.warn(
+          `Stock restore failed for item ${itemId} — variant not found`,
+        );
+      }
+    }
     const orders = await getSellerOrdersByStatus(sellerId, status);
     const finalUpdatedOrder = orders.filter(
       (order) =>
@@ -234,7 +242,7 @@ export async function updateProductStatusContoller(req, res, next) {
       updatedOrder: finalUpdatedOrder[0],
     });
   } catch (error) {
-    console.log("error in accept order api");
+    console.log("error in changing order status api logic");
     next(error);
   }
 }
@@ -333,79 +341,87 @@ export async function orderDetailsController(req, res, next) {
   }
 }
 
+export async function getBuyerOrders(userId, status) {
+  const orders = await orderModel.aggregate([
+    {
+      $match: {
+        user: userId,
+        orderStatus: "placed",
+        ...(status ? { "items.itemStatus": status } : {}),
+      },
+    },
+    {
+      $project: {
+        createdAt: 1,
+        items: status
+          ? {
+              $filter: {
+                input: "$items",
+                as: "item",
+                cond: { $eq: ["$$item.itemStatus", status] },
+              },
+            }
+          : "$items",
+      },
+    },
+    {
+      $unwind: "$items",
+    },
+    {
+      $lookup: {
+        from: "products",
+        localField: "items.product",
+        foreignField: "_id",
+        as: "productDetails",
+      },
+    },
+    {
+      $unwind: "$productDetails",
+    },
+    {
+      $addFields: {
+        matchedVariant: {
+          $filter: {
+            input: "$productDetails.variants",
+            as: "v",
+            cond: { $eq: ["$$v._id", "$items.variant"] },
+          },
+        },
+      },
+    },
+    {
+      $unwind: "$matchedVariant",
+    },
+    {
+      $project: {
+        orderId: "$_id",
+        _id: 0,
+        createdAt: 1,
+        price: "$items.price",
+        quantity: "$items.quantity",
+        itemId: "$items._id",
+        itemStatus: "$items.itemStatus",
+        productDetails: {
+          productId: "$productDetails._id",
+          title: "$productDetails.title",
+        },
+        variantDetails: {
+          variantId: "$matchedVariant._id",
+          thumbnail: { $arrayElemAt: ["$matchedVariant.images", 0] },
+        },
+      },
+    },
+    {
+      $sort: { createdAt: -1 },
+    },
+  ]);
+  return orders;
+}
 export async function getMyOrderController(req, res, next) {
   try {
     const userId = req.user._id;
     const { status } = req.query;
-
-    const orders = await orderModel.aggregate([
-      {
-        $match: {
-          user: userId,
-          orderStatus: "placed",
-        },
-      },
-      {
-        $unwind: "$items",
-      },
-      ...(status ? [{ $match: { "items.itemStatus": status } }] : []),
-      {
-        $lookup: {
-          from: "products",
-          localField: "items.product",
-          foreignField: "_id",
-          as: "productDetails",
-        },
-      },
-      {
-        $unwind: "$productDetails",
-      },
-      {
-        $addFields: {
-          matchedVariant: {
-            $filter: {
-              input: "$productDetails.variants",
-              as: "v",
-              cond: {
-                $eq: ["$$v._id", "$items.variant"],
-              },
-            },
-          },
-        },
-      },
-      {
-        $unwind: "$matchedVariant",
-      },
-      {
-        $group: {
-          _id: "$_id",
-          totalAmount: {
-            $first: "$totalAmount",
-          },
-          createdAt: {
-            $first: "$createdAt",
-          },
-          items: {
-            $push: {
-              itemId: "$items._id",
-              quantity: "$items.quantity",
-              itemStatus: "$items.itemStatus",
-              product: "$productDetails._id",
-              variant: "$matchedVariant._id",
-              productTitle: "$productDetails.title",
-              thumbnail: {
-                $arrayElemAt: ["$matchedVariant.images", 0],
-              },
-            },
-          },
-        },
-      },
-      {
-        $sort: {
-          createdAt: -1,
-        },
-      },
-    ]);
+    const orders = await getBuyerOrders(userId, status);
     res.status(200).json({
       success: true,
       message: "Orders fetched successfully",
@@ -437,18 +453,23 @@ export async function cancelOrderByBuyerController(req, res, next) {
         400,
       );
     }
-    await productModel.updateOne(
+    const stockResult = await productModel.updateOne(
       { _id: item.product, "variants._id": item.variant },
       { $inc: { "variants.$.stock": item.quantity } },
     );
+    if (stockResult.modifiedCount === 0) {
+      console.warn(
+        `Stock restore failed for item ${itemId} — variant not found`,
+      );
+    }
     item.itemStatus = "cancelled";
     item.statusHistory.push({
       status: "cancelled",
       changedBy: req.user._id,
     });
     await order.save();
-    const orders = await getSellerOrdersByStatus(item.seller, "cancelled");
-    const updatedOrder = orders.filter(
+    const orders = await getBuyerOrders(req.user._id, "cancelled");
+    const finalUpdatedOrder = orders.filter(
       (order) =>
         order.orderId.toString() === orderId &&
         order.itemId.toString() === itemId &&
@@ -457,7 +478,7 @@ export async function cancelOrderByBuyerController(req, res, next) {
     res.status(200).json({
       success: true,
       message: "Product order cancelled successfully",
-      updatedOrder: updatedOrder[0],
+      updatedOrder: finalUpdatedOrder[0],
     });
   } catch (error) {
     console.log("error in order cancelation by buyer logic");
