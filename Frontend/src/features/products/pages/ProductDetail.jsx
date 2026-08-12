@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router";
+import { useParams, useNavigate, useLocation } from "react-router";
 import useProduct from "../hooks/useProduct";
 import { useSelector } from "react-redux";
 import {
@@ -23,10 +23,12 @@ import AppFooter from "../../shared/components/AppFooter";
 import Loading from "../../shared/components/Loading";
 import { useOrder } from "../../orders/hooks/useOrder";
 import { usePayment } from "../../orders/hooks/usePayment";
+import { useAuthGuard } from "../../auth/hooks/useAuthGuard";
 
 /* ─── Component ──────────────────────────────────────────── */
 const ProductDetail = () => {
   const { productId } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [selectedVariantId, setSelectedVariantId] = useState(null);
@@ -42,6 +44,7 @@ const ProductDetail = () => {
   const wishListItems = useSelector((state) => state.wishlist.allWishListItem);
   const { handleCreateOrder } = useOrder();
   const { initiatePayment } = usePayment();
+  const { requireAuth } = useAuthGuard();
   const wishListedItem = wishListItems.some(
     (item) => item.variantId === selectedVariantId,
   );
@@ -56,14 +59,16 @@ const ProductDetail = () => {
     initiatePayment(user, items);
   }
   function handleAddItemToWishList(productId, variantId) {
-    if (wishListedItem) {
-      handleRemoveItemFromWishList(productId, variantId);
-    } else {
-      handleAddToWishList({
-        productId,
-        variantId,
-      });
-    }
+    requireAuth(() => {
+      if (wishListedItem) {
+        handleRemoveItemFromWishList(productId, variantId);
+      } else {
+        handleAddToWishList({
+          productId,
+          variantId,
+        });
+      }
+    });
   }
   useEffect(() => {
     (async () => {
@@ -84,12 +89,14 @@ const ProductDetail = () => {
     setQuantity(1);
   }, [selectedVariantId]);
   function addToCartHandle(variantId) {
-    const data = {
-      productId,
-      variantId,
-      quantity,
-    };
-    handleAddToCart(data);
+    requireAuth(() => {
+      const data = {
+        productId,
+        variantId,
+        quantity,
+      };
+      handleAddToCart(data);
+    });
   }
   /* ── derived values from selected variant ── */
   const selectedVariant =
@@ -471,11 +478,13 @@ const ProductDetail = () => {
                 <button
                   disabled={stock === 0}
                   onClick={() => {
-                    if (user.address) {
-                      handleCheckOut();
-                    } else {
-                      navigate("/checkout/address");
-                    }
+                    requireAuth(() => {
+                      if (Object.keys(user.address).length > 0) {
+                        handleCheckOut();
+                      } else {
+                        navigate("/checkout/address", { state: location.state });
+                      }
+                    });
                   }}
                   className="cursor-pointer w-full flex items-center justify-center gap-2 py-4 bg-stone-900 text-white text-sm font-bold uppercase tracking-widest rounded-2xl hover:bg-stone-700 active:scale-[0.98] transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
                 >

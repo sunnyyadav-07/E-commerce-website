@@ -8,7 +8,6 @@ import ProductDetail from "../features/products/pages/ProductDetail.jsx";
 import CreateParentProduct from "../features/products/pages/Seller/CreateParentProduct.jsx";
 import CreateProductVariants from "../features/products/pages/Seller/CreateProductVariants.jsx";
 import Cart from "../features/addToCart/pages/Cart.jsx";
-import CartProtected from "../features/addToCart/components/CartProtected.jsx";
 import WishList from "../features/wishList/pages/WishList.jsx";
 import EditProduct from "../features/products/pages/Seller/EditProduct.jsx";
 import Catalog from "../features/catalogs/Pages/Catalog.jsx";

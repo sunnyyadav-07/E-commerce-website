@@ -14,7 +14,14 @@ function App() {
   return (
     <>
       <RouterProvider router={router} />
-      <Toaster position="top-center" reverseOrder={false} />
+      <Toaster
+        position="top-center"
+        visibleToasts={1}
+        toastOptions={{
+          duration: 1800,
+        }}
+        reverseOrder={false}
+      />
     </>
   );
 }

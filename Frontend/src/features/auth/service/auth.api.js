@@ -44,5 +44,9 @@ export async function sendEmailForgotPassword(email) {
 
 export async function resetPassword(data) {
   const response = await api.post("/reset-password", data);
-  return response.data
+  return response.data;
+}
+export async function saveUserAddress(data) {
+  const response = await api.post("/save-address", data);
+  return response.data;
 }

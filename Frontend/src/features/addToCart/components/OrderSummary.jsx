@@ -8,11 +8,12 @@ import {
 } from "lucide-react";
 import { usePayment } from "../../orders/hooks/usePayment";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 
 /* ── Order Summary Panel ─────────────────────────────────── */
 const OrderSummary = ({ items, onContinueShopping }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const user = useSelector((state) => state.auth.user);
   const { initiatePayment } = usePayment();
   function handleCheckout() {
@@ -23,7 +24,7 @@ const OrderSummary = ({ items, onContinueShopping }) => {
         quantity: item.quantity,
       };
     });
-    initiatePayment(user, itemsDetails);
+    initiatePayment(user, itemsDetails, true);
   }
   const subtotal = items?.reduce((acc, item) => {
     const price = item?.price;
@@ -87,7 +88,7 @@ const OrderSummary = ({ items, onContinueShopping }) => {
             if (user.address) {
               handleCheckout();
             } else {
-              navigate("/checkout/address");
+              navigate("/checkout/address", { state: location.state });
             }
           }}
           className="cursor-pointer w-full flex items-center justify-center gap-2 py-4 bg-[#3b557e] text-white text-sm font-bold uppercase tracking-widest rounded-2xl hover:bg-[#2d4363] active:scale-[0.98] transition-all duration-200 shadow-lg hover:shadow-xl"

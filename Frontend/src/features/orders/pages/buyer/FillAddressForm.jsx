@@ -10,6 +10,7 @@ import {
 } from "../../../shared/components/FormUI";
 import AppFooter from "../../../shared/components/AppFooter";
 import { addressSchema } from "../../../auth/schemas/validationSchemas";
+import useAuth from "../../../auth/hooks/useAuth";
 
 /* ═══════════════════════════════════════════════════════════════════════ */
 const FillAddressForm = () => {
@@ -23,9 +24,13 @@ const FillAddressForm = () => {
     resolver: zodResolver(addressSchema),
     mode: "onBlur",
   });
-
-  const onSubmit = (data) => {
-    console.log(data);
+  const { handleSaveUserAddress } = useAuth();
+  const submitHandler = async (data) => {
+    const addressData = await handleSaveUserAddress(data);
+    if (addressData.success) {
+      const from = location.state?.from?.pathname || "/";
+      navigate(from, { replace: true });
+    }
   };
 
   return (
@@ -67,7 +72,7 @@ const FillAddressForm = () => {
 
         {/* ── Card ── */}
         <div className="bg-white rounded-3xl shadow-sm border border-stone-100 p-8">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleSubmit(submitHandler)} className="space-y-6">
             {/* ── Contact ── */}
             <SectionLabel>Contact details</SectionLabel>
 
@@ -75,14 +80,14 @@ const FillAddressForm = () => {
               <FormField
                 label="Full Name"
                 icon={User}
-                error={errors.fullName?.message}
+                error={errors.fullname?.message}
               >
                 <input
                   type="text"
                   id="fullName"
                   placeholder="John Doe"
                   className={inputClass}
-                  {...register("fullName")}
+                  {...register("fullname")}
                 />
               </FormField>
 
@@ -107,14 +112,14 @@ const FillAddressForm = () => {
             <FormField
               label="Address"
               icon={Home}
-              error={errors.address?.message}
+              error={errors.addressLine?.message}
             >
               <textarea
                 id="address"
                 rows={3}
                 placeholder="House / Flat No., Street, Area, Landmark…"
                 className={`${inputClass} resize-none`}
-                {...register("address")}
+                {...register("addressLine")}
               />
             </FormField>
 

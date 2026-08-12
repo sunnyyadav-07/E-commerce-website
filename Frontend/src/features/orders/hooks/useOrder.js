@@ -21,6 +21,7 @@ import {
   verifyPayment,
 } from "../service/order.api";
 import toast from "react-hot-toast";
+import { clearCart } from "../../addToCart/state/cart.slice";
 
 export const useOrder = () => {
   const dispatch = useDispatch();
@@ -59,9 +60,10 @@ export const useOrder = () => {
       dispatch(setLoading(false));
     }
   }
-  async function handleVerifypayment(data) {
+  async function handleVerifypayment(data, isFromCart = false) {
     try {
       const res = await verifyPayment(data);
+      if (isFromCart) dispatch(clearCart());
       toast.success("Payment successful");
       return res;
     } catch (error) {

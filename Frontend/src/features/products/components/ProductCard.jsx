@@ -2,12 +2,17 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useSelector } from "react-redux";
 import { Heart } from "lucide-react";
+import { useAuthGuard } from "../../auth/hooks/useAuthGuard";
+import { useWishList } from "../../wishList/hooks/useWishList";
 
 const ProductCard = ({ product }) => {
   const [hovered, setHovered] = useState(false);
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);
   const isSeller = user?.role === "seller";
+  const { requireAuth } = useAuthGuard();
+  const { handleAddToWishList, handleRemoveItemFromWishList } = useWishList();
+  const wishListItems = useSelector((state) => state.wishlist.allWishListItem);
 
   const defaultVariant =
     product.variants?.find((v) => v.isDefault) || product.variants?.[0];
@@ -16,6 +21,10 @@ const ProductCard = ({ product }) => {
     defaultVariant?.price || product.price || { amount: 0, currency: "INR" };
   const currency =
     price.currency === "INR" ? "₹" : price.currency === "USD" ? "$" : price.currency;
+
+  const isWishlisted = wishListItems.some(
+    (item) => item.productId === product._id && item.variantId === defaultVariant?._id,
+  );
 
   return (
     <div
@@ -57,9 +66,18 @@ const ProductCard = ({ product }) => {
             className={`cursor-pointer absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm transition-all duration-300 hover:scale-110 ${
               hovered ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
             }`}
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              requireAuth(() => {
+                if (isWishlisted) {
+                  handleRemoveItemFromWishList(product._id, defaultVariant?._id);
+                } else {
+                  handleAddToWishList({ productId: product._id, variantId: defaultVariant?._id });
+                }
+              });
+            }}
           >
-            <Heart className="w-4 h-4 text-stone-700" />
+            <Heart className={`w-4 h-4 ${isWishlisted ? "fill-red-500 text-red-500" : "text-stone-700"}`} />
           </button>
         )}
 

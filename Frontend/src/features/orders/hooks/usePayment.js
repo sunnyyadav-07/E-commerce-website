@@ -7,7 +7,7 @@ export const usePayment = () => {
   const navigate = useNavigate();
   const { handleCreateOrder, handleVerifypayment, handlecancelPayment } =
     useOrder();
-  async function initiatePayment(user, items) {
+  async function initiatePayment(user, items, isFromCart = false) {
     const order = await handleCreateOrder({ items });
     const options = {
       key: import.meta.env.VITE_RAZORPAY_KEY_ID,
@@ -19,11 +19,14 @@ export const usePayment = () => {
       handler: async function (response) {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
           response;
-        const verifyRes = await handleVerifypayment({
-          razorpay_order_id,
-          razorpay_payment_id,
-          razorpay_signature,
-        });
+        const verifyRes = await handleVerifypayment(
+          {
+            razorpay_order_id,
+            razorpay_payment_id,
+            razorpay_signature,
+          },
+          isFromCart,
+        );
         if (verifyRes.success) {
           navigate(`/order-success/${verifyRes.orderId}`);
         }

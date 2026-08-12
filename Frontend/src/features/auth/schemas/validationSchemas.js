@@ -68,7 +68,7 @@ export const resetPasswordSchema = z
    Shipping / Delivery Address
 ───────────────────────────────────────────── */
 export const addressSchema = z.object({
-  fullName: z
+  fullname: z
     .string()
     .min(1, "Full name is required")
     .min(8, "Full name must be at least 8 characters"),
@@ -76,7 +76,7 @@ export const addressSchema = z.object({
     .string()
     .min(1, "Phone number is required")
     .regex(/^\+?[\d\s\-().]{7,15}$/, "Please enter a valid phone number"),
-  address: z
+  addressLine: z
     .string()
     .min(1, "Address is required")
     .min(10, "Please enter a more complete address"),

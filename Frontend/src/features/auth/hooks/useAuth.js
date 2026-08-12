@@ -7,8 +7,15 @@ import {
   logoutUser,
   sendEmailForgotPassword,
   resetPassword,
+  saveUserAddress,
 } from "../service/auth.api";
-import { clearUser, setError, setLoading, setUser } from "../state/auth.slice";
+import {
+  clearUser,
+  setError,
+  setLoading,
+  setUser,
+  setUserAddress,
+} from "../state/auth.slice";
 import toast from "react-hot-toast";
 import { clearCart } from "../../addToCart/state/cart.slice";
 import { clearWishlist } from "../../wishList/state/wishlist.slice";
@@ -126,6 +133,23 @@ const useAuth = () => {
       dispatch(setLoading(false));
     }
   }
+  async function handleSaveUserAddress(data) {
+    try {
+      dispatch(setLoading(true));
+      const res = await saveUserAddress(data);
+      dispatch(setUserAddress(res.address));
+      toast.success("Your address saved successfully. Now place your order", {
+        duration: 2500,
+      });
+      return res;
+    } catch (error) {
+      const errMsg = error.response?.data?.message || error.message;
+      dispatch(setError(errMsg));
+      toast.error(errMsg);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
   return {
     handleRegisterUser,
     handleLoginUser,
@@ -134,6 +158,7 @@ const useAuth = () => {
     handleLogoutUser,
     handleResetPassword,
     handleSendEmailForgotPassword,
+    handleSaveUserAddress,
   };
 };
 export default useAuth;
