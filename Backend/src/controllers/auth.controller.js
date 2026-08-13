@@ -19,7 +19,11 @@ async function sendTokenRequest(user, res, message) {
     config.JWT_SECRET,
     { expiresIn: "7d" },
   );
-  res.cookie("token", token);
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: config.NODE_ENV === "production",
+    sameSite: config.NODE_ENV === "production" ? "none" : "lax",
+  });
   res.status(200).json({
     success: true,
     message,
@@ -28,9 +32,8 @@ async function sendTokenRequest(user, res, message) {
       email: user.email,
       fullname: user.fullname,
       role: user.role,
-      address:user.address
+      address: user.address,
     },
-
   });
 }
 export async function registerController(req, res, next) {
@@ -93,7 +96,7 @@ export async function loginController(req, res, next) {
     }
     sendTokenRequest(user, res, "Login successfully");
   } catch (error) {
-    console.log("error in login logic")
+    console.log("error in login logic");
     next(error);
   }
 }
@@ -129,8 +132,12 @@ export async function googleCallback(req, res) {
       config.JWT_SECRET,
       { expiresIn: "7d" },
     );
-    res.cookie("token", token);
-    if (!user.role) {
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: config.NODE_ENV === "production",
+      sameSite: config.NODE_ENV === "production" ? "none" : "lax",
+    });
+    if (user.role == null) {
       return res.redirect("http://localhost:5173/select-role");
     } else {
       if (user.role == "buyer") {

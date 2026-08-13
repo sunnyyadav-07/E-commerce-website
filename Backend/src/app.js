@@ -13,6 +13,10 @@ import catalogRouter from "./routes/catalog.route.js";
 import { globalErrorHandler } from "./utils/globalErrorHandler.js";
 import orderRouter from "./routes/order.route.js";
 import paymentRouter from "./routes/payment.route.js";
+import path from "path";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const app = express();
 app.use(morgan("dev"));
 // app.use(cors({
@@ -51,5 +55,11 @@ app.use("/api/wishlist", wishListRouter);
 app.use("/api/catalog", catalogRouter);
 app.use("/api/order", orderRouter);
 app.use("/api/payment", paymentRouter);
+
+app.use(express.static(path.join(__dirname, "../Frontend/dist")));
+
+app.get("*name", (req, res) => {
+  res.sendFile(path.join(__dirname, "../Frontend/dist/index.html"));
+});
 app.use(globalErrorHandler);
 export default app;
