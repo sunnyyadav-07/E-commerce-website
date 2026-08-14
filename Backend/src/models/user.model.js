@@ -13,7 +13,6 @@ const userSchema = new mongoose.Schema({
   },
   contact: {
     type: Number,
-    unique: true,
     required: function () {
       return this.authProvider === "local";
     },

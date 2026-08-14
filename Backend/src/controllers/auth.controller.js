@@ -101,7 +101,7 @@ export async function loginController(req, res, next) {
   }
 }
 
-export async function googleCallback(req, res) {
+export async function googleCallback(req, res, next) {
   try {
     const { emails, photos, displayName, id } = req.user;
     const email = emails[0].value;
@@ -110,13 +110,18 @@ export async function googleCallback(req, res) {
       $or: [{ email }, { googleId: id }],
     });
     if (!user) {
-      user = await userModel.create({
-        email,
-        googleId: id,
-        fullname: displayName,
-        authProvider: "google",
-        role: null,
-      });
+      try {
+        user = await userModel.create({
+          email,
+          googleId: id,
+          fullname: displayName,
+          authProvider: "google",
+          role: null,
+        });
+      } catch (error) {
+        console.log("error in google callback logic");
+        next(error);
+      }
     }
     // when user is registered without google and then login with google
     if (user && !user.googleId) {
@@ -176,7 +181,7 @@ export async function setUserRoleController(req, res, next) {
     res.status(200).json({
       success: true,
       message: "Role updated successfully",
-      role: user.role,
+      user,
     });
   } catch (error) {
     console.log("error in set user role logic");
@@ -235,7 +240,7 @@ export async function forgotPasswordController(req, res, next) {
       user.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 min
       await user.save();
       const info = await sendEmail({
-        toEmail: "yadavsunny1916@gmail.com",
+        toEmail: email,
         rawToken,
       });
     }
