@@ -3,16 +3,7 @@ import { useNavigate } from "react-router";
 import useAuth from "../hooks/useAuth";
 
 const SelectRole = () => {
-  const navigate = useNavigate();
   const { handleSetUserRole } = useAuth();
-  async function handleClick(role) {
-    const res = await handleSetUserRole({ role });
-    if (res.role == "buyer") {
-      navigate("/");
-    } else if (res.role == "seller") {
-      navigate("/seller/dashboard");
-    }
-  }
   const roles = [
     {
       id: "buyer",
@@ -106,7 +97,7 @@ const SelectRole = () => {
               <button
                 className="mt-10 px-10 py-4 border border-white/30 text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-300 hover:bg-white hover:text-gray-900 hover:border-white opacity-0 group-hover:opacity-100 translate-y-12 group-hover:translate-y-0 backdrop-blur-sm bg-white/5"
                 onClick={() => {
-                  handleClick(role.id);
+                  handleSetUserRole({ role: role.id });
                 }}
               >
                 Select Journey

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useAuth from "../hooks/useAuth";
@@ -9,10 +9,12 @@ import Footer from "../components/Footer";
 import Heading from "../components/Heading";
 import FormField from "../components/FormField";
 import PasswordToggleIcon from "../components/PasswordToggleIcon";
+import toast from "react-hot-toast";
 
 const Login = () => {
   const navigate = useNavigate();
   const { handleLoginUser } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const location = useLocation();
   const {
@@ -38,6 +40,18 @@ const Login = () => {
     }
   };
 
+  useEffect(() => {
+    const error = searchParams.get("error");
+    console.log(error);
+    if (error) {
+      toast.error("User already registered with this email", {
+        duration: 2500,
+      });
+
+      searchParams.delete("error");
+      setSearchParams(searchParams);
+    }
+  }, [searchParams, setSearchParams]);
   return (
     <div className="h-screen bg-white flex flex-col font-sans text-gray-800 overflow-hidden">
       {/* Main Content Area - Split Layout consistent with Register */}

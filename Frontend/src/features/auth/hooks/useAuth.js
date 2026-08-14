@@ -68,6 +68,7 @@ const useAuth = () => {
     try {
       dispatch(setLoading(true));
       const data = await setUserRole({ role });
+      dispatch(setUser(data.user));
       toast.success("Role has been set successfully.");
       return data;
     } catch (error) {
