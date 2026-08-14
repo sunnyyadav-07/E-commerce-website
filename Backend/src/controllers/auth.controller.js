@@ -143,17 +143,17 @@ export async function googleCallback(req, res, next) {
       sameSite: config.NODE_ENV === "production" ? "none" : "lax",
     });
     if (user.role == null) {
-      return res.redirect("http://localhost:5173/select-role");
+      return res.redirect(`${config.FRONTEND_URL}/select-role`);
     } else {
       if (user.role == "buyer") {
-        return res.redirect("http://localhost:5173/");
+        return res.redirect(`${config.FRONTEND_URL}/`);
       } else {
-        return res.redirect("http://localhost:5173/seller/dashboard");
+        return res.redirect(`${config.FRONTEND_URL}/seller/dashboard`);
       }
     }
   } catch (error) {
     console.log(error);
-    return res.redirect("http://localhost:5173/login");
+    return res.redirect(`${config.FRONTEND_URL}/login`);
   }
 }
 
@@ -287,7 +287,7 @@ export async function resetPasswordController(req, res, next) {
         400,
       );
     }
-    sendPasswordChangedNotification("yadavsunny1916@gmail.com").catch((err) =>
+    sendPasswordChangedNotification(user.email).catch((err) =>
       console.error("Failed to send password change notification:", err),
     );
     return res.status(200).json({

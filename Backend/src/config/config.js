@@ -59,12 +59,17 @@ if (!process.env.RAZORPAY_WEBHOOK_SECRET) {
     "RAZORPAY_WEBHOOK_SECRET is undefined in the environment variable",
   );
 }
+if (!process.env.FRONTEND_URL) {
+  throw new Error("FRONTEND_URL is undefined in the environment variable");
+}
+if (!process.env.BACKEND_URL) {
+  throw new Error("BACKEND_URL is undefined in the environment variable");
+}
 export const config = {
   MONGO_URI: process.env.MONGO_URI,
   JWT_SECRET: process.env.JWT_SECRET,
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
-  GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL,
   IMAGEKIT_PRIVATE_KEY: process.env.IMAGEKIT_PRIVATE_KEY,
   REDIS_PASSWORD: process.env.REDIS_PASSWORD,
   REDIS_PORT: process.env.REDIS_PORT,
@@ -77,4 +82,6 @@ export const config = {
   RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
   RAZORPAY_WEBHOOK_SECRET: process.env.RAZORPAY_WEBHOOK_SECRET,
   NODE_ENV: process.env.NODE_ENV,
+  FRONTEND_URL: process.env.FRONTEND_URL,
+  BACKEND_URL: process.env.BACKEND_URL,
 };

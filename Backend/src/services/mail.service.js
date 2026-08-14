@@ -19,7 +19,7 @@ transporter
     console.error("Email transporter verification failed");
   });
 export async function sendEmail({ toEmail, rawToken }) {
-  const resetUrl = `http://localhost:5173/reset-password/?token=${rawToken}`;
+  const resetUrl = `${config.FRONTEND_URL}/reset-password/?token=${rawToken}`;
   const mailOptions = {
     from: config.GOOGLE_USER,
     to: toEmail,
