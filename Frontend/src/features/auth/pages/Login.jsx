@@ -42,7 +42,6 @@ const Login = () => {
 
   useEffect(() => {
     const error = searchParams.get("error");
-    console.log(error);
     if (error) {
       toast.error("User already registered with this email", {
         duration: 2500,
