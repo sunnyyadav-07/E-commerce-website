@@ -34,6 +34,7 @@ import Shipped from "../features/orders/pages/buyer/Shipped.jsx";
 import Delivered from "../features/orders/pages/buyer/Delivered.jsx";
 import Cancelled from "../features/orders/pages/buyer/Cancelled.jsx";
 import Protected from "./protected/Protected.jsx";
+import NotFound from "../pages/NotFound.jsx";
 
 export const router = createBrowserRouter([
   {
@@ -120,4 +121,7 @@ export const router = createBrowserRouter([
       },
     ],
   },
+
+  // Wildcard — catch all unmatched routes
+  { path: "*", element: <NotFound /> },
 ]);

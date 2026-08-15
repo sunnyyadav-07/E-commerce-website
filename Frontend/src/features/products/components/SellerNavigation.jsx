@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   Inbox,
   ClipboardList,
-  Settings,
   Package,
   Menu,
   X
@@ -18,7 +17,6 @@ const SellerNavigation = () => {
     { icon: LayoutDashboard, label: "Dashboard", to: "/seller/dashboard" },
     { icon: Inbox, label: "Inventory", to: "/seller/create-product" },
     { icon: ClipboardList, label: "Orders", to: "/seller/order" },
-    { icon: Settings, label: "Settings", to: "/seller/settings" },
   ];
 
   return (
