@@ -2,7 +2,6 @@ import userModel from "../models/user.model.js";
 import { config } from "../config/config.js";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import blacklistModel from "../models/blackList.model.js";
 import redis from "../config/cache.js";
 import {
   sendEmail,

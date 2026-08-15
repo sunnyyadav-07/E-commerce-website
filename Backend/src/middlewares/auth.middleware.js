@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 import { config } from "../config/config.js";
 import userModel from "../models/user.model.js";
-import blacklistModel from "../models/blackList.model.js";
 import crypto from "crypto";
 import redis from "../config/cache.js";
 export async function authUser(req, res, next) {
