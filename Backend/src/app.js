@@ -56,10 +56,10 @@ app.use("/api/catalog", catalogRouter);
 app.use("/api/order", orderRouter);
 app.use("/api/payment", paymentRouter);
 
-app.use(express.static(path.join(__dirname, "../Frontend/dist")));
+app.use(express.static(path.join(__dirname, "../../Frontend/dist")));
 
 app.get("*name", (req, res) => {
-  res.sendFile(path.join(__dirname, "../Frontend/dist/index.html"));
+  res.sendFile(path.join(__dirname, "../../Frontend/dist/index.html"));
 });
 app.use(globalErrorHandler);
 export default app;
