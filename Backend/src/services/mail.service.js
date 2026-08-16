@@ -16,7 +16,7 @@ transporter
     console.log("Email transporter is ready to send emails");
   })
   .catch((err) => {
-    console.error("Email transporter verification failed");
+    console.error("Email transporter verification failed",err);
   });
 export async function sendEmail({ toEmail, rawToken }) {
   const resetUrl = `${config.FRONTEND_URL}/reset-password/?token=${rawToken}`;

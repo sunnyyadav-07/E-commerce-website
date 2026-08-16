@@ -17,6 +17,7 @@ import {
 } from "../validators/auth.validator.js";
 import { authorizeRole, authUser } from "../middlewares/auth.middleware.js";
 import { validateAddress } from "../validators/address.validator.js";
+import { config } from "../config/config.js";
 
 const authRouter = Router();
 authRouter.post("/register", validateRegisterUser, registerController);
@@ -29,7 +30,7 @@ authRouter.get(
   "/google/callback",
   passport.authenticate("google", {
     session: false,
-    failureRedirect: "http://localhost:5173/login",
+    failureRedirect: `${config.FRONTEND_URL}/login`,
   }),
   googleCallback,
 );
